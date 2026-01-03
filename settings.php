@@ -25,7 +25,7 @@ if ($hassiteconfig) {
         'local_savian_ai/org_code',
         get_string('org_code', 'local_savian_ai'),
         get_string('org_code_desc', 'local_savian_ai'),
-        't001',
+        '',  // No default - must be configured
         PARAM_ALPHANUMEXT
     ));
 
