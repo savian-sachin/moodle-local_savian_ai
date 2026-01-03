@@ -16,7 +16,7 @@ if ($hassiteconfig) {
         'local_savian_ai/api_url',
         get_string('api_url', 'local_savian_ai'),
         get_string('api_url_desc', 'local_savian_ai'),
-        '',  // No default - must be configured
+        'https://app.savian.ai.vn/api/moodle/v1/',  // Production default
         PARAM_URL
     ));
 

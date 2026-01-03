@@ -33,7 +33,7 @@ class client {
      * Constructor
      */
     public function __construct() {
-        $this->base_url = get_config('local_savian_ai', 'api_url') ?: '';
+        $this->base_url = get_config('local_savian_ai', 'api_url') ?: 'https://app.savian.ai.vn/api/moodle/v1/';
         $this->api_key = get_config('local_savian_ai', 'api_key');
         $this->org_code = get_config('local_savian_ai', 'org_code') ?: 't001';
 
