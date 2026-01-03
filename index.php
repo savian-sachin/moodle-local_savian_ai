@@ -279,6 +279,16 @@ if (!empty($recent)) {
     echo html_writer::div('No recent activity', 'alert alert-info');
 }
 
+// Help & Tutorials Link
+echo html_writer::start_div('text-center mt-5 mb-4');
+echo html_writer::link(
+    new moodle_url('/local/savian_ai/tutorials.php'),
+    '<i class="fa fa-question-circle mr-2"></i>' . get_string('tutorials', 'local_savian_ai'),
+    ['class' => 'btn btn-info btn-lg']
+);
+echo html_writer::tag('p', 'Need help getting started? Check out our tutorials!', ['class' => 'text-muted mt-2']);
+echo html_writer::end_div();
+
 // Footer
 echo local_savian_ai_render_footer();
 
