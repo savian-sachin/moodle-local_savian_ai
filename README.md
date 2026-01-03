@@ -4,7 +4,8 @@
 
 [![Moodle Version](https://img.shields.io/badge/Moodle-4.5%2B-orange)](https://moodle.org/)
 [![License](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](LICENSE.txt)
-[![Version](https://img.shields.io/badge/version-2.2.0--beta-green)](CHANGES.md)
+[![Version](https://img.shields.io/badge/version-1.0.0-brightgreen)](CHANGES.md)
+[![Stability](https://img.shields.io/badge/stability-stable-green)](https://github.com/savian-sachin/moodle-local-savian-ai/releases)
 
 ---
 
@@ -275,6 +276,6 @@ See [LICENSE.txt](LICENSE.txt) for the full license text.
 
 ## 🔄 Version
 
-**Current Version**: 2.2.0-beta (January 2026)
+**Current Version**: 1.0.0 (January 2026) - **Stable Release** ✨
 
 See [CHANGES.md](CHANGES.md) for complete version history.
