@@ -92,6 +92,16 @@ function local_savian_ai_extend_navigation(global_navigation $navigation) {
             new pix_icon('i/report', '')
         );
         $node->showinflatnavigation = true;
+
+        // Add tutorials link
+        $node->add(
+            get_string('tutorials', 'local_savian_ai'),
+            new moodle_url('/local/savian_ai/tutorials.php'),
+            navigation_node::TYPE_CUSTOM,
+            null,
+            'savian_tutorials',
+            new pix_icon('t/help', '')
+        );
     }
 }
 

@@ -387,6 +387,22 @@ $string['kb_availability'] = 'Will appear in document list as approved course';
 $string['kb_usage'] = 'Future course generations can use this content';
 $string['kb_chat'] = 'Students can ask questions about this course';
 
+// Tutorials
+$string['tutorials'] = 'Help & Tutorials';
+$string['select_your_role'] = 'Select your role to see relevant tutorials';
+$string['for_administrators'] = 'For Administrators';
+$string['for_teachers'] = 'For Teachers';
+$string['for_students'] = 'For Students';
+$string['quick_start'] = 'Quick Start Guide';
+$string['tutorial_search'] = 'Search tutorials...';
+$string['tutorial_admin_setup'] = 'Administrator Setup Guide';
+$string['tutorial_teacher_generate'] = 'Generate Your First Course';
+$string['tutorial_quality_scores'] = 'Understanding Quality Scores';
+$string['tutorial_student_chat'] = 'Using the AI Chat Tutor';
+$string['tutorial_knowledge_base'] = 'Knowledge Feedback Loop';
+$string['video_tutorials'] = 'Video Tutorials';
+$string['faqs'] = 'Frequently Asked Questions';
+
 // ADDIE v2.1: Quality Control
 $string['quality_report'] = 'Course Quality Report';
 $string['overall_score'] = 'Overall Score';
