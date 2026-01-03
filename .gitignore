@@ -1,0 +1,42 @@
+# Moodle Plugin - Git Ignore
+
+# Build files
+/amd/build/*.min.js.map
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test coverage
+/tests/coverage/
+/tests/behat/screenshots/
+
+# Temporary files
+*.tmp
+*.bak
+*~
+
+# Package managers
+node_modules/
+vendor/
+
+# Environment files (should not contain production credentials)
+.env
+.env.local

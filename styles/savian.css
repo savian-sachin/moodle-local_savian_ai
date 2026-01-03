@@ -1,0 +1,98 @@
+/**
+ * Savian AI - Minimal Professional Styling
+ * Blends with Moodle's default theme
+ * Subtle purple accents only
+ */
+
+/* =======================
+   MINIMAL BRANDING
+   ======================= */
+
+/* Small logo - top right corner only */
+.savian-logo-small {
+    font-size: 14px;
+    color: #6C3BAA;
+    font-weight: 600;
+    float: right;
+    opacity: 0.7;
+    margin-bottom: 10px;
+}
+
+/* Subtle accent border for key feature cards */
+.savian-accent-card {
+    border-left: 4px solid #6C3BAA;
+}
+
+/* =======================
+   BUTTONS (Minimal)
+   ======================= */
+
+/* Savian branded button - ONLY for primary plugin actions */
+.btn-savian {
+    background: linear-gradient(135deg, #6C3BAA 0%, #8B5AC8 100%);
+    border-color: #6C3BAA;
+    color: white !important;
+    transition: all 0.3s ease;
+}
+
+.btn-savian:hover,
+.btn-savian:focus,
+.btn-savian:active {
+    background: linear-gradient(135deg, #8B5AC8 0%, #9D6FD4 100%);
+    border-color: #8B5AC8;
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(108, 59, 170, 0.4) !important;
+}
+
+.btn-savian:not(:disabled):not(.disabled):active,
+.btn-savian:not(:disabled):not(.disabled).active {
+    background: linear-gradient(135deg, #6C3BAA 0%, #8B5AC8 100%);
+    color: white !important;
+}
+
+/* =======================
+   STATUS BADGES (Subtle)
+   ======================= */
+
+/* Processing status - subtle purple */
+.badge-savian-processing {
+    background-color: #F3F0F9;
+    color: #6C3BAA;
+    border: 1px solid #D4C2EA;
+}
+
+/* =======================
+   UTILITIES (Minimal)
+   ======================= */
+
+/* Purple text for emphasis (use sparingly) */
+.savian-text-primary {
+    color: #6C3BAA;
+}
+
+/* Light purple background (very subtle) */
+.savian-bg-light {
+    background-color: #F9F8FC;
+}
+
+/* =======================
+   RESPONSIVE
+   ======================= */
+
+@media (max-width: 768px) {
+    .savian-logo-small {
+        font-size: 12px;
+    }
+}
+
+/* =======================
+   NOTE: Everything else uses Moodle's default Bootstrap classes:
+   - .card, .card-header, .card-body
+   - .btn-primary, .btn-secondary, .btn-success
+   - .table, .table-striped
+   - .alert-info, .alert-success, .alert-warning
+   - .badge-primary, .badge-success, .badge-secondary
+
+   This ensures the plugin blends naturally with Moodle's theme.
+   ======================= */

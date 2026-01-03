@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50">
+  <defs>
+    <linearGradient id="savianGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6C3BAA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF7B54;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- SAVIAN AI text -->
+  <text x="10" y="35" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="url(#savianGradient)" letter-spacing="2">
+    SAVIAN AI
+  </text>
+</svg>

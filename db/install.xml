@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/savian_ai/db" VERSION="20251230" COMMENT="XMLDB file for Savian AI plugin">
+  <TABLES>
+    <!-- Configuration table for API settings -->
+    <TABLE NAME="local_savian_config" COMMENT="Stores Savian AI API configuration">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Setting name"/>
+        <FIELD NAME="value" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Setting value"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="name" TYPE="unique" FIELDS="name"/>
+      </KEYS>
+    </TABLE>
+
+    <!-- Documents table for caching uploaded documents -->
+    <TABLE NAME="local_savian_documents" COMMENT="Caches documents uploaded to Savian AI">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="savian_doc_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Document ID from Savian API"/>
+        <FIELD NAME="course_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Associated course (optional)"/>
+        <FIELD NAME="title" TYPE="char" LENGTH="500" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="subject_area" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="pending" SEQUENCE="false" COMMENT="pending, processing, completed, failed"/>
+        <FIELD NAME="progress" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Processing progress 0-100"/>
+        <FIELD NAME="chunk_count" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="qna_count" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="file_size" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="file_type" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="tags" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON array of tags"/>
+        <FIELD NAME="is_active" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
+        <FIELD NAME="last_synced" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="savian_doc_id" TYPE="unique" FIELDS="savian_doc_id"/>
+        <KEY NAME="usermodified" TYPE="foreign" FIELDS="usermodified" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="course_id" UNIQUE="false" FIELDS="course_id"/>
+        <INDEX NAME="status" UNIQUE="false" FIELDS="status"/>
+      </INDEXES>
+    </TABLE>
+
+    <!-- Generations table for logging content generation -->
+    <TABLE NAME="local_savian_generations" COMMENT="Logs content generation requests">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="request_id" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" COMMENT="UUID from API"/>
+        <FIELD NAME="generation_type" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="questions, questions_from_documents, course_content, chat"/>
+        <FIELD NAME="course_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="user_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="topic" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="document_ids" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON array of document IDs"/>
+        <FIELD NAME="questions_count" TYPE="int" LENGTH="5" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="qbank_category_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="pending" SEQUENCE="false"/>
+        <FIELD NAME="request_data" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON request parameters"/>
+        <FIELD NAME="response_data" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON response"/>
+        <FIELD NAME="error_message" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="user_id" TYPE="foreign" FIELDS="user_id" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="request_id" UNIQUE="false" FIELDS="request_id"/>
+        <INDEX NAME="course_id" UNIQUE="false" FIELDS="course_id"/>
+        <INDEX NAME="generation_type" UNIQUE="false" FIELDS="generation_type"/>
+      </INDEXES>
+    </TABLE>
+
+    <!-- Chat conversations table -->
+    <TABLE NAME="local_savian_chat_conversations" COMMENT="Stores chat conversations">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="conversation_uuid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="UUID from API or generated locally"/>
+        <FIELD NAME="user_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="course_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Course context (null for global)"/>
+        <FIELD NAME="context_type" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="course" SEQUENCE="false" COMMENT="course, global"/>
+        <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Auto-generated or user-set title"/>
+        <FIELD NAME="document_ids" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON array of associated document IDs"/>
+        <FIELD NAME="message_count" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="last_message_at" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="is_archived" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="user_id" TYPE="foreign" FIELDS="user_id" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="conversation_uuid" TYPE="unique" FIELDS="conversation_uuid"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="course_id" UNIQUE="false" FIELDS="course_id"/>
+        <INDEX NAME="user_course" UNIQUE="false" FIELDS="user_id,course_id"/>
+        <INDEX NAME="last_message_at" UNIQUE="false" FIELDS="last_message_at"/>
+      </INDEXES>
+    </TABLE>
+
+    <!-- Chat messages table -->
+    <TABLE NAME="local_savian_chat_messages" COMMENT="Stores individual chat messages">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="conversation_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="message_uuid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false" COMMENT="UUID from API if available"/>
+        <FIELD NAME="role" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="user, assistant, system"/>
+        <FIELD NAME="content" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Message content"/>
+        <FIELD NAME="formatted_content" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="HTML formatted (Markdown/LaTeX rendered)"/>
+        <FIELD NAME="sources" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON array of document sources"/>
+        <FIELD NAME="feedback" TYPE="int" LENGTH="2" NOTNULL="false" SEQUENCE="false" COMMENT="1=thumbs up, -1=thumbs down, null=no feedback"/>
+        <FIELD NAME="feedback_comment" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="token_count" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="response_time_ms" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="conversation_id" TYPE="foreign" FIELDS="conversation_id" REFTABLE="local_savian_chat_conversations" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated"/>
+        <INDEX NAME="role" UNIQUE="false" FIELDS="role"/>
+      </INDEXES>
+    </TABLE>
+
+    <!-- Chat user settings table -->
+    <TABLE NAME="local_savian_chat_settings" COMMENT="Stores per-user chat widget preferences">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="user_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="widget_position" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="bottom-right" SEQUENCE="false" COMMENT="bottom-right, bottom-left"/>
+        <FIELD NAME="widget_minimized" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
+        <FIELD NAME="sound_enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="theme_preference" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="auto" SEQUENCE="false" COMMENT="auto, light, dark"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="user_id" TYPE="foreign-unique" FIELDS="user_id" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+
+    <!-- Per-course chat settings table -->
+    <TABLE NAME="local_savian_chat_course_config" COMMENT="Per-course chat widget configuration">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="course_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="chat_enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Enable chat for this course"/>
+        <FIELD NAME="students_can_chat" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Allow students to use chat"/>
+        <FIELD NAME="welcome_message" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Course-specific welcome message"/>
+        <FIELD NAME="auto_include_docs" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Auto-include course documents"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="course_id" TYPE="foreign-unique" FIELDS="course_id" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="usermodified" TYPE="foreign" FIELDS="usermodified" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>
