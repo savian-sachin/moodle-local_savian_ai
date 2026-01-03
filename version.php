@@ -9,7 +9,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_savian_ai';
-$plugin->version = 2026010105;  // YYYYMMDDXX format - ADDIE v2.0 migration complete
+$plugin->version = 2026010300;  // YYYYMMDDXX format - First stable release
 $plugin->requires = 2024100700; // Moodle 4.5 minimum
-$plugin->maturity = MATURITY_BETA;
-$plugin->release = 'v2.0.0-beta';
+$plugin->maturity = MATURITY_STABLE;
+$plugin->release = 'v1.0.0';
