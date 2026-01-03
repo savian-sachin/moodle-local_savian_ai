@@ -9,7 +9,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_savian_ai';
-$plugin->version = 2026010300;  // YYYYMMDDXX format - First stable release
+$plugin->version = 2026010301;  // YYYYMMDDXX format - Stable with tutorials
 $plugin->requires = 2024100700; // Moodle 4.5 minimum
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = 'v1.0.0';
+$plugin->release = 'v1.0.1';
