@@ -204,7 +204,7 @@ function show_admin_tutorials() {
 
     echo html_writer::tag('h5', 'Step 2: Enter API Credentials', ['class' => 'mt-3']);
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', '<strong>API Base URL</strong>: Your Savian AI endpoint (e.g., https://api.savian.ai/moodle/v1/)');
+    echo html_writer::tag('li', '<strong>API Base URL</strong>: https://app.savian.ai.vn/api/moodle/v1/');
     echo html_writer::tag('li', '<strong>API Key</strong>: Provided by Savian AI');
     echo html_writer::tag('li', '<strong>Organization Code</strong>: Your org identifier');
     echo html_writer::end_tag('ul');

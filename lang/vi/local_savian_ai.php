@@ -19,7 +19,7 @@ $string['savian_ai:generate'] = 'Tạo nội dung với Savian AI';
 // Settings
 $string['settings_heading'] = 'Cấu hình Savian AI';
 $string['api_url'] = 'URL API';
-$string['api_url_desc'] = 'Địa chỉ API của Savian AI (ví dụ: https://api.savian.ai/moodle/v1/)';
+$string['api_url_desc'] = 'Địa chỉ API của Savian AI (ví dụ: https://app.savian.ai.vn/api/moodle/v1/)';
 $string['api_key'] = 'API Key';
 $string['api_key_desc'] = 'Khóa API Savian AI của bạn (định dạng: moodle_orgcode_xxx)';
 $string['org_code'] = 'Mã Tổ chức';

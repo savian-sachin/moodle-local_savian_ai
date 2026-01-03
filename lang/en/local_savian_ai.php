@@ -19,7 +19,7 @@ $string['savian_ai:generate'] = 'Generate content with Savian AI';
 // Settings
 $string['settings_heading'] = 'Savian AI Configuration';
 $string['api_url'] = 'API Base URL';
-$string['api_url_desc'] = 'Savian AI API endpoint (e.g., https://api.savian.ai/moodle/v1/)';
+$string['api_url_desc'] = 'Savian AI API endpoint (e.g., https://app.savian.ai.vn/api/moodle/v1/)';
 $string['api_key'] = 'API Key';
 $string['api_key_desc'] = 'Your Savian AI API key (format: moodle_orgcode_xxx)';
 $string['org_code'] = 'Organization Code';
