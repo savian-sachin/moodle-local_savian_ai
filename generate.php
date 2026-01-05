@@ -11,7 +11,17 @@ require_once(__DIR__ . '/../../config.php');
 require_login();
 
 $courseid = required_param('courseid', PARAM_INT);
-$mode = optional_param('mode', 'topic', PARAM_ALPHA); // 'topic' or 'documents'
+$requested_mode = optional_param('mode', 'documents', PARAM_ALPHA);
+
+// Redirect if someone tries topic mode (not supported)
+if ($requested_mode === 'topic') {
+    redirect(new moodle_url('/local/savian_ai/generate.php', [
+        'courseid' => $courseid,
+        'mode' => 'documents'
+    ]));
+}
+
+$mode = 'documents';  // Always documents mode
 $action = optional_param('action', '', PARAM_ALPHA);
 
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
