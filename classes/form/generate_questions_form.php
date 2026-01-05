@@ -28,13 +28,15 @@ class generate_questions_form extends \moodleform {
         $courseid = $customdata['courseid'] ?? 0;
         $mode = $customdata['mode'] ?? 'topic'; // 'topic' or 'documents'
 
+        // Course ID (hidden) - MUST be first to ensure it's included
+        $mform->addElement('hidden', 'courseid', $courseid);
+        $mform->setType('courseid', PARAM_INT);
+        $mform->setDefault('courseid', $courseid);
+
         // Generation mode (hidden)
         $mform->addElement('hidden', 'mode', $mode);
         $mform->setType('mode', PARAM_ALPHA);
-
-        // Course ID (hidden)
-        $mform->addElement('hidden', 'courseid', $courseid);
-        $mform->setType('courseid', PARAM_INT);
+        $mform->setDefault('mode', $mode);
 
         // Topic
         $mform->addElement('text', 'topic', get_string('topic', 'local_savian_ai'), ['size' => 60]);
