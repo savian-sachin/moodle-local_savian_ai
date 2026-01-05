@@ -213,7 +213,12 @@ if (has_capability('local/savian_ai:generate', context_system::instance())) {
 // Display document list
 echo html_writer::tag('h3', get_string('document_list', 'local_savian_ai'), ['class' => 'mt-4']);
 
-$documents = $DB->get_records('local_savian_documents', ['is_active' => 1], 'timecreated DESC');
+// Filter documents: Show course-specific + global library only
+$sql = "SELECT * FROM {local_savian_documents}
+        WHERE is_active = 1
+          AND (course_id = ? OR course_id IS NULL OR course_id = 0)
+        ORDER BY timecreated DESC";
+$documents = $DB->get_records_sql($sql, [$courseid]);
 
 if (empty($documents)) {
     echo html_writer::div(
