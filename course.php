@@ -211,6 +211,27 @@ echo html_writer::link(
 echo html_writer::tag('p', 'Need help? Check out our step-by-step tutorials!', ['class' => 'text-muted mt-2']);
 echo html_writer::end_div();
 
+// Coming Soon Features (Collapsible)
+echo html_writer::start_div('mt-5 mb-4');
+echo html_writer::start_tag('details', ['class' => 'border rounded p-3 bg-light']);
+echo html_writer::tag('summary', '🔮 Coming Soon: Student Learning Analytics & Personalization', ['class' => 'font-weight-bold text-info', 'style' => 'cursor: pointer;']);
+echo html_writer::start_div('mt-3');
+
+echo html_writer::tag('h6', '📊 Identify Student Struggles & Generate Personalized Content', ['class' => 'text-info']);
+echo html_writer::tag('p', 'AI-powered analytics will show where students need extra help:', ['class' => 'small']);
+echo html_writer::start_tag('ul', ['class' => 'small mb-3']);
+echo html_writer::tag('li', '📈 Identify topics where students struggle most');
+echo html_writer::tag('li', '🎯 See which concepts need reinforcement');
+echo html_writer::tag('li', '✨ One-click generate personalized review content');
+echo html_writer::tag('li', '📤 Auto-assign targeted materials to struggling students');
+echo html_writer::end_tag('ul');
+
+echo html_writer::tag('p', '<strong>Example:</strong> "25% of students struggling with Week 3 concepts" → Generate review materials → Assign to those students automatically', ['class' => 'small text-muted']);
+
+echo html_writer::end_div();
+echo html_writer::end_tag('details');
+echo html_writer::end_div();
+
 // Footer
 echo local_savian_ai_render_footer();
 

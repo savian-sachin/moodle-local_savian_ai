@@ -271,6 +271,27 @@ echo html_writer::div(
     'mt-4'
 );
 
+// Coming Soon Features (Collapsible)
+echo html_writer::start_div('mt-5 mb-4');
+echo html_writer::start_tag('details', ['class' => 'border rounded p-3 bg-light']);
+echo html_writer::tag('summary', '🔮 Coming Soon: AI Assessment Evaluation', ['class' => 'font-weight-bold text-success', 'style' => 'cursor: pointer;']);
+echo html_writer::start_div('mt-3');
+
+echo html_writer::tag('h6', '🤖 Automatic Grading of Short Text & Essays', ['class' => 'text-success']);
+echo html_writer::tag('p', 'AI will evaluate student responses that currently require manual grading:', ['class' => 'small']);
+echo html_writer::start_tag('ul', ['class' => 'small mb-3']);
+echo html_writer::tag('li', '✨ Automatic grading of short answer questions');
+echo html_writer::tag('li', '📝 Detailed feedback on essay responses');
+echo html_writer::tag('li', '📊 Rubric-based assessment with suggestions');
+echo html_writer::tag('li', '⏱️ Save 70% of grading time');
+echo html_writer::end_tag('ul');
+
+echo html_writer::tag('p', '<strong>Use case:</strong> Students submit essays → AI provides draft grades + feedback → You review and finalize', ['class' => 'small text-muted']);
+
+echo html_writer::end_div();
+echo html_writer::end_tag('details');
+echo html_writer::end_div();
+
 // Footer
 echo local_savian_ai_render_footer();
 

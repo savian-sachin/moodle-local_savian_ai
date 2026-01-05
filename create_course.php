@@ -1227,6 +1227,24 @@ echo html_writer::div(
     ''
 );
 
+// Coming Soon Features (Collapsible)
+echo html_writer::start_div('mt-5 mb-4');
+echo html_writer::start_tag('details', ['class' => 'border rounded p-3 bg-light']);
+echo html_writer::tag('summary', '🔮 Coming Soon: Exciting New Features', ['class' => 'font-weight-bold text-primary', 'style' => 'cursor: pointer;']);
+echo html_writer::start_div('mt-3');
+
+echo html_writer::tag('h6', '📌 Insert Content Between Existing Topics', ['class' => 'text-primary']);
+echo html_writer::tag('p', 'Generate content to insert between existing course sections:', ['class' => 'small']);
+echo html_writer::start_tag('ul', ['class' => 'small mb-3']);
+echo html_writer::tag('li', 'Already have Week 1? Add Week 2, 3, 4 incrementally');
+echo html_writer::tag('li', 'Expand courses without recreating from scratch');
+echo html_writer::tag('li', 'Perfect for building courses over time');
+echo html_writer::end_tag('ul');
+
+echo html_writer::end_div();
+echo html_writer::end_tag('details');
+echo html_writer::end_div();
+
 // Footer
 echo local_savian_ai_render_footer();
 
