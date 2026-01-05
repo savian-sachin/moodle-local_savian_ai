@@ -909,10 +909,12 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
         'alert alert-info mb-4'
     );
 
-    $documents = $DB->get_records_menu('local_savian_documents',
-        ['is_active' => 1, 'status' => 'completed'],
-        'title ASC',
-        'savian_doc_id, title');
+    // Filter documents: course-specific + global library only
+    $sql = "SELECT savian_doc_id, title FROM {local_savian_documents}
+            WHERE is_active = 1 AND status = 'completed'
+              AND (course_id = ? OR course_id IS NULL OR course_id = 0)
+            ORDER BY title ASC";
+    $documents = $DB->get_records_sql_menu($sql, [$courseid]);
 
     if (empty($documents)) {
         echo $OUTPUT->notification('No completed documents available. Upload documents first.', 'warning');
