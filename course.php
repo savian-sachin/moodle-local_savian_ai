@@ -155,19 +155,11 @@ if (has_capability('local/savian_ai:generate', $context)) {
     echo html_writer::start_div('card h-100');
     echo html_writer::div('❓ Generate Questions', 'card-header');
     echo html_writer::start_div('card-body');
-    echo html_writer::tag('p', 'Create quiz questions from documents or topics.', ['class' => 'card-text mb-2']);
-    echo html_writer::div(
-        html_writer::link(
-            new moodle_url('/local/savian_ai/generate.php', ['courseid' => $courseid, 'mode' => 'documents']),
-            'From Documents',
-            ['class' => 'btn btn-savian mr-2']
-        ) .
-        html_writer::link(
-            new moodle_url('/local/savian_ai/generate.php', ['courseid' => $courseid, 'mode' => 'topic']),
-            'From Topic',
-            ['class' => 'btn btn-outline-primary']
-        ),
-        ''
+    echo html_writer::tag('p', 'Create quiz questions from your course documents.', ['class' => 'card-text']);
+    echo html_writer::link(
+        new moodle_url('/local/savian_ai/generate.php', ['courseid' => $courseid, 'mode' => 'documents']),
+        'Generate Questions',
+        ['class' => 'btn btn-primary']
     );
     echo html_writer::end_div();
     echo html_writer::end_div();
