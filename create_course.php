@@ -1042,20 +1042,58 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
 
         // Documents (left side - 8 columns)
         echo html_writer::start_div('col-md-8');
-        echo html_writer::div(
-            html_writer::tag('label', 'Select Documents: <span class="text-danger">*</span>', ['class' => 'font-weight-bold', 'for' => 'documents']) .
-            html_writer::tag('small', ' (Hold Ctrl/Cmd to select multiple)', ['class' => 'text-muted ml-2']) .
-            html_writer::select($documents, 'document_ids[]', null, false, [
-                'multiple' => true,
-                'size' => 5,
-                'class' => 'form-control',
-                'id' => 'documents',
-                'required' => true,
-                'aria-required' => 'true'
-            ]) .
-            html_writer::tag('small', count($documents) . ' completed documents available', ['class' => 'form-text text-muted']),
-            'form-group'
-        );
+        // Document selection with visual cards
+        echo html_writer::start_div('form-group');
+        echo html_writer::tag('label', 'Select Documents: <span class="text-danger">*</span>', ['class' => 'font-weight-bold d-block mb-2']);
+        echo html_writer::tag('small', count($documents) . ' documents available in this course', ['class' => 'text-muted d-block mb-3']);
+
+        if (count($documents) > 0) {
+            // Add "Select All" / "Deselect All" buttons
+            echo html_writer::start_div('mb-2');
+            echo html_writer::tag('button', 'Select All', [
+                'type' => 'button',
+                'class' => 'btn btn-sm btn-outline-primary mr-2',
+                'onclick' => 'document.querySelectorAll(".doc-checkbox").forEach(el => el.checked = true);'
+            ]);
+            echo html_writer::tag('button', 'Deselect All', [
+                'type' => 'button',
+                'class' => 'btn btn-sm btn-outline-secondary',
+                'onclick' => 'document.querySelectorAll(".doc-checkbox").forEach(el => el.checked = false);'
+            ]);
+            echo html_writer::end_div();
+
+            // Document cards in grid
+            echo html_writer::start_div('row');
+            $count = 0;
+            foreach ($documents as $doc_id => $doc_title) {
+                $count++;
+                echo html_writer::start_div('col-md-6 col-lg-4 mb-2');
+                echo html_writer::start_div('card h-100');
+                echo html_writer::start_div('card-body p-2');
+                echo html_writer::start_div('custom-control custom-checkbox');
+                echo html_writer::empty_tag('input', [
+                    'type' => 'checkbox',
+                    'name' => 'document_ids[]',
+                    'value' => $doc_id,
+                    'id' => 'doc_' . $doc_id,
+                    'class' => 'custom-control-input doc-checkbox',
+                    'checked' => $count <= 3 ? 'checked' : null  // Pre-select first 3
+                ]);
+                echo html_writer::tag('label', '📄 ' . s($doc_title), [
+                    'for' => 'doc_' . $doc_id,
+                    'class' => 'custom-control-label font-weight-normal'
+                ]);
+                echo html_writer::end_div();
+                echo html_writer::end_div();
+                echo html_writer::end_div();
+                echo html_writer::end_div();
+            }
+            echo html_writer::end_div();
+        } else {
+            echo html_writer::div('No documents available. Upload documents first.', 'alert alert-warning');
+        }
+
+        echo html_writer::end_div();
         echo html_writer::end_div();
 
         // Duration (right side - 4 columns)
