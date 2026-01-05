@@ -11,44 +11,53 @@ defined('MOODLE_INTERNAL') || die();
 $capabilities = [
     // Use Savian AI features (view documents, usage stats, chat)
     'local/savian_ai:use' => [
+        'riskbitmask' => RISK_PERSONAL,
         'captype' => 'read',
-        'contextlevel' => CONTEXT_COURSE,
+        'contextlevel' => CONTEXT_SYSTEM,  // System level for global access
         'archetypes' => [
-            'student' => CAP_ALLOW,        // NEW: Students can now use chat
+            'student' => CAP_ALLOW,
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
+            'coursecreator' => CAP_ALLOW,  // Course creators too
             'manager' => CAP_ALLOW,
         ],
     ],
 
     // Generate content (questions, course content)
     'local/savian_ai:generate' => [
+        'riskbitmask' => RISK_SPAM,
         'captype' => 'write',
-        'contextlevel' => CONTEXT_COURSE,
+        'contextlevel' => CONTEXT_SYSTEM,  // System level for global access
         'archetypes' => [
+            'teacher' => CAP_ALLOW,  // Regular teachers too
             'editingteacher' => CAP_ALLOW,
+            'coursecreator' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
         ],
     ],
 
     // View conversation history (teachers can view student chats)
     'local/savian_ai:viewchathistory' => [
-        'riskbitmask' => RISK_PERSONAL,    // Access to personal data
+        'riskbitmask' => RISK_PERSONAL,
         'captype' => 'read',
-        'contextlevel' => CONTEXT_COURSE,
+        'contextlevel' => CONTEXT_SYSTEM,  // System level
         'archetypes' => [
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
+            'coursecreator' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
         ],
     ],
 
     // Manage documents in chat (teachers can select/upload docs)
     'local/savian_ai:managechatdocuments' => [
+        'riskbitmask' => RISK_SPAM,
         'captype' => 'write',
-        'contextlevel' => CONTEXT_COURSE,
+        'contextlevel' => CONTEXT_SYSTEM,  // System level
         'archetypes' => [
+            'teacher' => CAP_ALLOW,  // Regular teachers too
             'editingteacher' => CAP_ALLOW,
+            'coursecreator' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
         ],
     ],
