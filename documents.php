@@ -10,11 +10,20 @@ require_once(__DIR__ . '/../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 
 require_login();
-require_capability('local/savian_ai:use', context_system::instance());
+
+// Get course context if courseid provided, otherwise system context
+$courseid = optional_param('courseid', 0, PARAM_INT);
+if ($courseid > 0) {
+    $context = context_course::instance($courseid);
+} else {
+    $context = context_system::instance();
+}
+
+require_capability('local/savian_ai:use', $context);
 
 $action = optional_param('action', '', PARAM_ALPHA);
 $docid = optional_param('docid', 0, PARAM_INT);
-$courseid = optional_param('courseid', 0, PARAM_INT);
+// courseid already loaded above for context
 
 $PAGE->set_url(new moodle_url('/local/savian_ai/documents.php'));
 $PAGE->set_context(context_system::instance());
