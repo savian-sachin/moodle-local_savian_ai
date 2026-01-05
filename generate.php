@@ -28,9 +28,13 @@ $PAGE->set_heading($course->fullname);
 $client = new \local_savian_ai\api\client();
 $qbank_creator = new \local_savian_ai\content\qbank_creator();
 
-// Initialize form
+// Initialize form with URL to preserve parameters
+$form_url = new moodle_url('/local/savian_ai/generate.php', [
+    'courseid' => $courseid,
+    'mode' => $mode
+]);
 $customdata = ['courseid' => $courseid, 'mode' => $mode];
-$mform = new \local_savian_ai\form\generate_questions_form(null, $customdata);
+$mform = new \local_savian_ai\form\generate_questions_form($form_url, $customdata);
 
 // Handle form submission
 if ($mform->is_cancelled()) {
