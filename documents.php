@@ -133,34 +133,17 @@ echo $OUTPUT->header();
 // Consistent header
 echo local_savian_ai_render_header('Documents', 'Upload and manage documents for AI generation');
 
-// Course selector
-echo html_writer::start_div('card mb-4');
-echo html_writer::div('📚 Select Context', 'card-header');
-echo html_writer::start_div('card-body');
-
-$user_courses = enrol_get_users_courses($USER->id, true);
-$course_options = [0 => 'Global Library (All Courses)'];
-foreach ($user_courses as $course) {
-    $course_options[$course->id] = $course->fullname;
+// Display current course context
+if ($courseid > 0) {
+    $course_record = $DB->get_record('course', ['id' => $courseid], 'fullname', IGNORE_MISSING);
+    if ($course_record) {
+        echo html_writer::start_div('alert alert-info mb-4');
+        echo html_writer::tag('strong', '📚 Course: ');
+        echo html_writer::tag('span', s($course_record->fullname), ['class' => 'badge badge-primary badge-lg ml-2']);
+        echo html_writer::tag('p', 'Documents uploaded here are available only in this course.', ['class' => 'mb-0 mt-2 small']);
+        echo html_writer::end_div();
+    }
 }
-
-echo html_writer::start_tag('form', ['method' => 'get', 'class' => 'form-inline']);
-echo html_writer::tag('label', 'Upload to: ', ['class' => 'mr-2 font-weight-bold']);
-echo html_writer::select(
-    $course_options,
-    'courseid',
-    $courseid,
-    false,
-    ['class' => 'form-control mr-2', 'onchange' => 'this.form.submit()']
-);
-echo html_writer::tag('small',
-    $courseid > 0 ? '✓ Documents uploaded here will only be available in this course' : '✓ Documents uploaded here will be available in all courses',
-    ['class' => 'text-muted']
-);
-echo html_writer::end_tag('form');
-
-echo html_writer::end_div();
-echo html_writer::end_div();
 
 // Sync documents from API
 $sync_response = $client->get_documents(['per_page' => 100]);
@@ -222,12 +205,11 @@ if (has_capability('local/savian_ai:generate', $context)) {
 // Display document list
 echo html_writer::tag('h3', get_string('document_list', 'local_savian_ai'), ['class' => 'mt-4']);
 
-// Filter documents: Show course-specific + global library only
-$sql = "SELECT * FROM {local_savian_documents}
-        WHERE is_active = 1
-          AND (course_id = ? OR course_id IS NULL OR course_id = 0)
-        ORDER BY timecreated DESC";
-$documents = $DB->get_records_sql($sql, [$courseid]);
+// Show only current course documents (no global library)
+$documents = $DB->get_records('local_savian_documents', [
+    'is_active' => 1,
+    'course_id' => $courseid
+], 'timecreated DESC');
 
 if (empty($documents)) {
     echo html_writer::div(
