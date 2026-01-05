@@ -34,18 +34,18 @@ $client = new \local_savian_ai\api\client();
 
 // Handle actions
 if ($action === 'delete' && $docid && confirm_sesskey()) {
-    require_capability('local/savian_ai:generate', context_system::instance());
+    require_capability('local/savian_ai:generate', $context);
 
     $response = $client->delete_document($docid);
 
     if ($response->http_code === 200 && isset($response->success) && $response->success) {
         // Update local record
         $DB->set_field('local_savian_documents', 'is_active', 0, ['savian_doc_id' => $docid]);
-        redirect(new moodle_url('/local/savian_ai/documents.php'),
+        redirect(new moodle_url('/local/savian_ai/documents.php', ['courseid' => $courseid]),
                  get_string('document_deleted', 'local_savian_ai'), null, 'success');
     } else {
         $error = $response->error ?? $response->message ?? 'Unknown error';
-        redirect(new moodle_url('/local/savian_ai/documents.php'),
+        redirect(new moodle_url('/local/savian_ai/documents.php', ['courseid' => $courseid]),
                  get_string('document_delete_failed', 'local_savian_ai', $error), null, 'error');
     }
 }
@@ -54,12 +54,11 @@ if ($action === 'delete' && $docid && confirm_sesskey()) {
 $mform = new \local_savian_ai\form\upload_document_form(null, ['courseid' => $courseid]);
 
 if ($mform->is_cancelled()) {
-    $redirect_params = $courseid > 0 ? ['courseid' => $courseid] : [];
-    redirect(new moodle_url('/local/savian_ai/documents.php', $redirect_params));
+    redirect(new moodle_url('/local/savian_ai/documents.php', ['courseid' => $courseid]));
 } else if ($data = $mform->get_data()) {
     // Get courseid from form data if available
     $courseid = $data->courseid ?? $courseid;
-    require_capability('local/savian_ai:generate', context_system::instance());
+    require_capability('local/savian_ai:generate', $context);
 
     // Save uploaded file to temp location
     $fs = get_file_storage();
@@ -115,8 +114,7 @@ if ($mform->is_cancelled()) {
 
             $DB->insert_record('local_savian_documents', $record);
 
-            $redirect_params = $courseid > 0 ? ['courseid' => $courseid] : [];
-            redirect(new moodle_url('/local/savian_ai/documents.php', $redirect_params),
+            redirect(new moodle_url('/local/savian_ai/documents.php', ['courseid' => $courseid]),
                      get_string('document_uploaded', 'local_savian_ai'), null, 'success');
         } else {
             $error = $response->error ?? $response->message ?? 'Unknown error';
