@@ -286,6 +286,7 @@ if (empty($documents)) {
                 new moodle_url('/local/savian_ai/documents.php', [
                     'action' => 'delete',
                     'docid' => $doc->savian_doc_id,
+                    'courseid' => $courseid,  // Preserve courseid!
                     'sesskey' => sesskey(),
                 ]),
                 get_string('delete'),
