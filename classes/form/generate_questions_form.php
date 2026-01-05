@@ -81,23 +81,6 @@ class generate_questions_form extends \moodleform {
                 $mform->addElement('static', 'document_selector',
                     get_string('select_documents', 'local_savian_ai') . ' <span class="text-danger">*</span>',
                     $doc_html);
-
-                // Add JavaScript validation to ensure at least one checkbox selected
-                $doc_html .= '<script>';
-                $doc_html .= 'document.addEventListener("DOMContentLoaded", function() {';
-                $doc_html .= '  var form = document.querySelector("form.mform");';
-                $doc_html .= '  if (form) {';
-                $doc_html .= '    form.addEventListener("submit", function(e) {';
-                $doc_html .= '      var checked = document.querySelectorAll(".doc-checkbox-gen:checked");';
-                $doc_html .= '      if (checked.length === 0) {';
-                $doc_html .= '        e.preventDefault();';
-                $doc_html .= '        alert("Please select at least one document");';
-                $doc_html .= '        return false;';
-                $doc_html .= '      }';
-                $doc_html .= '    });';
-                $doc_html .= '  }';
-                $doc_html .= '});';
-                $doc_html .= '</script>';
             }
         }
 
