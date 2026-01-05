@@ -157,18 +157,7 @@ if ($action === 'poll' && !empty($SESSION->savian_ai_pending_request)) {
 echo $OUTPUT->header();
 
 // Consistent header
-echo local_savian_ai_render_header('Generate Questions', 'Create quiz questions from documents or topics');
-
-// Tab navigation
-$tabs = [];
-$tabs[] = new tabobject('topic',
-    new moodle_url('/local/savian_ai/generate.php', ['courseid' => $courseid, 'mode' => 'topic']),
-    get_string('generate_from_topic', 'local_savian_ai'));
-$tabs[] = new tabobject('documents',
-    new moodle_url('/local/savian_ai/generate.php', ['courseid' => $courseid, 'mode' => 'documents']),
-    get_string('generate_from_documents', 'local_savian_ai'));
-
-echo $OUTPUT->tabtree($tabs, $mode);
+echo local_savian_ai_render_header('Generate Questions from Documents', 'Create quiz questions from your course materials');
 
 // Show preview if questions are in session
 if ($action === 'preview' && !empty($SESSION->savian_ai_questions)) {
