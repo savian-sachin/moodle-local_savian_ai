@@ -41,9 +41,9 @@ class generate_questions_form extends \moodleform {
         $mform->setType('topic', PARAM_TEXT);
         $mform->addRule('topic', get_string('required'), 'required', null, 'client');
 
-        // Document selection (only for RAG mode)
+        // Document selection (only for RAG mode) - Visual card selector
         if ($mode === 'documents') {
-            // Show only current course documents
+            // Get only current course documents
             $documents = $DB->get_records_menu('local_savian_documents',
                 ['is_active' => 1, 'status' => 'completed', 'course_id' => $courseid],
                 'title ASC',
@@ -53,14 +53,36 @@ class generate_questions_form extends \moodleform {
                 $mform->addElement('static', 'no_documents', '',
                     \html_writer::div(get_string('no_documents', 'local_savian_ai'), 'alert alert-warning'));
             } else {
-                $options = [
-                    'multiple' => true,
-                    'size' => min(5, count($documents)),
-                ];
-                $mform->addElement('select', 'document_ids',
-                    get_string('select_documents', 'local_savian_ai'),
-                    $documents, $options);
-                $mform->addRule('document_ids', get_string('required'), 'required', null, 'client');
+                // Use static element with custom HTML for better UX
+                $doc_html = '<div class="mb-2">';
+                $doc_html .= '<button type="button" class="btn btn-sm btn-outline-primary mr-2" onclick="document.querySelectorAll(\'.doc-checkbox-gen\').forEach(el => el.checked = true);">Select All</button>';
+                $doc_html .= '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="document.querySelectorAll(\'.doc-checkbox-gen\').forEach(el => el.checked = false);">Deselect All</button>';
+                $doc_html .= '<span class="ml-3 text-muted small">' . count($documents) . ' documents available</span>';
+                $doc_html .= '</div>';
+
+                $doc_html .= '<div class="row">';
+                $count = 0;
+                foreach ($documents as $doc_id => $doc_title) {
+                    $count++;
+                    $doc_html .= '<div class="col-md-6 col-lg-4 mb-2">';
+                    $doc_html .= '<div class="card h-100">';
+                    $doc_html .= '<div class="card-body p-2">';
+                    $doc_html .= '<div class="custom-control custom-checkbox">';
+                    $doc_html .= '<input type="checkbox" class="custom-control-input doc-checkbox-gen" name="document_ids[]" value="' . $doc_id . '" id="gendoc_' . $doc_id . '"';
+                    if ($count <= 2) $doc_html .= ' checked';  // Pre-select first 2
+                    $doc_html .= ' required>';  // At least one required
+                    $doc_html .= '<label class="custom-control-label font-weight-normal" for="gendoc_' . $doc_id . '">📄 ' . htmlspecialchars($doc_title) . '</label>';
+                    $doc_html .= '</div></div></div></div>';
+                }
+                $doc_html .= '</div>';
+
+                $mform->addElement('static', 'document_selector',
+                    get_string('select_documents', 'local_savian_ai') . ' <span class="text-danger">*</span>',
+                    $doc_html);
+
+                // Hidden field for validation
+                $mform->addElement('hidden', 'has_documents', 1);
+                $mform->setType('has_documents', PARAM_INT);
             }
         }
 
