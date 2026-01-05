@@ -70,7 +70,7 @@ class generate_questions_form extends \moodleform {
                     $doc_html .= '<div class="custom-control custom-checkbox">';
                     $doc_html .= '<input type="checkbox" class="custom-control-input doc-checkbox-gen" name="document_ids[]" value="' . $doc_id . '" id="gendoc_' . $doc_id . '"';
                     if ($count <= 2) $doc_html .= ' checked';  // Pre-select first 2
-                    $doc_html .= ' required>';  // At least one required
+                    $doc_html .= '>';
                     $doc_html .= '<label class="custom-control-label font-weight-normal" for="gendoc_' . $doc_id . '">📄 ' . htmlspecialchars($doc_title) . '</label>';
                     $doc_html .= '</div></div></div></div>';
                 }
@@ -80,9 +80,22 @@ class generate_questions_form extends \moodleform {
                     get_string('select_documents', 'local_savian_ai') . ' <span class="text-danger">*</span>',
                     $doc_html);
 
-                // Hidden field for validation
-                $mform->addElement('hidden', 'has_documents', 1);
-                $mform->setType('has_documents', PARAM_INT);
+                // Add JavaScript validation to ensure at least one checkbox selected
+                $doc_html .= '<script>';
+                $doc_html .= 'document.addEventListener("DOMContentLoaded", function() {';
+                $doc_html .= '  var form = document.querySelector("form.mform");';
+                $doc_html .= '  if (form) {';
+                $doc_html .= '    form.addEventListener("submit", function(e) {';
+                $doc_html .= '      var checked = document.querySelectorAll(".doc-checkbox-gen:checked");';
+                $doc_html .= '      if (checked.length === 0) {';
+                $doc_html .= '        e.preventDefault();';
+                $doc_html .= '        alert("Please select at least one document");';
+                $doc_html .= '        return false;';
+                $doc_html .= '      }';
+                $doc_html .= '    });';
+                $doc_html .= '  }';
+                $doc_html .= '});';
+                $doc_html .= '</script>';
             }
         }
 
