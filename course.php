@@ -201,6 +201,16 @@ echo html_writer::div(
     'mt-3'
 );
 
+// Help & Tutorials Link
+echo html_writer::start_div('text-center mt-5 mb-4');
+echo html_writer::link(
+    new moodle_url('/local/savian_ai/tutorials.php', ['role' => 'teacher']),
+    '<i class="fa fa-question-circle mr-2"></i>' . get_string('tutorials', 'local_savian_ai'),
+    ['class' => 'btn btn-info btn-lg']
+);
+echo html_writer::tag('p', 'Need help? Check out our step-by-step tutorials!', ['class' => 'text-muted mt-2']);
+echo html_writer::end_div();
+
 // Footer
 echo local_savian_ai_render_footer();
 
