@@ -50,6 +50,9 @@ $mform = new \local_savian_ai\form\generate_questions_form($form_url, $customdat
 if ($mform->is_cancelled()) {
     redirect(new moodle_url('/local/savian_ai/generate.php', ['courseid' => $courseid]));
 } else if ($data = $mform->get_data()) {
+    // Get document_ids from POST (static HTML checkboxes not in $data)
+    $document_ids = optional_param_array('document_ids', [], PARAM_INT);
+
     // Prepare generation options
     $options = [
         'learning_objectives' => !empty($data->learning_objectives) ?
@@ -62,9 +65,9 @@ if ($mform->is_cancelled()) {
     ];
 
     // Generate questions
-    if ($mode === 'documents' && !empty($data->document_ids)) {
+    if ($mode === 'documents' && !empty($document_ids)) {
         // RAG-based generation
-        $response = $client->generate_questions_from_docs($data->document_ids, $data->topic, $options);
+        $response = $client->generate_questions_from_docs($document_ids, $data->topic, $options);
     } else {
         // Topic-based generation
         $response = $client->generate_questions($data->topic, $options);
