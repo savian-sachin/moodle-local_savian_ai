@@ -200,8 +200,8 @@ if ($sync_response->http_code === 200 && isset($sync_response->documents)) {
     }
 }
 
-// Display upload form (collapsible)
-if (has_capability('local/savian_ai:generate', context_system::instance())) {
+// Display upload form (collapsible) - teachers can upload
+if (has_capability('local/savian_ai:generate', $context)) {
     echo html_writer::start_div('card mb-4');
     echo html_writer::start_div('card-header');
     echo html_writer::tag('a', '+ ' . get_string('upload_document', 'local_savian_ai'), [
@@ -296,9 +296,12 @@ if (empty($documents)) {
         // Created date
         $row[] = userdate($doc->timecreated, get_string('strftimedatetime', 'langconfig'));
 
-        // Actions
+        // Actions (teachers can delete their own documents)
         $actions = [];
-        if (has_capability('local/savian_ai:generate', context_system::instance())) {
+        $can_manage = has_capability('local/savian_ai:generate', $context);
+        $is_owner = ($doc->usermodified == $USER->id);
+
+        if ($can_manage || $is_owner) {
             $actions[] = html_writer::link(
                 new moodle_url('/local/savian_ai/documents.php', [
                     'action' => 'delete',
