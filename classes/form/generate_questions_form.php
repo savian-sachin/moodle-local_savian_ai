@@ -63,7 +63,6 @@ class generate_questions_form extends \moodleform {
                     get_string('select_documents', 'local_savian_ai'),
                     $documents, $options);
                 $mform->addRule('document_ids', get_string('required'), 'required', null, 'client');
-                $mform->addHelpButton('document_ids', 'document_ids', 'local_savian_ai');
             }
         }
 
