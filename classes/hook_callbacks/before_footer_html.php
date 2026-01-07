@@ -31,12 +31,54 @@ class before_footer_html {
             return;
         }
 
-        // Check context (course pages only setting)
-        $course_only = get_config('local_savian_ai', 'chat_course_pages_only');
+        // Only show on course pages (not admin, settings, preferences, etc.)
         $context = $COURSE->id != SITEID ? \context_course::instance($COURSE->id) : \context_system::instance();
 
-        if ($course_only && $COURSE->id == SITEID) {
-            return; // Skip on site pages
+        // Check if this is a course context
+        if ($COURSE->id == SITEID) {
+            return; // Never show on site-level pages
+        }
+
+        // Get current page type
+        $pagetype = $PAGE->pagetype;
+
+        // List of allowed page types (course-related pages students access)
+        $allowed_pagetypes = [
+            'course-view-',           // Course homepage
+            'mod-',                   // All activity modules (forum, quiz, assign, page, etc.)
+            'blocks-',                // Block pages within course
+            'grade-report-',          // Grade reports
+            'local-savian_ai-',       // Our own plugin pages
+        ];
+
+        // Check if current page is in allowed list
+        $is_allowed_page = false;
+        foreach ($allowed_pagetypes as $allowed) {
+            if (strpos($pagetype, $allowed) === 0) {
+                $is_allowed_page = true;
+                break;
+            }
+        }
+
+        // Block on admin, settings, preferences, user profile edit, etc.
+        $blocked_pagetypes = [
+            'admin-',
+            'my-index',               // Dashboard
+            'user-edit',              // Edit profile
+            'user-preferences-',      // User preferences
+            'course-edit',            // Course settings
+            'enrol-',                 // Enrollment pages
+        ];
+
+        foreach ($blocked_pagetypes as $blocked) {
+            if (strpos($pagetype, $blocked) === 0) {
+                return; // Don't show on blocked pages
+            }
+        }
+
+        // Must be on an allowed page type
+        if (!$is_allowed_page) {
+            return;
         }
 
         if (!has_capability('local/savian_ai:use', $context)) {
@@ -56,6 +98,16 @@ class before_footer_html {
             $is_student = !has_capability('local/savian_ai:generate', $context);
             if ($course_config && $is_student && !$course_config->students_can_chat) {
                 return; // Students can't chat in this course
+            }
+        }
+
+        // Check for active chat restrictions (students only, teachers bypass)
+        $restriction = null;
+        if ($COURSE->id != SITEID) {
+            $is_student = !has_capability('local/savian_ai:generate', $context);
+            if ($is_student) {
+                $restriction_manager = new \local_savian_ai\chat\restriction_manager();
+                $restriction = $restriction_manager->get_active_restriction($COURSE->id, $USER->id);
             }
         }
 
@@ -81,7 +133,14 @@ class before_footer_html {
             'canViewHistory' => has_capability('local/savian_ai:generate', $context),
             'enableFeedback' => get_config('local_savian_ai', 'enable_chat_feedback'),
             'userPosition' => $user_settings ? $user_settings->widget_position : null,
-            'userMinimized' => $user_settings ? $user_settings->widget_minimized : 1
+            'userMinimized' => $user_settings ? $user_settings->widget_minimized : 1,
+            'restriction' => $restriction ? [
+                'isRestricted' => true,
+                'message' => $restriction->message,
+                'resumesAt' => $restriction->resumes_at,
+                'restrictionType' => $restriction->restriction_type,
+                'restrictionName' => $restriction->restriction_name ?? ''
+            ] : null
         ];
 
         // Load AMD module

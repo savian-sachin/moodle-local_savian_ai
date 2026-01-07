@@ -71,6 +71,22 @@ class provider implements
             'timecreated' => 'privacy:metadata:generations:timecreated',
         ], 'privacy:metadata:generations');
 
+        // Analytics reports (who triggered manual reports)
+        $collection->add_database_table('local_savian_analytics_reports', [
+            'course_id' => 'privacy:metadata:analytics_reports:course_id',
+            'user_id' => 'privacy:metadata:analytics_reports:user_id',
+            'report_type' => 'privacy:metadata:analytics_reports:report_type',
+            'timecreated' => 'privacy:metadata:analytics_reports:timecreated',
+        ], 'privacy:metadata:analytics_reports');
+
+        // Analytics events (real-time tracking)
+        $collection->add_database_table('local_savian_analytics_events', [
+            'course_id' => 'privacy:metadata:analytics_events:course_id',
+            'user_id' => 'privacy:metadata:analytics_events:user_id',
+            'event_name' => 'privacy:metadata:analytics_events:event_name',
+            'timecreated' => 'privacy:metadata:analytics_events:timecreated',
+        ], 'privacy:metadata:analytics_events');
+
         // External service data
         $collection->add_external_location_link('savian_api', [
             'user_id' => 'privacy:metadata:external:user_id',
@@ -78,6 +94,7 @@ class provider implements
             'course_id' => 'privacy:metadata:external:course_id',
             'chat_message' => 'privacy:metadata:external:chat_message',
             'document_content' => 'privacy:metadata:external:document_content',
+            'anonymized_analytics' => 'privacy:metadata:external:anonymized_analytics',
         ], 'privacy:metadata:external');
 
         return $collection;
@@ -180,6 +197,40 @@ class provider implements
                     ]
                 );
             }
+
+            // Export analytics reports (manually triggered by this user)
+            $analytics_reports = $DB->get_records('local_savian_analytics_reports', ['user_id' => $userid]);
+            foreach ($analytics_reports as $report) {
+                writer::with_context($context)->export_data(
+                    [get_string('privacy:analyticsreports', 'local_savian_ai'), $report->id],
+                    (object) [
+                        'course_id' => $report->course_id,
+                        'report_type' => $report->report_type,
+                        'trigger_type' => $report->trigger_type,
+                        'student_count' => $report->student_count,
+                        'status' => $report->status,
+                        'created' => \core_privacy\local\request\transform::datetime($report->timecreated),
+                    ]
+                );
+            }
+
+            // Export analytics events (real-time tracking)
+            $analytics_events = $DB->get_records('local_savian_analytics_events', ['user_id' => $userid]);
+            if (!empty($analytics_events)) {
+                $events_data = array_map(function($event) {
+                    return [
+                        'course_id' => $event->course_id,
+                        'event_name' => $event->event_name,
+                        'processed' => $event->processed ? 'Yes' : 'No',
+                        'created' => \core_privacy\local\request\transform::datetime($event->timecreated),
+                    ];
+                }, array_values($analytics_events));
+
+                writer::with_context($context)->export_data(
+                    [get_string('privacy:analyticsevents', 'local_savian_ai')],
+                    (object) ['events' => $events_data]
+                );
+            }
         }
     }
 
@@ -237,6 +288,18 @@ class provider implements
         // Delete generation history
         $DB->delete_records('local_savian_generations', ['user_id' => $userid]);
 
+        // Delete analytics reports triggered by this user
+        $DB->delete_records('local_savian_analytics_reports', ['user_id' => $userid]);
+
+        // Delete analytics events for this user
+        $DB->delete_records('local_savian_analytics_events', ['user_id' => $userid]);
+
+        // Delete analytics cache (anonymized data)
+        // Note: We delete by finding the anonymized ID first
+        $anonymizer = new \local_savian_ai\analytics\anonymizer();
+        $anon_id = $anonymizer->anonymize_user_id($userid);
+        $DB->delete_records('local_savian_analytics_cache', ['anon_user_id' => $anon_id]);
+
         // Note: Documents are not user-specific (shared resources), so not deleted
     }
 
@@ -255,6 +318,14 @@ class provider implements
 
             // Add users who have generation history
             $sql = "SELECT DISTINCT user_id FROM {local_savian_generations}";
+            $userlist->add_from_sql('user_id', $sql, []);
+
+            // Add users who triggered analytics reports
+            $sql = "SELECT DISTINCT user_id FROM {local_savian_analytics_reports} WHERE user_id IS NOT NULL";
+            $userlist->add_from_sql('user_id', $sql, []);
+
+            // Add users in analytics events
+            $sql = "SELECT DISTINCT user_id FROM {local_savian_analytics_events}";
             $userlist->add_from_sql('user_id', $sql, []);
         }
     }

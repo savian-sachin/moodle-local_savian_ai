@@ -167,5 +167,123 @@
         <KEY NAME="usermodified" TYPE="foreign" FIELDS="usermodified" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
+
+    <!-- Chat restrictions table for time-based chat disabling -->
+    <TABLE NAME="local_savian_chat_restrictions" COMMENT="Chat restriction rules for courses">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="course_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Course this restriction applies to"/>
+        <FIELD NAME="restriction_type" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="quiz or manual"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Display name for manual restrictions"/>
+        <FIELD NAME="quiz_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Quiz ID if type=quiz"/>
+        <FIELD NAME="timestart" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Manual restriction start (Unix timestamp)"/>
+        <FIELD NAME="timeend" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Manual restriction end (Unix timestamp)"/>
+        <FIELD NAME="restriction_message" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Custom message to show students"/>
+        <FIELD NAME="is_enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="course_id_fk" TYPE="foreign" FIELDS="course_id" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="quiz_id_fk" TYPE="foreign" FIELDS="quiz_id" REFTABLE="quiz" REFFIELDS="id"/>
+        <KEY NAME="usermodified_fk" TYPE="foreign" FIELDS="usermodified" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="course_enabled" UNIQUE="false" FIELDS="course_id,is_enabled"/>
+        <INDEX NAME="quiz_unique" UNIQUE="true" FIELDS="course_id,quiz_id"/>
+      </INDEXES>
+    </TABLE>
+
+    <!-- Chat restriction groups mapping table -->
+    <TABLE NAME="local_savian_chat_restriction_groups" COMMENT="Group assignments for chat restrictions">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="restriction_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="group_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="restriction_id_fk" TYPE="foreign" FIELDS="restriction_id" REFTABLE="local_savian_chat_restrictions" REFFIELDS="id"/>
+        <KEY NAME="group_id_fk" TYPE="foreign" FIELDS="group_id" REFTABLE="groups" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="restriction_group_unique" UNIQUE="true" FIELDS="restriction_id,group_id"/>
+      </INDEXES>
+    </TABLE>
+
+    <!-- Analytics reports table for tracking sent analytics reports -->
+    <TABLE NAME="local_savian_analytics_reports" COMMENT="Tracks analytics reports sent to Savian AI API">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="course_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="report_type" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="on_demand, scheduled, real_time, end_of_course"/>
+        <FIELD NAME="trigger_type" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" COMMENT="manual, cron, event, completion"/>
+        <FIELD NAME="date_from" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Report start timestamp"/>
+        <FIELD NAME="date_to" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Report end timestamp"/>
+        <FIELD NAME="student_count" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="activity_count" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="pending" SEQUENCE="false" COMMENT="pending, sending, sent, failed"/>
+        <FIELD NAME="api_response" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON response from API"/>
+        <FIELD NAME="error_message" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="retry_count" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="user_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="User who triggered (if manual)"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="course_id" TYPE="foreign" FIELDS="course_id" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="user_id" TYPE="foreign" FIELDS="user_id" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="report_type" UNIQUE="false" FIELDS="report_type"/>
+        <INDEX NAME="status" UNIQUE="false" FIELDS="status"/>
+        <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated"/>
+      </INDEXES>
+    </TABLE>
+
+    <!-- Analytics cache table for caching extracted metrics -->
+    <TABLE NAME="local_savian_analytics_cache" COMMENT="Caches extracted analytics data for performance">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="course_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="anon_user_id" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="SHA256 hashed user ID"/>
+        <FIELD NAME="metrics_json" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Cached student metrics"/>
+        <FIELD NAME="last_activity" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="course_user" UNIQUE="true" FIELDS="course_id,anon_user_id"/>
+        <INDEX NAME="last_activity" UNIQUE="false" FIELDS="last_activity"/>
+      </INDEXES>
+    </TABLE>
+
+    <!-- Analytics events table for tracking real-time events -->
+    <TABLE NAME="local_savian_analytics_events" COMMENT="Tracks real-time events for analytics">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="course_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="user_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="event_name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="event_context" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON event context"/>
+        <FIELD NAME="processed" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="course_id" TYPE="foreign" FIELDS="course_id" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="user_id" TYPE="foreign" FIELDS="user_id" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="processed" UNIQUE="false" FIELDS="processed"/>
+        <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

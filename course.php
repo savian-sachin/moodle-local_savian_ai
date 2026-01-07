@@ -15,7 +15,8 @@ $courseid = required_param('courseid', PARAM_INT);
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 
-require_capability('local/savian_ai:use', $context);
+// Dashboard is for teachers/managers only (not students)
+require_capability('local/savian_ai:generate', $context);
 
 $PAGE->set_url(new moodle_url('/local/savian_ai/course.php', ['courseid' => $courseid]));
 $PAGE->set_context($context);
@@ -179,6 +180,21 @@ if (has_capability('local/savian_ai:generate', $context)) {
     echo html_writer::end_div();
     echo html_writer::end_div();
     echo html_writer::end_div();
+
+    // Learning Analytics card
+    echo html_writer::start_div('col-md-12 mb-3');
+    echo html_writer::start_div('card savian-accent-card');
+    echo html_writer::div('📊 Learning Analytics', 'card-header');
+    echo html_writer::start_div('card-body');
+    echo html_writer::tag('p', 'Get AI-powered insights on student performance and engagement. Identify at-risk students who need intervention.', ['class' => 'card-text']);
+    echo html_writer::link(
+        new moodle_url('/local/savian_ai/analytics_reports.php', ['courseid' => $courseid]),
+        '📊 Analytics Dashboard',
+        ['class' => 'btn btn-savian']
+    );
+    echo html_writer::end_div();
+    echo html_writer::end_div();
+    echo html_writer::end_div();
 }
 
 echo html_writer::end_div(); // row
@@ -206,19 +222,28 @@ echo html_writer::end_div();
 // Coming Soon Features (Collapsible)
 echo html_writer::start_div('mt-5 mb-4');
 echo html_writer::start_tag('details', ['class' => 'border rounded p-3 bg-light']);
-echo html_writer::tag('summary', '🔮 Coming Soon: Student Learning Analytics & Personalization', ['class' => 'font-weight-bold text-info', 'style' => 'cursor: pointer;']);
+echo html_writer::tag('summary', '🔮 Coming Soon: Advanced Features', ['class' => 'font-weight-bold text-success', 'style' => 'cursor: pointer;']);
 echo html_writer::start_div('mt-3');
 
-echo html_writer::tag('h6', '📊 Identify Student Struggles & Generate Personalized Content', ['class' => 'text-info']);
-echo html_writer::tag('p', 'AI-powered analytics will show where students need extra help:', ['class' => 'small']);
+echo html_writer::tag('h6', '✨ Personalized Learning Paths', ['class' => 'text-success']);
+echo html_writer::tag('p', 'AI will automatically generate personalized content for struggling students:', ['class' => 'small']);
 echo html_writer::start_tag('ul', ['class' => 'small mb-3']);
-echo html_writer::tag('li', '📈 Identify topics where students struggle most');
-echo html_writer::tag('li', '🎯 See which concepts need reinforcement');
-echo html_writer::tag('li', '✨ One-click generate personalized review content');
-echo html_writer::tag('li', '📤 Auto-assign targeted materials to struggling students');
+echo html_writer::tag('li', '🎯 Auto-generate review materials for struggling topics identified in analytics');
+echo html_writer::tag('li', '📤 Automatically assign personalized content to at-risk students');
+echo html_writer::tag('li', '📊 Track improvement after interventions');
+echo html_writer::tag('li', '🤖 Adaptive difficulty based on student performance');
 echo html_writer::end_tag('ul');
 
-echo html_writer::tag('p', '<strong>Example:</strong> "25% of students struggling with Week 3 concepts" → Generate review materials → Assign to those students automatically', ['class' => 'small text-muted']);
+echo html_writer::tag('h6', '📝 AI-Powered Assessment Grading', ['class' => 'text-success mt-3']);
+echo html_writer::tag('p', 'Automatic grading and feedback for open-ended responses:', ['class' => 'small']);
+echo html_writer::start_tag('ul', ['class' => 'small mb-3']);
+echo html_writer::tag('li', '✨ Auto-grade short answer and essay questions');
+echo html_writer::tag('li', '📊 Rubric-based assessment with AI suggestions');
+echo html_writer::tag('li', '💬 Detailed personalized feedback for each student');
+echo html_writer::tag('li', '⏱️ Save 70% of grading time');
+echo html_writer::end_tag('ul');
+
+echo html_writer::tag('p', '<strong>Example workflow:</strong> Analytics identifies 15 students struggling with "Neural Networks" → AI generates review quiz → Auto-assigns to those 15 students → Tracks their improvement', ['class' => 'small text-muted']);
 
 echo html_writer::end_div();
 echo html_writer::end_tag('details');

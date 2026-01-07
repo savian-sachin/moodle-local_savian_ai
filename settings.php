@@ -109,6 +109,55 @@ if ($hassiteconfig) {
         1
     ));
 
+    // === LEARNING ANALYTICS SETTINGS ===
+    $settings->add(new admin_setting_heading(
+        'local_savian_ai/analytics_heading',
+        get_string('analytics_settings', 'local_savian_ai'),
+        get_string('analytics_enabled_desc', 'local_savian_ai')
+    ));
+
+    $settings->add(new admin_setting_configcheckbox(
+        'local_savian_ai/analytics_enabled',
+        get_string('analytics_enabled', 'local_savian_ai'),
+        get_string('analytics_enabled_desc', 'local_savian_ai'),
+        1
+    ));
+
+    $settings->add(new admin_setting_configselect(
+        'local_savian_ai/analytics_frequency',
+        get_string('analytics_frequency', 'local_savian_ai'),
+        get_string('analytics_frequency_desc', 'local_savian_ai'),
+        'manual',
+        [
+            'manual' => get_string('analytics_frequency_manual', 'local_savian_ai'),
+            'daily' => get_string('analytics_frequency_daily', 'local_savian_ai'),
+            'weekly' => get_string('analytics_frequency_weekly', 'local_savian_ai'),
+            'both' => get_string('analytics_frequency_both', 'local_savian_ai')
+        ]
+    ));
+
+    $settings->add(new admin_setting_configcheckbox(
+        'local_savian_ai/analytics_realtime_enabled',
+        get_string('analytics_realtime_enabled', 'local_savian_ai'),
+        get_string('analytics_realtime_enabled_desc', 'local_savian_ai'),
+        0
+    ));
+
+    $settings->add(new admin_setting_configtext(
+        'local_savian_ai/analytics_retention_days',
+        get_string('analytics_retention_days', 'local_savian_ai'),
+        get_string('analytics_retention_days_desc', 'local_savian_ai'),
+        365,
+        PARAM_INT
+    ));
+
+    $settings->add(new admin_setting_configcheckbox(
+        'local_savian_ai/analytics_require_consent',
+        get_string('analytics_require_consent', 'local_savian_ai'),
+        get_string('analytics_require_consent_desc', 'local_savian_ai'),
+        0
+    ));
+
     $ADMIN->add('localplugins', $settings);
 
     // Add link to plugin management page

@@ -431,6 +431,46 @@ class client {
     }
 
     /**
+     * Send analytics data to API for learning insights
+     *
+     * @param array $report_data Complete analytics report data
+     * @return object Response object with insights or request_id for async processing
+     */
+    public function send_analytics($report_data) {
+        return $this->request('POST', 'analytics/course-data/', $report_data);
+    }
+
+    /**
+     * Get analytics processing status (for async processing)
+     *
+     * @param string $report_id Report ID from analytics submission
+     * @return object Status response with insights when completed
+     */
+    public function get_analytics_status($report_id) {
+        return $this->request('GET', "analytics/status/{$report_id}/");
+    }
+
+    /**
+     * Get latest analytics report for a course
+     *
+     * @param int $course_id Course ID
+     * @return object Latest report with insights
+     */
+    public function get_latest_analytics($course_id) {
+        return $this->request('GET', "analytics/course/{$course_id}/latest/");
+    }
+
+    /**
+     * Get analytics report history for a course
+     *
+     * @param int $course_id Course ID
+     * @return object Report history
+     */
+    public function get_analytics_history($course_id) {
+        return $this->request('GET', "analytics/course/{$course_id}/history/");
+    }
+
+    /**
      * Create error response object
      *
      * @param string $message Error message

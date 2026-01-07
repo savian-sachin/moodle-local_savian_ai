@@ -60,13 +60,19 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
             };
 
             self.loadUserSettings();
-            self.render();
-            self.attachEvents();
 
-            // Auto-open if URL param present
-            var urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('openchat') === '1') {
-                self.maximize();
+            // Check if chat is restricted
+            if (self.config.restriction && self.config.restriction.isRestricted) {
+                self.renderRestrictedState();
+            } else {
+                self.render();
+                self.attachEvents();
+
+                // Auto-open if URL param present
+                var urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('openchat') === '1') {
+                    self.maximize();
+                }
             }
         });
     };
@@ -156,6 +162,134 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
         if (this.config.canManageDocuments && this.courseId) {
             this.loadCourseDocuments();
         }
+    };
+
+    /**
+     * Render the restricted state widget with countdown
+     */
+    ChatWidget.prototype.renderRestrictedState = function() {
+        var self = this;
+        var restriction = this.config.restriction;
+        var resumesAt = restriction.resumesAt ? restriction.resumesAt * 1000 : 0; // Convert to milliseconds
+        var positionClass = 'savian-widget-' + this.position;
+
+        var countdownHtml = '';
+        if (resumesAt > 0) {
+            countdownHtml = `
+                <div class="restriction-countdown">
+                    <p class="countdown-label">Resumes in:</p>
+                    <div class="countdown-timer">
+                        <div class="countdown-unit">
+                            <span class="countdown-value" id="countdown-hours">--</span>
+                            <span class="countdown-text">hrs</span>
+                        </div>
+                        <div class="countdown-unit">
+                            <span class="countdown-value" id="countdown-minutes">--</span>
+                            <span class="countdown-text">min</span>
+                        </div>
+                        <div class="countdown-unit">
+                            <span class="countdown-value" id="countdown-seconds">--</span>
+                            <span class="countdown-text">sec</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            countdownHtml = '<p class="restriction-no-end">Check back later</p>';
+        }
+
+        var html = `
+            <div id="savian-chat-widget" class="savian-chat-widget ${positionClass} restricted">
+                <!-- Restricted bubble with overlay -->
+                <div class="savian-chat-bubble restricted" role="button" tabindex="0" aria-label="Chat unavailable">
+                    <i class="fa fa-comments"></i>
+                    <span class="restriction-icon-overlay"><i class="fa fa-ban"></i></span>
+                </div>
+
+                <!-- Restricted message window -->
+                <div class="savian-chat-window restricted-window" role="dialog" aria-label="Chat Restricted">
+                    <div class="savian-chat-header restricted-header">
+                        <div class="chat-title">
+                            <i class="fa fa-clock-o"></i>
+                            <span>Chat Temporarily Unavailable</span>
+                        </div>
+                        <div class="chat-actions">
+                            <button class="btn-icon" id="savian-chat-minimize" title="Minimize">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="savian-chat-body restriction-body">
+                        <div class="restriction-icon-large">
+                            <i class="fa fa-graduation-cap fa-4x"></i>
+                        </div>
+                        <p class="restriction-message">${restriction.message}</p>
+                        ${countdownHtml}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        $('body').append(html);
+
+        // Attach events for restricted state
+        this.attachRestrictedEvents();
+
+        // Start countdown if there's an end time
+        if (resumesAt > 0) {
+            this.startCountdown(resumesAt);
+        }
+    };
+
+    /**
+     * Attach events for restricted state widget
+     */
+    ChatWidget.prototype.attachRestrictedEvents = function() {
+        var self = this;
+
+        // Toggle on bubble click
+        $(document).on('click', '#savian-chat-widget.restricted .savian-chat-bubble', function() {
+            $('#savian-chat-widget').toggleClass('minimized').toggleClass('maximized');
+        });
+
+        // Minimize button
+        $(document).on('click', '#savian-chat-widget.restricted #savian-chat-minimize', function(e) {
+            e.stopPropagation();
+            $('#savian-chat-widget').addClass('minimized').removeClass('maximized');
+        });
+    };
+
+    /**
+     * Start countdown timer
+     */
+    ChatWidget.prototype.startCountdown = function(targetTime) {
+        var self = this;
+
+        var updateCountdown = function() {
+            var now = Date.now();
+            var remaining = targetTime - now;
+
+            if (remaining <= 0) {
+                // Restriction ended - reload page to get fresh state
+                window.location.reload();
+                return;
+            }
+
+            var hours = Math.floor(remaining / (1000 * 60 * 60));
+            var minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+            $('#countdown-hours').text(hours.toString().padStart(2, '0'));
+            $('#countdown-minutes').text(minutes.toString().padStart(2, '0'));
+            $('#countdown-seconds').text(seconds.toString().padStart(2, '0'));
+        };
+
+        // Initial update
+        updateCountdown();
+
+        // Update every second
+        setInterval(updateCountdown, 1000);
     };
 
     ChatWidget.prototype.renderDocumentSelector = function() {

@@ -66,6 +66,18 @@ class chat extends external_api {
         self::validate_context($context);
         require_capability('local/savian_ai:use', $context);
 
+        // Check for chat restrictions (students only, teachers bypass)
+        if ($params['courseid'] > 0) {
+            $is_student = !has_capability('local/savian_ai:generate', $context);
+            if ($is_student) {
+                $restriction_manager = new \local_savian_ai\chat\restriction_manager();
+                $restriction = $restriction_manager->get_active_restriction($params['courseid'], $USER->id);
+                if ($restriction) {
+                    throw new \moodle_exception('chat_restricted', 'local_savian_ai', '', $restriction->message);
+                }
+            }
+        }
+
         $manager = new \local_savian_ai\chat\manager();
         $result = $manager->send_message(
             $params['message'],

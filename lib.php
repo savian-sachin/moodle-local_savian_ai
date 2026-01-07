@@ -113,9 +113,9 @@ function local_savian_ai_extend_navigation(global_navigation $navigation) {
  * @param context $context The course context
  */
 function local_savian_ai_extend_navigation_course($navigation, $course, $context) {
-    // Check if user has capability
-    if (has_capability('local/savian_ai:use', $context)) {
-        // Add single link to course landing page
+    // Dashboard and features are for teachers only (require 'generate' capability)
+    if (has_capability('local/savian_ai:generate', $context)) {
+        // Add dashboard link
         $navigation->add(
             get_string('pluginname', 'local_savian_ai'),
             new moodle_url('/local/savian_ai/course.php', ['courseid' => $course->id]),
@@ -125,17 +125,15 @@ function local_savian_ai_extend_navigation_course($navigation, $course, $context
             new pix_icon('i/report', '')
         );
 
-        // Add chat history link for teachers
-        if (has_capability('local/savian_ai:generate', $context)) {
-            $navigation->add(
-                get_string('chat_history', 'local_savian_ai'),
-                new moodle_url('/local/savian_ai/chat_history.php', ['courseid' => $course->id]),
-                navigation_node::TYPE_SETTING,
-                null,
-                'local_savian_ai_chat_history',
-                new pix_icon('i/report', '')
-            );
-        }
+        // Add chat history link
+        $navigation->add(
+            get_string('chat_history', 'local_savian_ai'),
+            new moodle_url('/local/savian_ai/chat_history.php', ['courseid' => $course->id]),
+            navigation_node::TYPE_SETTING,
+            null,
+            'local_savian_ai_chat_history',
+            new pix_icon('i/report', '')
+        );
     }
 }
 

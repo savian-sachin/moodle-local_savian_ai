@@ -167,13 +167,19 @@ if ($sync_response->http_code === 200 && isset($sync_response->documents)) {
         $record->last_synced = time();
         $record->timemodified = time();
 
+        // Get course_id from API (field is moodle_course_id in API response)
+        $api_course_id = $doc->moodle_course_id ?? $doc->course_id ?? null;
+
         if ($existing) {
             $record->id = $existing->id;
-            $record->course_id = $existing->course_id;
+            // Keep existing course_id, but if it's NULL and API has one, use API's value
+            $record->course_id = $existing->course_id ?: $api_course_id;
             $record->timecreated = $existing->timecreated;
             $record->usermodified = $existing->usermodified;
             $DB->update_record('local_savian_documents', $record);
         } else {
+            // For new documents synced from API, use the course_id from the API response
+            $record->course_id = $api_course_id;
             $record->timecreated = time();
             $record->usermodified = 0;
             $DB->insert_record('local_savian_documents', $record);

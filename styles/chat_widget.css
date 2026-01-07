@@ -811,3 +811,158 @@
         display: none !important;
     }
 }
+
+/* ==========================================
+   RESTRICTED STATE (Chat Disabled)
+   ========================================== */
+
+.savian-chat-widget.restricted .savian-chat-bubble.restricted {
+    background: linear-gradient(135deg, #6c757d 0%, #868e96 100%);
+    position: relative;
+}
+
+.savian-chat-widget.restricted .savian-chat-bubble.restricted:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(108, 117, 125, 0.4);
+}
+
+.savian-chat-widget.restricted .restriction-icon-overlay {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    background: #dc3545;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: white;
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.4);
+}
+
+.savian-chat-widget.restricted .restricted-window {
+    width: 340px;
+}
+
+.savian-chat-widget.restricted .restricted-header {
+    background: linear-gradient(135deg, #6c757d 0%, #868e96 100%);
+}
+
+.savian-chat-widget.restricted .restriction-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 30px 20px;
+    background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+    min-height: 300px;
+}
+
+.savian-chat-widget.restricted .restriction-icon-large {
+    color: #6c757d;
+    margin-bottom: 20px;
+    opacity: 0.7;
+}
+
+.savian-chat-widget.restricted .restriction-message {
+    font-size: 15px;
+    color: #495057;
+    line-height: 1.5;
+    margin-bottom: 24px;
+    max-width: 280px;
+}
+
+.savian-chat-widget.restricted .restriction-countdown {
+    background: white;
+    border-radius: 12px;
+    padding: 16px 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.savian-chat-widget.restricted .countdown-label {
+    font-size: 13px;
+    color: #6c757d;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.savian-chat-widget.restricted .countdown-timer {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+.savian-chat-widget.restricted .countdown-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.savian-chat-widget.restricted .countdown-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #6C3BAA;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.savian-chat-widget.restricted .countdown-text {
+    font-size: 11px;
+    color: #6c757d;
+    margin-top: 4px;
+    text-transform: uppercase;
+}
+
+.savian-chat-widget.restricted .restriction-no-end {
+    color: #6c757d;
+    font-style: italic;
+    font-size: 14px;
+}
+
+/* Responsive for restricted state */
+@media (max-width: 768px) {
+    .savian-chat-widget.restricted .restricted-window {
+        width: calc(100vw - 32px);
+    }
+
+    .savian-chat-widget.restricted .restriction-body {
+        padding: 24px 16px;
+        min-height: 260px;
+    }
+
+    .savian-chat-widget.restricted .countdown-value {
+        font-size: 24px;
+    }
+}
+
+/* Dark mode for restricted state */
+@media (prefers-color-scheme: dark) {
+    .savian-chat-widget.restricted .restriction-body {
+        background: linear-gradient(180deg, #2d2d2d 0%, #1e1e1e 100%);
+    }
+
+    .savian-chat-widget.restricted .restriction-message {
+        color: #e0e0e0;
+    }
+
+    .savian-chat-widget.restricted .restriction-countdown {
+        background: #3a3a3a;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .savian-chat-widget.restricted .countdown-label {
+        color: #adb5bd;
+    }
+
+    .savian-chat-widget.restricted .countdown-text {
+        color: #adb5bd;
+    }
+
+    .savian-chat-widget.restricted .restriction-no-end {
+        color: #adb5bd;
+    }
+}
