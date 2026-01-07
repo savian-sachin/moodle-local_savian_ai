@@ -7,6 +7,120 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2026-01-07 - Learning Analytics Release
+
+### 🎯 Major Feature: AI-Powered Learning Analytics
+
+**NEW: Comprehensive learning analytics system for identifying at-risk students and improving course effectiveness.**
+
+### Added
+
+#### Analytics System
+- **Data Extraction**: 40+ metrics per student (engagement, grades, completion, forum activity, quiz performance)
+- **AI Risk Analysis**: LLM-powered identification of at-risk students with personalized intervention recommendations
+- **Anonymization**: SHA256 hashing for GDPR compliance (data sent to API is irreversible)
+- **Reverse Lookup**: Display actual student names in teacher view (within Moodle only)
+- **Real-time Progress**: Polling with live progress updates (3-4 min for 50 students)
+- **Combined Dashboard**: Single page for generating reports and viewing history
+- **Detailed Insights Display**:
+  - At-risk students with risk scores, factors, and recommended actions
+  - Course improvement recommendations (6-8 AI-generated suggestions)
+  - Engagement insights (peak activity days/hours, averages)
+  - Struggling topics identification
+- **CSV Export**: Download full reports with all student details
+- **Automation**: 4 trigger types (manual, daily, weekly, real-time, end-of-course)
+
+#### New Classes (10)
+- `classes/analytics/anonymizer.php` - SHA256 anonymization with reverse lookup
+- `classes/analytics/data_extractor.php` - Extract metrics from Moodle database
+- `classes/analytics/metrics_calculator.php` - Calculate engagement, grades, risk scores
+- `classes/analytics/report_builder.php` - Orchestrate extraction, anonymization, API submission
+- `classes/task/send_analytics_daily.php` - Daily automated reports (2 AM)
+- `classes/task/send_analytics_weekly.php` - Weekly automated reports (Sunday 3 AM)
+- `classes/task/cleanup_old_analytics.php` - GDPR data retention cleanup (4 AM)
+- `classes/observer/analytics_observer.php` - Real-time event capture (quiz, assignment, completion)
+
+#### New Pages (3)
+- `analytics_reports.php` - Combined analytics dashboard (generate + history + detailed view)
+- `export_analytics_csv.php` - CSV export functionality
+- `send_analytics.php` - Redirect to analytics_reports.php (backward compatibility)
+
+#### New Database Tables (3)
+- `local_savian_analytics_reports` - Track sent reports with status, API response, insights
+- `local_savian_analytics_cache` - Performance caching for metrics (1-hour TTL)
+- `local_savian_analytics_events` - Real-time event tracking for batched sending
+
+#### New API Endpoints (4)
+- `POST /analytics/course-data/` - Submit anonymized student data for AI analysis
+- `GET /analytics/status/<report_id>/` - Poll processing status
+- `GET /analytics/course/<course_id>/latest/` - Get most recent completed report
+- `GET /analytics/course/<course_id>/history/` - Get all report history
+
+#### CLI Tools
+- `cli/generate_test_data.php` - Generate realistic test students with varied profiles (high performers, average, at-risk)
+
+#### Documentation (110+ pages)
+- `ANALYTICS_API_SPEC.md` (25 pages) - Complete Django API specification with Python examples
+- `ANALYTICS_TESTING_GUIDE.md` (40 pages) - 12 comprehensive test suites
+- `ANALYTICS_USER_GUIDE.md` (45 pages) - Admin, teacher, and student guides with FAQ
+- `END_TO_END_INTEGRATION_TEST.md` - Integration testing procedures
+- `PLUGIN_DIAGNOSTIC_REPORT.md` - Validation and compliance report
+
+#### Admin Settings
+- **Enable Learning Analytics** - Global on/off toggle
+- **Analytics Frequency** - Manual / Daily / Weekly / Both
+- **Enable Real-Time Analytics** - Event-driven reports
+- **Report Retention Period** - GDPR compliance (default: 365 days)
+- **Require User Consent** - Optional student consent mechanism
+
+### Changed
+
+#### Analytics Integration
+- Combined `send_analytics.php` and `analytics_reports.php` into single dashboard
+- Enhanced polling page with progress bar, student counter, time elapsed
+- Improved report history with auto-sync from Django API
+- Status badges now distinguish "Processing" vs "Completed" intelligently
+
+#### Privacy Enhancements
+- Extended privacy provider to include analytics data export/deletion
+- Added analytics tables to GDPR compliance
+- Anonymization ensures data cannot be re-identified after user deletion
+
+#### Database Compatibility
+- Fixed PostgreSQL compatibility in analytics queries
+- Changed `FROM_UNIXTIME()` to `to_timestamp()`
+- Changed `DATE()` to `to_char(to_timestamp(), 'YYYY-MM-DD')`
+- Changed `HOUR()` to `EXTRACT(HOUR FROM to_timestamp())`
+
+#### UI/UX Improvements
+- Chat widget now restricted to course content pages only (not settings, admin, preferences)
+- Student role blocked from accessing Savian AI dashboard (teachers only)
+- Navigation menu only shows for teachers with `local/savian_ai:generate` capability
+- "Coming Soon" section updated to reflect that Learning Analytics is now live
+
+#### Performance
+- Batch processing for courses with 100+ students (50 per batch)
+- Caching system for frequently calculated metrics
+- Async processing via Django Celery for large courses (≥50 students)
+- Retry logic accepts HTTP 202 (async accepted) as success
+
+### Fixed
+- PostgreSQL SQL compatibility issues in data extraction
+- Form action URLs now properly retain courseid parameter
+- JavaScript `toggleInsights()` function defined before use
+- `html_writer::tag()` vs `html_writer::empty_tag()` usage
+- Missing user fields in fullname() queries (phonetic, middlename, alternatename)
+- Retry logic treating HTTP 202 as failure (now accepts 202 and 200)
+
+### Security
+- All SQL queries use parameterized statements (no injection risks)
+- SHA256 anonymization prevents PII exposure to external API
+- Only aggregated metrics sent to Django (no names, emails, IPs)
+- Teacher-only access to analytics dashboards
+- Student data properly anonymized for external transmission
+
+---
+
 ## [1.0.0] - 2026-01-03 - First Stable Release
 
 ### 🎉 Production Release
