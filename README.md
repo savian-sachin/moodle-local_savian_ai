@@ -1,11 +1,11 @@
 # Savian AI - Moodle Plugin
 
-**AI-Powered Course Content Generation and Intelligent Tutoring for Moodle 4.5+**
+**AI-Powered Course Content Generation, Intelligent Tutoring & Learning Analytics for Moodle 4.5+**
 
 [![Moodle Version](https://img.shields.io/badge/Moodle-4.5%2B-orange)](https://moodle.org/)
 [![License](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](LICENSE.txt)
-[![Version](https://img.shields.io/badge/version-1.0.0-brightgreen)](CHANGES.md)
-[![Stability](https://img.shields.io/badge/stability-stable-green)](https://github.com/savian-sachin/moodle-local-savian-ai/releases)
+[![Version](https://img.shields.io/badge/version-1.1.0-brightgreen)](CHANGES.md)
+[![Stability](https://img.shields.io/badge/stability-stable-green)](https://github.com/savian-sachin/moodle-local_savian_ai/releases)
 
 ---
 
@@ -24,6 +24,15 @@
 - Source attribution for transparency
 - Conversation history for teachers
 - Feedback system for continuous improvement
+
+### 📈 Learning Analytics (NEW in v1.1.0)
+- AI-powered identification of at-risk students
+- 40+ metrics extracted per student (engagement, grades, completion, forum activity)
+- Personalized intervention recommendations
+- Course improvement suggestions
+- GDPR compliant with SHA256 anonymization
+- Automated daily/weekly reports
+- CSV export for offline analysis
 
 ### 📊 Quality Control System
 - Quality Matters (QM) alignment scoring (85%+ certifiable)
@@ -78,7 +87,7 @@
 
 ```bash
 cd [moodleroot]/local/
-git clone https://github.com/[your-org]/savian-moodle-plugin.git savian_ai
+git clone https://github.com/savian-sachin/moodle-local_savian_ai.git savian_ai
 cd savian_ai
 # Visit Site Administration → Notifications to complete install
 ```
@@ -146,6 +155,18 @@ Navigate to **Site Administration → Users → Permissions → Define roles**
 - Ask questions about course materials
 - Get AI-powered assistance
 - View conversation history
+
+#### View Learning Analytics
+
+1. Navigate to a course
+2. Click **Savian AI** in course menu
+3. Select **Learning Analytics**
+4. View:
+   - At-risk students with risk scores
+   - Contributing factors for each student
+   - Recommended interventions
+   - Course improvement suggestions
+5. Export reports as CSV
 
 ### For Students
 
@@ -241,8 +262,8 @@ Navigate to **Site Administration → Users → Permissions → Define roles**
 
 ## 🤝 Support
 
-- **Documentation**: See [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) for technical details
-- **Issues**: [GitHub Issues](../../issues)
+- **Documentation**: [User Guide](USER_GUIDE.md) | [Analytics Guide](ANALYTICS_USER_GUIDE.md)
+- **Issues**: [GitHub Issues](https://github.com/savian-sachin/moodle-local_savian_ai/issues)
 - **Contact**: support@savian.ai
 
 ---
@@ -267,8 +288,9 @@ See [LICENSE.txt](LICENSE.txt) for the full license text.
 
 ## 📚 Documentation
 
-- **User Guide**: This README
-- **Developer Guide**: [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)
+- **User Guide**: [USER_GUIDE.md](USER_GUIDE.md)
+- **Analytics Guide**: [ANALYTICS_USER_GUIDE.md](ANALYTICS_USER_GUIDE.md)
+- **API Specification**: [ANALYTICS_API_SPEC.md](ANALYTICS_API_SPEC.md)
 - **Version History**: [CHANGES.md](CHANGES.md)
 - **Privacy Policy**: [classes/privacy/provider.php](classes/privacy/provider.php)
 
@@ -276,6 +298,12 @@ See [LICENSE.txt](LICENSE.txt) for the full license text.
 
 ## 🔄 Version
 
-**Current Version**: 1.0.0 (January 2026) - **Stable Release** ✨
+**Current Version**: 1.1.0 (January 2026) - **Stable Release** ✨
+
+### What's New in v1.1.0
+- Learning Analytics System with AI-powered at-risk student detection
+- Automated daily/weekly analytics reports
+- CSV export functionality
+- GDPR-compliant data anonymization
 
 See [CHANGES.md](CHANGES.md) for complete version history.
