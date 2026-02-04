@@ -24,11 +24,16 @@ $string['api_key'] = 'API Key';
 $string['api_key_desc'] = 'Khóa API Savian AI của bạn';
 $string['org_code'] = 'Mã Tổ chức';
 $string['org_code_desc'] = 'Mã định danh tổ chức của bạn.';
-$string['org_code_warning'] = 'Cảnh báo: Thay đổi mã tổ chức sẽ xóa tất cả tài liệu đã tải lên vì chúng được liên kết với tổ chức.';
+$string['org_code_warning'] = 'Cảnh báo: Thay đổi mã tổ chức sẽ xóa tất cả tài liệu đã tải lên vì chúng được liên kết với tổ chức. Bạn có thể khôi phục tài liệu bằng cách gửi email đến info@savian.ai.vn với email đã đăng ký và mã tổ chức cần khôi phục.';
 $string['org_code_changed_documents_cleared'] = 'Mã tổ chức đã thay đổi. {$a} tài liệu đã bị xóa vì không còn hợp lệ cho tổ chức mới.';
 $string['validate_connection'] = 'Kiểm tra Kết nối';
 $string['connection_valid'] = 'Kết nối thành công! Tổ chức: {$a}';
 $string['connection_invalid'] = 'Kết nối thất bại: {$a}';
+$string['connection_status'] = 'Trạng thái Kết nối';
+$string['connection_status_connected'] = 'Đã kết nối với {$a}';
+$string['connection_status_failed'] = 'Kết nối thất bại: {$a}';
+$string['connection_status_error'] = 'Lỗi: {$a}';
+$string['connection_status_not_configured'] = 'Chưa cấu hình thông tin API. Vui lòng nhập API URL, Mã Tổ chức và API Key bên dưới.';
 
 // Navigation
 $string['dashboard'] = 'Bảng điều khiển';

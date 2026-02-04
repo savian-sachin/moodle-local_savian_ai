@@ -9,7 +9,59 @@
 defined('MOODLE_INTERNAL') || die;
 
 if ($hassiteconfig) {
+    global $SESSION;
+    // Store current org_code in session for comparison when settings are saved
+    $currentorgcode = get_config('local_savian_ai', 'org_code');
+    if (!empty($currentorgcode)) {
+        $SESSION->savian_previous_org_code = $currentorgcode;
+    }
     $settings = new admin_settingpage('local_savian_ai', get_string('pluginname', 'local_savian_ai'));
+
+    // === CONNECTION STATUS ===
+    // Check API connection status
+    $api_key = get_config('local_savian_ai', 'api_key');
+    $org_code = get_config('local_savian_ai', 'org_code');
+
+    $connection_status = '';
+    if (!empty($api_key) && !empty($org_code)) {
+        try {
+            $client = new \local_savian_ai\api\client();
+            $response = $client->validate();
+            if ($response->http_code === 200 && isset($response->valid) && $response->valid) {
+                $org_name = $response->organization->name ?? $org_code;
+                $connection_status = html_writer::div(
+                    html_writer::tag('span', '✓ ', ['style' => 'color: green; font-weight: bold;']) .
+                    get_string('connection_status_connected', 'local_savian_ai', $org_name),
+                    'alert alert-success'
+                );
+            } else {
+                $error = $response->error ?? $response->message ?? 'Unknown error';
+                $connection_status = html_writer::div(
+                    html_writer::tag('span', '✗ ', ['style' => 'color: red; font-weight: bold;']) .
+                    get_string('connection_status_failed', 'local_savian_ai', $error),
+                    'alert alert-danger'
+                );
+            }
+        } catch (Exception $e) {
+            $connection_status = html_writer::div(
+                html_writer::tag('span', '✗ ', ['style' => 'color: red; font-weight: bold;']) .
+                get_string('connection_status_error', 'local_savian_ai', $e->getMessage()),
+                'alert alert-danger'
+            );
+        }
+    } else {
+        $connection_status = html_writer::div(
+            html_writer::tag('span', '⚠ ', ['style' => 'color: orange; font-weight: bold;']) .
+            get_string('connection_status_not_configured', 'local_savian_ai'),
+            'alert alert-warning'
+        );
+    }
+
+    $settings->add(new admin_setting_heading(
+        'local_savian_ai/connection_status',
+        get_string('connection_status', 'local_savian_ai'),
+        $connection_status
+    ));
 
     // API URL
     $settings->add(new admin_setting_configtext(

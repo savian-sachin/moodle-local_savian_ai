@@ -24,11 +24,16 @@ $string['api_key'] = 'API Key';
 $string['api_key_desc'] = 'Your Savian AI API key';
 $string['org_code'] = 'Organization Code';
 $string['org_code_desc'] = 'Your organization code.';
-$string['org_code_warning'] = 'Warning: Changing the organization code will delete all uploaded documents as they are tied to the organization.';
+$string['org_code_warning'] = 'Warning: Changing the organization code will delete all uploaded documents as they are tied to the organization. You can recover documents by sending an email to info@savian.ai.vn with your registered email ID and the organization code for which you want to recover.';
 $string['org_code_changed_documents_cleared'] = 'Organization code changed. {$a} document(s) have been cleared as they are no longer valid for the new organization.';
 $string['validate_connection'] = 'Validate Connection';
 $string['connection_valid'] = 'Connection successful! Organization: {$a}';
 $string['connection_invalid'] = 'Connection failed: {$a}';
+$string['connection_status'] = 'Connection Status';
+$string['connection_status_connected'] = 'Connected to {$a}';
+$string['connection_status_failed'] = 'Connection failed: {$a}';
+$string['connection_status_error'] = 'Error: {$a}';
+$string['connection_status_not_configured'] = 'API credentials not configured. Please enter API URL, Organization Code, and API Key below.';
 
 // Navigation
 $string['dashboard'] = 'Dashboard';

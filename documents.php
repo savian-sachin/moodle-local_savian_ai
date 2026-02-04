@@ -143,11 +143,11 @@ if ($courseid > 0) {
     }
 }
 
-// Sync documents from API
+// Sync documents from API (always sync to get current org's documents)
 $sync_response = $client->get_documents(['per_page' => 100]);
 
 if ($sync_response->http_code === 200 && isset($sync_response->documents)) {
-    // Update local cache
+    // Update local cache with documents from current organization
     foreach ($sync_response->documents as $doc) {
         $existing = $DB->get_record('local_savian_documents', ['savian_doc_id' => $doc->id]);
 

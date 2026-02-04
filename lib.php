@@ -158,11 +158,18 @@ function local_savian_ai_before_footer() {
  * It clears all documents since they belong to the previous organization.
  */
 function local_savian_ai_org_code_updated() {
-    global $DB;
+    global $DB, $SESSION;
 
-    // Get the stored previous org code
-    $previousorgcode = get_config('local_savian_ai', 'previous_org_code');
+    // Get the new org code (already saved)
     $neworgcode = get_config('local_savian_ai', 'org_code');
+
+    // Get the previous org code from session (stored when settings page loaded)
+    $previousorgcode = isset($SESSION->savian_previous_org_code) ? $SESSION->savian_previous_org_code : null;
+
+    // If no session value, try the stored config value
+    if (empty($previousorgcode)) {
+        $previousorgcode = get_config('local_savian_ai', 'previous_org_code');
+    }
 
     // If org code has changed and there was a previous value
     if (!empty($previousorgcode) && $previousorgcode !== $neworgcode) {
@@ -173,16 +180,72 @@ function local_savian_ai_org_code_updated() {
             // Delete all documents
             $DB->delete_records('local_savian_documents');
 
-            // Also clear related chat course configs that reference documents
-            $DB->execute("UPDATE {local_savian_chat_course_config} SET document_ids = NULL");
-
             // Show admin notification
             \core\notification::warning(
                 get_string('org_code_changed_documents_cleared', 'local_savian_ai', $count)
             );
         }
+
+        // Sync new documents from API immediately
+        local_savian_ai_sync_documents();
     }
 
     // Store the current org code for future comparison
     set_config('previous_org_code', $neworgcode, 'local_savian_ai');
+
+    // Clear session
+    unset($SESSION->savian_previous_org_code);
+}
+
+/**
+ * Sync documents from API to local database.
+ *
+ * @return int Number of documents synced
+ */
+function local_savian_ai_sync_documents() {
+    global $DB;
+
+    $client = new \local_savian_ai\api\client();
+    $sync_response = $client->get_documents(['per_page' => 100]);
+    $synced = 0;
+
+    if ($sync_response->http_code === 200 && isset($sync_response->documents)) {
+        foreach ($sync_response->documents as $doc) {
+            $existing = $DB->get_record('local_savian_documents', ['savian_doc_id' => $doc->id]);
+
+            $record = new stdClass();
+            $record->savian_doc_id = $doc->id;
+            $record->title = $doc->title;
+            $record->description = $doc->description ?? '';
+            $record->subject_area = $doc->subject_area ?? '';
+            $record->status = $doc->processing_status;
+            $record->progress = $doc->processing_progress ?? 0;
+            $record->chunk_count = $doc->chunk_count ?? 0;
+            $record->qna_count = $doc->qna_count ?? 0;
+            $record->file_size = $doc->file_size ?? 0;
+            $record->file_type = $doc->source_file_type ?? '';
+            $record->tags = json_encode($doc->tags ?? []);
+            $record->is_active = $doc->is_active ? 1 : 0;
+            $record->last_synced = time();
+            $record->timemodified = time();
+
+            $api_course_id = $doc->moodle_course_id ?? $doc->course_id ?? null;
+
+            if ($existing) {
+                $record->id = $existing->id;
+                $record->course_id = $existing->course_id ?: $api_course_id;
+                $record->timecreated = $existing->timecreated;
+                $record->usermodified = $existing->usermodified;
+                $DB->update_record('local_savian_documents', $record);
+            } else {
+                $record->course_id = $api_course_id;
+                $record->timecreated = time();
+                $record->usermodified = 0;
+                $DB->insert_record('local_savian_documents', $record);
+            }
+            $synced++;
+        }
+    }
+
+    return $synced;
 }
