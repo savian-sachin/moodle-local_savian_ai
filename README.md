@@ -333,6 +333,10 @@ See [LICENSE.txt](LICENSE.txt) for the full license text.
 **Current Version**: 1.1.1 (February 2026) - **Stable Release** ✨
 
 ### What's New in v1.1.1
+- Connection status indicator on settings page (shows connected/failed/not configured)
+- Document sync on dashboard visit and after organization code change
+- Learning Analytics tutorials for teachers (at-risk detection, chat monitoring)
+- API setup documentation with registration link and free trial info
 - Auto-clear documents when organization code changes (prevents generation errors)
 - Removed test files for production security
 

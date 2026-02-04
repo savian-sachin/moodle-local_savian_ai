@@ -7,7 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.1.1] - 2026-02-04 - Bug Fix Release
+## [1.1.1] - 2026-02-04 - Document Sync & Tutorials Update
+
+### Added
+- **Connection Status Indicator**: Settings page now shows API connection status
+  - ✅ Connected (shows organization name)
+  - ❌ Failed (shows error message)
+  - ⚠️ Not Configured (prompts for credentials)
+- **Document Sync Improvements**:
+  - Sync documents on dashboard (index.php) visit
+  - Sync documents immediately after organization code change
+  - Reusable `local_savian_ai_sync_documents()` function
+- **Learning Analytics Tutorials**: Added comprehensive tutorials for teachers
+  - Tutorial 6: Learning Analytics - Identify At-Risk Students
+  - Tutorial 7: Monitoring Student Chat Conversations
+- **API Setup Documentation**: README now includes step-by-step guide
+  - Registration URL: https://app.savian.ai.vn/en/content-generation/moodle-plugin/register/
+  - 14-day free trial information
+  - Credential setup instructions
 
 ### Fixed
 - **Organization Change Handling**: Automatically clear all documents when organization code is changed in settings
