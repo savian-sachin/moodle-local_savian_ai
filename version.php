@@ -9,7 +9,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_savian_ai';
-$plugin->version = 2026010700;  // YYYYMMDDXX format - Learning analytics feature
+$plugin->version = 2026020400;  // YYYYMMDDXX format - Auto-clear documents on org change
 $plugin->requires = 2024100700; // Moodle 4.5 minimum
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = 'v1.1.0';
+$plugin->release = 'v1.1.1';

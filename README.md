@@ -4,7 +4,7 @@
 
 [![Moodle Version](https://img.shields.io/badge/Moodle-4.5%2B-orange)](https://moodle.org/)
 [![License](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](LICENSE.txt)
-[![Version](https://img.shields.io/badge/version-1.1.0-brightgreen)](CHANGES.md)
+[![Version](https://img.shields.io/badge/version-1.1.1-brightgreen)](CHANGES.md)
 [![Stability](https://img.shields.io/badge/stability-stable-green)](https://github.com/savian-sachin/moodle-local_savian_ai/releases)
 
 ---
@@ -298,7 +298,11 @@ See [LICENSE.txt](LICENSE.txt) for the full license text.
 
 ## 🔄 Version
 
-**Current Version**: 1.1.0 (January 2026) - **Stable Release** ✨
+**Current Version**: 1.1.1 (February 2026) - **Stable Release** ✨
+
+### What's New in v1.1.1
+- Auto-clear documents when organization code changes (prevents generation errors)
+- Removed test files for production security
 
 ### What's New in v1.1.0
 - Learning Analytics System with AI-powered at-risk student detection

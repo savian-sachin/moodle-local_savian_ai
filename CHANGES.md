@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.1] - 2026-02-04 - Bug Fix Release
+
+### Fixed
+- **Organization Change Handling**: Automatically clear all documents when organization code is changed in settings
+  - Documents are tied to the organization in the external API
+  - Prevents errors when trying to generate content with invalid document references
+  - Shows warning message in settings about document deletion
+  - Displays notification with count of deleted documents after org change
+
+### Security
+- Removed test files from production release (`cli/generate_test_data.php`, `test_chat_service.php`)
+
+---
+
 ## [1.1.0] - 2026-01-07 - Learning Analytics Release
 
 ### 🎯 Major Feature: AI-Powered Learning Analytics

@@ -20,14 +20,20 @@ if ($hassiteconfig) {
         PARAM_URL
     ));
 
-    // Organization Code
-    $settings->add(new admin_setting_configtext(
+    // Organization Code - with callback to clear documents on change
+    $orgcodesetting = new admin_setting_configtext(
         'local_savian_ai/org_code',
         get_string('org_code', 'local_savian_ai'),
-        get_string('org_code_desc', 'local_savian_ai'),
+        get_string('org_code_desc', 'local_savian_ai') . ' ' .
+            html_writer::tag('strong',
+                get_string('org_code_warning', 'local_savian_ai'),
+                ['class' => 'text-warning']
+            ),
         '',  // No default - must be configured
         PARAM_ALPHANUMEXT
-    ));
+    );
+    $orgcodesetting->set_updatedcallback('local_savian_ai_org_code_updated');
+    $settings->add($orgcodesetting);
 
     // API Key
     $settings->add(new admin_setting_configpasswordunmask(

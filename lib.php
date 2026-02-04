@@ -150,3 +150,39 @@ function local_savian_ai_before_footer() {
     // See: classes/hook_callbacks/before_footer_html.php
     // Keeping empty function to avoid errors during transition
 }
+
+/**
+ * Callback function when organization code setting is updated.
+ *
+ * This is called by Moodle's admin settings system after the org_code is saved.
+ * It clears all documents since they belong to the previous organization.
+ */
+function local_savian_ai_org_code_updated() {
+    global $DB;
+
+    // Get the stored previous org code
+    $previousorgcode = get_config('local_savian_ai', 'previous_org_code');
+    $neworgcode = get_config('local_savian_ai', 'org_code');
+
+    // If org code has changed and there was a previous value
+    if (!empty($previousorgcode) && $previousorgcode !== $neworgcode) {
+        // Count and delete all documents
+        $count = $DB->count_records('local_savian_documents');
+
+        if ($count > 0) {
+            // Delete all documents
+            $DB->delete_records('local_savian_documents');
+
+            // Also clear related chat course configs that reference documents
+            $DB->execute("UPDATE {local_savian_chat_course_config} SET document_ids = NULL");
+
+            // Show admin notification
+            \core\notification::warning(
+                get_string('org_code_changed_documents_cleared', 'local_savian_ai', $count)
+            );
+        }
+    }
+
+    // Store the current org code for future comparison
+    set_config('previous_org_code', $neworgcode, 'local_savian_ai');
+}
