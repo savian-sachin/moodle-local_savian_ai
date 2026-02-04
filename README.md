@@ -60,7 +60,7 @@
 - **Moodle**: 4.5 or higher
 - **PHP**: 8.1, 8.2, or 8.3 (8.4+ not officially supported)
 - **Database**: PostgreSQL or MySQL
-- **Savian AI Account**: API credentials required ([Contact Savian AI](mailto:support@savian.ai))
+- **Savian AI Account**: API credentials required ([Register here](https://app.savian.ai.vn/en/content-generation/moodle-plugin/register/) - 14-day free trial)
 
 ---
 
@@ -96,22 +96,53 @@ cd savian_ai
 
 ## ⚙️ Configuration
 
-### 1. API Credentials
+### 1. Get API Credentials
+
+Before configuring the plugin, you need to obtain API credentials from Savian AI:
+
+1. **Register for an Account**
+   - Visit [Savian AI Moodle Plugin Registration](https://app.savian.ai.vn/en/content-generation/moodle-plugin/register/)
+   - Enter your email and organization details
+   - You'll receive a verification link via email
+
+2. **Verify Your Email**
+   - Click the verification link sent to your email
+   - Complete the verification process
+
+3. **Get Your Credentials**
+   - After verification, you'll receive:
+     - **API URL**: Your Savian AI API endpoint
+     - **API Key**: Your unique API key
+     - **Organization Code**: Your organization identifier
+   - These credentials are available in your Savian AI dashboard
+
+> 💡 **Free Trial**: New accounts include a 14-day free trial to test all features.
+
+> 📧 **Need Help?**: Contact support@savian.ai for assistance with registration or credentials.
+
+### 2. Configure Plugin Settings
 
 Navigate to **Site Administration → Plugins → Local plugins → Savian AI**
 
 **Required Settings:**
-- **API Base URL**: Your Savian AI API endpoint
+- **API Base URL**: Enter your Savian AI API endpoint (default: `https://app.savian.ai.vn/api/moodle/v1/`)
+- **Organization Code**: Your organization identifier from Savian AI
 - **API Key**: Your organization's API key
-- **Organization Code**: Your organization identifier
+
+**Connection Status**: After saving, the settings page shows connection status:
+- ✅ **Connected**: Successfully connected to your organization
+- ❌ **Failed**: Check your credentials
+- ⚠️ **Not Configured**: Enter your API credentials
 
 **Optional Settings:**
 - Enable/disable chat widget
-- Default chat position
+- Chat widget position (bottom-right/bottom-left)
+- Chat widget size (small/medium/large)
 - Custom welcome message
-- Auto-save approved courses
+- Enable conversation history
+- Enable chat feedback
 
-### 2. Assign Capabilities
+### 3. Assign Capabilities
 
 Navigate to **Site Administration → Users → Permissions → Define roles**
 
@@ -120,11 +151,12 @@ Navigate to **Site Administration → Users → Permissions → Define roles**
 - **Teacher**: `local/savian_ai:use` + `local/savian_ai:generate` (full access)
 - **Manager**: `local/savian_ai:manage` (admin settings)
 
-### 3. Test Connection
+### 4. Test Connection
 
 1. Go to **Site Administration → Plugins → Local plugins → Savian AI**
-2. Click **Validate Connection**
-3. Verify success message appears
+2. Save your settings
+3. Check the **Connection Status** at the top of the settings page
+4. Verify it shows "✓ Connected to [Your Organization Name]"
 
 ---
 
