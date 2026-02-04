@@ -138,7 +138,7 @@ function show_overview() {
     echo html_writer::start_div('card-body text-center');
     echo html_writer::tag('div', '🎓', ['class' => 'display-3']);
     echo html_writer::tag('h4', 'Teachers', ['class' => 'card-title']);
-    echo html_writer::tag('p', 'Course generation, quality scores, and best practices', ['class' => 'card-text']);
+    echo html_writer::tag('p', 'Course generation, learning analytics, quality scores, and best practices', ['class' => 'card-text']);
     echo html_writer::link(
         new moodle_url('/local/savian_ai/tutorials.php', ['role' => 'teacher']),
         'View Teacher Tutorials',
@@ -509,6 +509,120 @@ function show_teacher_tutorials() {
     echo html_writer::end_tag('ol');
 
     echo html_writer::div('💡 <strong>Tip:</strong> Focus edits on items with yellow/red quality tags', 'alert alert-info mt-3');
+
+    echo html_writer::end_div();
+    echo html_writer::end_div();
+
+    // Tutorial 6: Learning Analytics
+    echo html_writer::start_div('card mb-4 tutorial-card');
+    echo html_writer::div('📊 Tutorial 6: Learning Analytics - Identify At-Risk Students (NEW)', 'card-header bg-danger text-white');
+    echo html_writer::start_div('card-body');
+
+    echo html_writer::tag('h5', 'What is Learning Analytics?');
+    echo html_writer::tag('p', 'AI-powered analysis that identifies students who may be struggling, with personalized intervention recommendations.', ['class' => 'lead']);
+
+    echo html_writer::tag('h5', 'Key Features:', ['class' => 'mt-3']);
+    echo html_writer::start_tag('ul');
+    echo html_writer::tag('li', '🎯 <strong>At-Risk Detection</strong>: AI analyzes 40+ metrics per student');
+    echo html_writer::tag('li', '📈 <strong>Risk Scores</strong>: 0-100 scale with High/Medium/Low classification');
+    echo html_writer::tag('li', '💡 <strong>Intervention Recommendations</strong>: Personalized suggestions for each student');
+    echo html_writer::tag('li', '📋 <strong>Course Improvements</strong>: AI suggests ways to improve course design');
+    echo html_writer::tag('li', '📥 <strong>CSV Export</strong>: Download reports for offline analysis');
+    echo html_writer::end_tag('ul');
+
+    echo html_writer::tag('h5', 'How to Access:', ['class' => 'mt-4']);
+    echo html_writer::start_tag('ol');
+    echo html_writer::tag('li', 'Navigate to your course');
+    echo html_writer::tag('li', 'Click <strong>"Savian AI"</strong> in course navigation');
+    echo html_writer::tag('li', 'Click <strong>"Learning Analytics"</strong> tab');
+    echo html_writer::tag('li', 'Click <strong>"Generate Analytics Report"</strong>');
+    echo html_writer::tag('li', 'Wait 1-2 minutes for AI analysis');
+    echo html_writer::end_tag('ol');
+
+    echo html_writer::tag('h5', 'Understanding the Report:', ['class' => 'mt-4']);
+
+    echo html_writer::tag('h6', '🔴 High Risk Students (70-100):');
+    echo html_writer::start_tag('ul');
+    echo html_writer::tag('li', 'Immediate intervention recommended');
+    echo html_writer::tag('li', 'Multiple warning indicators present');
+    echo html_writer::tag('li', 'Personal outreach suggested');
+    echo html_writer::end_tag('ul');
+
+    echo html_writer::tag('h6', '🟡 Medium Risk Students (40-69):', ['class' => 'mt-2']);
+    echo html_writer::start_tag('ul');
+    echo html_writer::tag('li', 'Monitor closely');
+    echo html_writer::tag('li', 'Some concerning patterns detected');
+    echo html_writer::tag('li', 'Consider proactive support');
+    echo html_writer::end_tag('ul');
+
+    echo html_writer::tag('h6', '🟢 Low Risk Students (0-39):', ['class' => 'mt-2']);
+    echo html_writer::start_tag('ul');
+    echo html_writer::tag('li', 'On track');
+    echo html_writer::tag('li', 'Continue normal monitoring');
+    echo html_writer::tag('li', 'May still benefit from engagement');
+    echo html_writer::end_tag('ul');
+
+    echo html_writer::tag('h5', 'Metrics Analyzed:', ['class' => 'mt-4']);
+    echo html_writer::start_div('row');
+    echo html_writer::div('<strong>Engagement</strong><ul><li>Login frequency</li><li>Time on course</li><li>Page views</li><li>Resource access</li></ul>', 'col-md-3');
+    echo html_writer::div('<strong>Performance</strong><ul><li>Quiz scores</li><li>Assignment grades</li><li>Grade trends</li><li>Completion rate</li></ul>', 'col-md-3');
+    echo html_writer::div('<strong>Participation</strong><ul><li>Forum posts</li><li>Discussion replies</li><li>Peer interactions</li><li>Group work</li></ul>', 'col-md-3');
+    echo html_writer::div('<strong>Patterns</strong><ul><li>Submission timing</li><li>Late submissions</li><li>Activity gaps</li><li>Drop-off points</li></ul>', 'col-md-3');
+    echo html_writer::end_div();
+
+    echo html_writer::tag('h5', 'Intervention Recommendations:', ['class' => 'mt-4']);
+    echo html_writer::tag('p', 'For each at-risk student, AI provides specific recommendations:');
+    echo html_writer::start_tag('ul');
+    echo html_writer::tag('li', '📧 <strong>Communication</strong>: Email templates, meeting suggestions');
+    echo html_writer::tag('li', '📚 <strong>Resources</strong>: Additional materials, tutorials');
+    echo html_writer::tag('li', '⏰ <strong>Deadlines</strong>: Extension recommendations');
+    echo html_writer::tag('li', '👥 <strong>Support</strong>: Peer tutoring, study groups');
+    echo html_writer::end_tag('ul');
+
+    echo html_writer::tag('h5', 'Export Reports:', ['class' => 'mt-4']);
+    echo html_writer::start_tag('ol');
+    echo html_writer::tag('li', 'Click <strong>"Export CSV"</strong> button');
+    echo html_writer::tag('li', 'Download includes: Student ID, Risk Score, Contributing Factors, Recommendations');
+    echo html_writer::tag('li', 'Use for offline analysis or sharing with advisors');
+    echo html_writer::end_tag('ol');
+
+    echo html_writer::div('🔒 <strong>Privacy:</strong> Student data is anonymized with SHA256 before AI processing. Full GDPR compliance with data export/deletion support.', 'alert alert-info mt-3');
+
+    echo html_writer::div('💡 <strong>Best Practice:</strong> Run analytics weekly to catch at-risk students early. Early intervention = better outcomes!', 'alert alert-success');
+
+    echo html_writer::end_div();
+    echo html_writer::end_div();
+
+    // Tutorial 7: Chat History
+    echo html_writer::start_div('card mb-4 tutorial-card');
+    echo html_writer::div('💬 Tutorial 7: Monitoring Student Chat Conversations', 'card-header');
+    echo html_writer::start_div('card-body');
+
+    echo html_writer::tag('h5', 'Why Monitor Chat History?');
+    echo html_writer::start_tag('ul');
+    echo html_writer::tag('li', 'Understand what concepts students struggle with');
+    echo html_writer::tag('li', 'Identify common questions to address in class');
+    echo html_writer::tag('li', 'Spot students who need extra help');
+    echo html_writer::tag('li', 'Improve course materials based on questions');
+    echo html_writer::end_tag('ul');
+
+    echo html_writer::tag('h5', 'How to Access:', ['class' => 'mt-3']);
+    echo html_writer::start_tag('ol');
+    echo html_writer::tag('li', 'Navigate to your course');
+    echo html_writer::tag('li', 'Click <strong>"Savian AI"</strong> in course navigation');
+    echo html_writer::tag('li', 'Click <strong>"Chat History"</strong>');
+    echo html_writer::tag('li', 'Filter by student, date range, or keyword');
+    echo html_writer::end_tag('ol');
+
+    echo html_writer::tag('h5', 'What You Can See:', ['class' => 'mt-3']);
+    echo html_writer::start_tag('ul');
+    echo html_writer::tag('li', 'All student questions and AI responses');
+    echo html_writer::tag('li', 'Feedback ratings (thumbs up/down)');
+    echo html_writer::tag('li', 'Conversation timestamps');
+    echo html_writer::tag('li', 'Sources used in responses');
+    echo html_writer::end_tag('ul');
+
+    echo html_writer::div('💡 <strong>Tip:</strong> Review negative feedback (thumbs down) to identify areas where the AI or course materials need improvement.', 'alert alert-info mt-3');
 
     echo html_writer::end_div();
     echo html_writer::end_div();
