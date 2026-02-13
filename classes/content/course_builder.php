@@ -165,18 +165,18 @@ class course_builder {
 
         $course = $DB->get_record('course', ['id' => $course_id], '*', MUST_EXIST);
 
-        // Create course module first
+        // Create course module first.
         $cm = new \stdClass();
         $cm->course = $course_id;
         $cm->module = $DB->get_field('modules', 'id', ['name' => 'page']);
-        $cm->instance = 0; // Will be updated after page_add_instance
+        $cm->instance = 0;
         $cm->section = $DB->get_field('course_sections', 'id', ['course' => $course_id, 'section' => $section_num]);
         $cm->idnumber = '';
         $cm->added = time();
 
         $cm->id = $DB->insert_record('course_modules', $cm);
 
-        // Create page instance
+        // Create page instance.
         $page = new \stdClass();
         $page->course = $course_id;
         $page->coursemodule = $cm->id;
@@ -192,17 +192,20 @@ class course_builder {
 
         $page->id = $DB->insert_record('page', $page);
 
-        // Update course_module with instance ID
+        // Update course_module with instance ID.
         $DB->set_field('course_modules', 'instance', $page->id, ['id' => $cm->id]);
 
-        // Add to section sequence
+        // Add to section sequence.
         $section = $DB->get_record('course_sections', ['course' => $course_id, 'section' => $section_num]);
         $sequence = !empty($section->sequence) ? explode(',', $section->sequence) : [];
         $sequence[] = $cm->id;
         $DB->set_field('course_sections', 'sequence', implode(',', $sequence), ['id' => $section->id]);
 
-        // Rebuild course cache
+        // Rebuild course cache.
         rebuild_course_cache($course_id, true);
+
+        // Trigger course module created event.
+        $this->trigger_cm_created_event($cm->id, $course_id);
 
         return $page->id;
     }
@@ -288,8 +291,11 @@ class course_builder {
             );
         }
 
-        // Rebuild course cache
+        // Rebuild course cache.
         rebuild_course_cache($course_id, true);
+
+        // Trigger course module created event.
+        $this->trigger_cm_created_event($cm->id, $course_id);
 
         return $quiz->id;
     }
@@ -352,8 +358,11 @@ class course_builder {
         $sequence[] = $cm->id;
         $DB->set_field('course_sections', 'sequence', implode(',', $sequence), ['id' => $section->id]);
 
-        // Rebuild course cache
+        // Rebuild course cache.
         rebuild_course_cache($course_id, true);
+
+        // Trigger course module created event.
+        $this->trigger_cm_created_event($cm->id, $course_id);
 
         return $assignment->id;
     }
@@ -400,8 +409,11 @@ class course_builder {
         $sequence[] = $cm->id;
         $DB->set_field('course_sections', 'sequence', implode(',', $sequence), ['id' => $section->id]);
 
-        // Rebuild course cache
+        // Rebuild course cache.
         rebuild_course_cache($course_id, true);
+
+        // Trigger course module created event.
+        $this->trigger_cm_created_event($cm->id, $course_id);
 
         return $label->id;
     }
@@ -464,8 +476,11 @@ class course_builder {
         $sequence[] = $cm->id;
         $DB->set_field('course_sections', 'sequence', implode(',', $sequence), ['id' => $section->id]);
 
-        // Rebuild course cache
+        // Rebuild course cache.
         rebuild_course_cache($course_id, true);
+
+        // Trigger course module created event.
+        $this->trigger_cm_created_event($cm->id, $course_id);
 
         return $forum->id;
     }
@@ -528,8 +543,11 @@ class course_builder {
         $sequence[] = $cm->id;
         $DB->set_field('course_sections', 'sequence', implode(',', $sequence), ['id' => $section->id]);
 
-        // Rebuild course cache
+        // Rebuild course cache.
         rebuild_course_cache($course_id, true);
+
+        // Trigger course module created event.
+        $this->trigger_cm_created_event($cm->id, $course_id);
 
         return $label->id;
     }
@@ -602,6 +620,24 @@ class course_builder {
         }
 
         return $glossary->id;
+    }
+
+    /**
+     * Trigger course_module_created event for a newly created course module.
+     *
+     * @param int $cmid Course module ID
+     * @param int $courseid Course ID
+     */
+    protected function trigger_cm_created_event($cmid, $courseid) {
+        try {
+            $cminfo = get_coursemodule_from_id('', $cmid, $courseid);
+            if ($cminfo) {
+                $event = \core\event\course_module_created::create_from_cm($cminfo);
+                $event->trigger();
+            }
+        } catch (\Exception $e) {
+            debugging('Failed to trigger course_module_created event: ' . $e->getMessage(), DEBUG_DEVELOPER);
+        }
     }
 
     /**

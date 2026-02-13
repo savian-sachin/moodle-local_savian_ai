@@ -6,10 +6,20 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
+/**
+ * Cache definitions for Savian AI plugin
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_savian_ai';
-$plugin->version = 2026021300;  // YYYYMMDDXX format - Fix 13 plugin review issues
-$plugin->requires = 2024100700; // Moodle 4.5 minimum
-$plugin->maturity = MATURITY_STABLE;
-$plugin->release = 'v1.2.0';
+$definitions = [
+    'session_data' => [
+        'mode' => cache_store::MODE_SESSION,
+        'simplekeys' => true,
+        'simpledata' => false,
+    ],
+];

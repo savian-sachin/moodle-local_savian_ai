@@ -158,43 +158,44 @@ function local_savian_ai_before_footer() {
  * It clears all documents since they belong to the previous organization.
  */
 function local_savian_ai_org_code_updated() {
-    global $DB, $SESSION;
+    global $DB;
 
-    // Get the new org code (already saved)
+    // Get the new org code (already saved).
     $neworgcode = get_config('local_savian_ai', 'org_code');
 
-    // Get the previous org code from session (stored when settings page loaded)
-    $previousorgcode = isset($SESSION->savian_previous_org_code) ? $SESSION->savian_previous_org_code : null;
+    // Get the previous org code from cache (stored when settings page loaded).
+    $cache = \cache::make('local_savian_ai', 'session_data');
+    $previousorgcode = $cache->get('previous_org_code');
 
-    // If no session value, try the stored config value
+    // If no cache value, try the stored config value.
     if (empty($previousorgcode)) {
         $previousorgcode = get_config('local_savian_ai', 'previous_org_code');
     }
 
-    // If org code has changed and there was a previous value
+    // If org code has changed and there was a previous value.
     if (!empty($previousorgcode) && $previousorgcode !== $neworgcode) {
-        // Count and delete all documents
+        // Count and delete all documents.
         $count = $DB->count_records('local_savian_documents');
 
         if ($count > 0) {
-            // Delete all documents
+            // Delete all documents.
             $DB->delete_records('local_savian_documents');
 
-            // Show admin notification
+            // Show admin notification.
             \core\notification::warning(
                 get_string('org_code_changed_documents_cleared', 'local_savian_ai', $count)
             );
         }
 
-        // Sync new documents from API immediately
+        // Sync new documents from API immediately.
         local_savian_ai_sync_documents();
     }
 
-    // Store the current org code for future comparison
+    // Store the current org code for future comparison.
     set_config('previous_org_code', $neworgcode, 'local_savian_ai');
 
-    // Clear session
-    unset($SESSION->savian_previous_org_code);
+    // Clear cache.
+    $cache->delete('previous_org_code');
 }
 
 /**

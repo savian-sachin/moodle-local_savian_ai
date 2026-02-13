@@ -9,7 +9,7 @@
 namespace local_savian_ai\hook_callbacks;
 
 /**
- * Hook callback for injecting CSS and JS into page head
+ * Hook callback for injecting CSS into page head
  *
  * @package    local_savian_ai
  * @copyright  2025 Savian AI
@@ -23,20 +23,17 @@ class before_standard_head_html {
      * @param \core\hook\output\before_standard_head_html_generation $hook
      */
     public static function callback(\core\hook\output\before_standard_head_html_generation $hook): void {
-        global $CFG;
+        global $CFG, $PAGE;
 
-        // Inject CSS link tags
+        // Inject CSS link tags.
         $csslink1 = '<link rel="stylesheet" type="text/css" href="' . $CFG->wwwroot . '/local/savian_ai/styles/savian.css" />';
         $csslink2 = '<link rel="stylesheet" type="text/css" href="' . $CFG->wwwroot . '/local/savian_ai/styles/chat_widget.css" />';
         $csslink3 = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />';
 
-        // Add to hook
         $hook->add_html($csslink1 . "\n" . $csslink2 . "\n" . $csslink3);
 
-        // Inject JavaScript libraries (these go in head for early loading)
-        $jslink1 = '<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>';
-        $jslink2 = '<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>';
-
-        $hook->add_html("\n" . $jslink1 . "\n" . $jslink2);
+        // Load JavaScript libraries via Moodle's JS loading mechanism.
+        $PAGE->requires->js(new \moodle_url('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js'), true);
+        $PAGE->requires->js(new \moodle_url('https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'), true);
     }
 }

@@ -10,10 +10,13 @@ namespace local_savian_ai\api;
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->libdir . '/filelib.php');
+
 /**
  * Savian AI API Client
  *
  * Handles all communication with the Savian AI external service.
+ * Uses Moodle's \curl class (lib/filelib.php) for proxy and SSL compatibility.
  *
  * @package    local_savian_ai
  * @copyright  2026 Savian AI
@@ -37,7 +40,7 @@ class client {
         $this->api_key = get_config('local_savian_ai', 'api_key');
         $this->org_code = get_config('local_savian_ai', 'org_code') ?: 't001';
 
-        // Ensure base URL ends with /
+        // Ensure base URL ends with /.
         if (substr($this->base_url, -1) !== '/') {
             $this->base_url .= '/';
         }
@@ -50,7 +53,7 @@ class client {
      */
     public function validate() {
         return $this->request('POST', 'auth/validate/', [
-            'org_code' => $this->org_code
+            'org_code' => $this->org_code,
         ]);
     }
 
@@ -63,35 +66,29 @@ class client {
      * @return object Response object
      */
     public function upload_document($filepath, $title, $metadata = []) {
-        $ch = curl_init();
+        if (empty($this->api_key)) {
+            return $this->error_response('API key not configured', 0);
+        }
 
-        $post_fields = [
+        $curl = new \curl();
+        $curl->setHeader('X-API-Key: ' . $this->api_key);
+
+        $params = [
             'document' => new \CURLFile($filepath),
             'title' => $title,
             'description' => $metadata['description'] ?? '',
             'subject_area' => $metadata['subject_area'] ?? '',
             'tags' => json_encode($metadata['tags'] ?? []),
             'course_id' => $metadata['course_id'] ?? '',
-            'course_name' => $metadata['course_name'] ?? ''
+            'course_name' => $metadata['course_name'] ?? '',
         ];
 
-        // Upload document with metadata
+        $curl->setopt(['CURLOPT_TIMEOUT' => 300]);
 
-        curl_setopt_array($ch, [
-            CURLOPT_URL => $this->base_url . 'documents/upload/',
-            CURLOPT_HTTPHEADER => [
-                'X-API-Key: ' . $this->api_key,
-            ],
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $post_fields,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 300, // 5 minutes for file upload
-        ]);
-
-        $response = curl_exec($ch);
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curl_error = curl_error($ch);
-        curl_close($ch);
+        $response = $curl->post($this->base_url . 'documents/upload/', $params);
+        $info = $curl->get_info();
+        $http_code = $info['http_code'] ?? 0;
+        $curl_error = $curl->get_errno() ? $curl->error : '';
 
         if ($curl_error) {
             return $this->error_response($curl_error, 0);
@@ -248,14 +245,14 @@ class client {
             'target_audience' => $options['target_audience'] ?? '',
             'duration_weeks' => $options['duration_weeks'] ?? 4,
 
-            // ADDIE v2.0 parameters
+            // ADDIE v2.0 parameters.
             'age_group' => $options['age_group'] ?? 'undergrad',
             'industry' => $options['industry'] ?? 'general',
             'prior_knowledge_level' => $options['prior_knowledge_level'] ?? 'beginner',
 
             'content_types' => $options['content_types'] ?? [
                 'sections', 'pages', 'activities', 'discussions',
-                'quiz_questions', 'assignments'
+                'quiz_questions', 'assignments',
             ],
             'language' => $options['language'] ?? 'en',
         ];
@@ -283,7 +280,7 @@ class client {
     }
 
     /**
-     * Internal request method
+     * Internal request method using Moodle's \curl class
      *
      * @param string $method HTTP method (GET, POST, DELETE)
      * @param string $endpoint API endpoint
@@ -295,34 +292,38 @@ class client {
             return $this->error_response('API key not configured', 0);
         }
 
-        $ch = curl_init();
+        $curl = new \curl();
+        $curl->setHeader('X-API-Key: ' . $this->api_key);
+        $curl->setHeader('Content-Type: application/json');
+        $curl->setopt(['CURLOPT_TIMEOUT' => 60]);
 
-        $options = [
-            CURLOPT_URL => $this->base_url . $endpoint,
-            CURLOPT_HTTPHEADER => [
-                'X-API-Key: ' . $this->api_key,
-                'Content-Type: application/json',
-            ],
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 60,
-        ];
+        $url = $this->base_url . $endpoint;
 
+        $response = '';
         if ($method === 'POST') {
-            $options[CURLOPT_POST] = true;
-            $options[CURLOPT_POSTFIELDS] = json_encode($data);
+            $response = $curl->post($url, json_encode($data));
         } else if ($method === 'DELETE') {
-            $options[CURLOPT_CUSTOMREQUEST] = 'DELETE';
+            $curl->setopt(['CURLOPT_CUSTOMREQUEST' => 'DELETE']);
             if (!empty($data)) {
-                $options[CURLOPT_POSTFIELDS] = json_encode($data);
+                $response = $curl->post($url, json_encode($data));
+            } else {
+                $response = $curl->get($url);
             }
+        } else {
+            $response = $curl->get($url);
         }
 
-        curl_setopt_array($ch, $options);
+        $info = $curl->get_info();
+        $http_code = $info['http_code'] ?? 0;
+        $curl_error = $curl->get_errno() ? $curl->error : '';
 
-        $response = curl_exec($ch);
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curl_error = curl_error($ch);
-        curl_close($ch);
+        // Detect blocked URL (Moodle HTTP security).
+        if ($http_code == 0 && empty($curl_error) && $response === '') {
+            return $this->error_response(
+                get_string('error_url_blocked', 'local_savian_ai', $url),
+                0
+            );
+        }
 
         if ($curl_error) {
             return $this->error_response($curl_error, 0);
@@ -342,7 +343,7 @@ class client {
      *
      * @param string $message Message content
      * @param string|null $conversation_uuid Conversation UUID
-     * @param array $options Additional options (user_id, user_email, user_role, course_id, course_name, document_ids, language)
+     * @param array $options Additional options
      * @return object Response with message and conversation_id
      */
     public function chat_send($message, $conversation_uuid = null, $options = []) {
@@ -357,7 +358,7 @@ class client {
             'course_id' => $options['course_id'] ? (string)$options['course_id'] : null,
             'course_name' => $options['course_name'] ?? ($COURSE->id != SITEID ? $COURSE->fullname : null),
             'document_ids' => $options['document_ids'] ?? [],
-            'language' => $options['language'] ?? 'en'
+            'language' => $options['language'] ?? 'en',
         ];
 
         return $this->request('POST', 'chat/send/', $data);
@@ -397,7 +398,7 @@ class client {
         $data = [
             'message_id' => $message_uuid,
             'feedback' => $feedback === 1 ? 'helpful' : 'not_helpful',
-            'comment' => $comment
+            'comment' => $comment,
         ];
 
         return $this->request('POST', 'chat/feedback/', $data);
@@ -424,7 +425,7 @@ class client {
             'generation_request_id' => $request_id,
             'approved_by' => $approved_by,
             'approval_date' => date('Y-m-d'),
-            'instructor_notes' => 'Reviewed and approved for institutional use'
+            'instructor_notes' => 'Reviewed and approved for institutional use',
         ];
 
         return $this->request('POST', 'courses/save-approved/', $data);

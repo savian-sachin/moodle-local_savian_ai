@@ -10,6 +10,8 @@ require_once(__DIR__ . '/../../config.php');
 
 require_login();
 
+$savian_cache = cache::make('local_savian_ai', 'session_data');
+
 $courseid = required_param('courseid', PARAM_INT);
 $action = optional_param('action', '', PARAM_ALPHA);
 
@@ -26,7 +28,7 @@ $PAGE->set_heading($course->fullname);
 
 // Handle save
 if ($action === 'save' && confirm_sesskey()) {
-    $questions = json_decode($SESSION->savian_ai_questions);
+    $questions = json_decode($savian_cache->get('questions'));
 
     // Update questions from form data
     foreach ($questions as $idx => $q) {
@@ -41,8 +43,8 @@ if ($action === 'save' && confirm_sesskey()) {
         }
     }
 
-    // Save back to session
-    $SESSION->savian_ai_questions = json_encode($questions);
+    // Save back to cache
+    $savian_cache->set('questions', json_encode($questions));
 
     redirect(new moodle_url('/local/savian_ai/generate.php', [
         'courseid' => $courseid,
@@ -55,8 +57,8 @@ echo $OUTPUT->header();
 // Consistent header
 echo local_savian_ai_render_header('Edit Questions', 'Modify generated questions before adding to Question Bank');
 
-if (!empty($SESSION->savian_ai_questions)) {
-    $questions = json_decode($SESSION->savian_ai_questions);
+if ($savian_cache->get('questions')) {
+    $questions = json_decode($savian_cache->get('questions'));
 
     echo html_writer::start_tag('form', [
         'method' => 'post',

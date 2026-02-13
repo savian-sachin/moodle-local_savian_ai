@@ -36,30 +36,30 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
     ChatInterface.prototype.render = function() {
         var html = `
             <div class="savian-chat-fullpage">
-                <div class="chat-sidebar">
-                    <div class="sidebar-header">
+                <div class="savian-chat-sidebar">
+                    <div class="savian-sidebar-header">
                         <h4>Conversations</h4>
                         <button class="btn btn-sm btn-savian" id="new-conversation-btn">
                             <i class="fa fa-plus"></i> New
                         </button>
                     </div>
-                    <div class="conversation-list" id="conversation-list">
+                    <div class="savian-conversation-list" id="savian-conversation-list">
                         <div class="text-center p-3">
                             <div class="spinner-border spinner-border-sm"></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="chat-main">
-                    <div class="chat-messages-container" id="chat-messages-full">
-                        <div class="chat-message assistant">
-                            <div class="message-content">
+                <div class="savian-chat-main">
+                    <div class="savian-chat-messages-container" id="chat-messages-full">
+                        <div class="savian-chat-message assistant">
+                            <div class="savian-message-content">
                                 Hi! I'm your AI assistant. Select a conversation or start a new one.
                             </div>
                         </div>
                     </div>
 
-                    <div class="chat-input-area">
+                    <div class="savian-chat-input-area">
                         <textarea
                             id="chat-input-full"
                             class="form-control"
@@ -97,10 +97,10 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
         });
 
         // Click on conversation in sidebar
-        $(document).on('click', '.conversation-item', function() {
+        $(document).on('click', '.savian-conversation-item', function() {
             var convId = parseInt($(this).data('conversation-id'));
             self.loadConversation(convId);
-            $('.conversation-item').removeClass('active');
+            $('.savian-conversation-item').removeClass('active');
             $(this).addClass('active');
         });
     };
@@ -120,23 +120,23 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
                         var title = conv.title || 'Conversation ' + conv.id;
                         var time = new Date(conv.last_message_at * 1000).toLocaleString();
                         html += `
-                            <div class="conversation-item" data-conversation-id="${conv.id}">
-                                <div class="conv-title">${title}</div>
-                                <div class="conv-meta">
+                            <div class="savian-conversation-item" data-conversation-id="${conv.id}">
+                                <div class="savian-conv-title">${title}</div>
+                                <div class="savian-conv-meta">
                                     <small>${conv.message_count} messages • ${time}</small>
                                 </div>
                             </div>
                         `;
                     });
                 }
-                $('#conversation-list').html(html || '<p class="text-muted p-3">No conversations yet. Start chatting below!</p>');
+                $('#savian-conversation-list').html(html || '<p class="text-muted p-3">No conversations yet. Start chatting below!</p>');
             } else {
                 console.error('Invalid response:', response);
-                $('#conversation-list').html('<p class="text-muted p-3">No conversations yet</p>');
+                $('#savian-conversation-list').html('<p class="text-muted p-3">No conversations yet</p>');
             }
         }).fail(function(error) {
             console.error('Failed to load conversations:', error);
-            $('#conversation-list').html('<p class="text-danger p-3">Failed to load. Check console for details.</p>');
+            $('#savian-conversation-list').html('<p class="text-danger p-3">Failed to load. Check console for details.</p>');
         });
     };
 
@@ -157,8 +157,8 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
 
     ChatInterface.prototype.startNewConversation = function() {
         this.conversationId = null;
-        $('#chat-messages-full').html('<div class="chat-message assistant"><div class="message-content">Hi! I\'m your AI tutor. How can I help you today?</div></div>');
-        $('.conversation-item').removeClass('active');
+        $('#chat-messages-full').html('<div class="savian-chat-message assistant"><div class="savian-message-content">Hi! I\'m your AI tutor. How can I help you today?</div></div>');
+        $('.savian-conversation-item').removeClass('active');
     };
 
     return {

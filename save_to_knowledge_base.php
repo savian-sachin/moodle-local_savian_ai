@@ -24,12 +24,13 @@ $PAGE->set_course($course);
 $PAGE->set_title('Save to Knowledge Base');
 $PAGE->set_heading($course->fullname);
 
-// Get stored generation data
-$save_data = $SESSION->savian_kb_save_data ?? null;
+// Get stored generation data from cache.
+$savian_cache = cache::make('local_savian_ai', 'session_data');
+$save_data = $savian_cache->get('kb_save_data');
 
 if (!$save_data) {
     redirect(new moodle_url('/local/savian_ai/course.php', ['courseid' => $courseid]),
-             'No course data found. Please generate a course first.', null, 'error');
+             get_string('no_course_data', 'local_savian_ai'), null, 'error');
 }
 
 $course_structure_json = $save_data['course_structure'];
@@ -86,8 +87,8 @@ try {
         echo html_writer::end_div();
         echo html_writer::end_div();
 
-        // Clear session
-        unset($SESSION->savian_kb_save_data);
+        // Clear cache.
+        $savian_cache->delete('kb_save_data');
 
         // Go to course button
         echo html_writer::div(

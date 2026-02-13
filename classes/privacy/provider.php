@@ -11,6 +11,7 @@ namespace local_savian_ai\privacy;
 use core_privacy\local\metadata\collection;
 use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\contextlist;
+use core_privacy\local\request\userlist;
 use core_privacy\local\request\writer;
 
 defined('MOODLE_INTERNAL') || die();
@@ -27,7 +28,8 @@ defined('MOODLE_INTERNAL') || die();
  */
 class provider implements
     \core_privacy\local\metadata\provider,
-    \core_privacy\local\request\plugin\provider {
+    \core_privacy\local\request\plugin\provider,
+    \core_privacy\local\request\core_userlist_provider {
 
     /**
      * Declare what user data this plugin stores
@@ -235,11 +237,11 @@ class provider implements
     }
 
     /**
-     * Delete all user data for specified contexts
+     * Delete all user data for the specified users in the specified context.
      *
-     * @param approved_contextlist $contextlist The approved contexts to delete data from
+     * @param userlist $userlist The approved context and user information to delete data for.
      */
-    public static function delete_data_for_users_in_context(\core_privacy\local\request\userlist $userlist) {
+    public static function delete_data_for_users_in_context(userlist $userlist) {
         global $DB;
 
         $context = $userlist->get_context();
@@ -306,9 +308,9 @@ class provider implements
     /**
      * Get list of users with data in specified context
      *
-     * @param \core_privacy\local\request\userlist $userlist The userlist
+     * @param userlist $userlist The userlist to add users to.
      */
-    public static function get_users_in_context(\core_privacy\local\request\userlist $userlist) {
+    public static function get_users_in_context(userlist $userlist) {
         $context = $userlist->get_context();
 
         if ($context->contextlevel == CONTEXT_SYSTEM) {

@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] - 2026-02-13 - Plugin Review Compliance
+
+### Added
+- **GitHub Actions CI**: Automated testing with moodle-plugin-ci (linting, codechecker, PHPUnit, Behat, Grunt)
+- **Ad-hoc Task**: `send_analytics_adhoc` task for non-blocking analytics event processing
+- **Cache Definitions**: `db/caches.php` with `MODE_SESSION` cache for session data
+- **AMD Module**: `tutorial_search.js` for tutorials page search functionality
+
+### Changed
+- **CSS Namespacing**: All selectors prefixed with `savian-` (e.g. `.chat-message` → `.savian-chat-message`) to avoid theme conflicts
+- **API Client**: Replaced direct `curl_init` calls with Moodle's `\curl` class from `lib/filelib.php` — proper proxy support and file uploads
+- **Privacy Provider**: Added `core_userlist_provider` interface, corrected method signatures
+- **JS Loading**: CDN scripts (highlight.js, MathJax) loaded via `$PAGE->requires->js()` instead of raw script tags
+- **Language Strings**: Moved ~180 hard-coded strings from `tutorials.php` to `lang/en/local_savian_ai.php`
+- **Function Namespacing**: Global functions renamed with `local_savian_ai_` frankenstyle prefix (e.g. `show_overview()` → `local_savian_ai_show_overview()`)
+- **Event Triggering**: `course_builder.php` now fires `course_module_created` events after creating pages, quizzes, assignments, and forums
+- **Observer Refactor**: Analytics observer queues ad-hoc tasks instead of inline processing — no more sleep/retry blocking
+- **Session Management**: Migrated all `$SESSION->savian_*` usage to Moodle Cache API (`MODE_SESSION`)
+
+### Fixed
+- **Performance**: Added 90-day time-range cap and `LIMIT 10000` on raw log queries in `data_extractor.php`
+- **File Uploads**: Upload document button now works correctly (was broken due to raw curl usage)
+
+---
+
 ## [1.1.1] - 2026-02-04 - Document Sync & Tutorials Update
 
 ### Added
@@ -304,6 +329,12 @@ from development versions into a production-ready package.
 ---
 
 ## Upgrade Notes
+
+### From 1.1.1 to 1.2.0
+- New cache definitions in `db/caches.php` (auto-registered on upgrade)
+- New ad-hoc task class `send_analytics_adhoc` (no DB changes)
+- CSS class names changed — custom theme overrides may need updating
+- Global function names changed — any external code calling old names must update
 
 ### From 2.0 to 2.2
 - No database changes

@@ -26,38 +26,40 @@ $PAGE->set_heading($course->fullname);
 
 $client = new \local_savian_ai\api\client();
 $course_builder = new \local_savian_ai\content\course_builder();
+$savian_cache = cache::make('local_savian_ai', 'session_data');
 
 // Handle create action
-if ($action === 'create' && confirm_sesskey() && !empty($SESSION->savian_ai_course_structure)) {
-    $course_structure = json_decode($SESSION->savian_ai_course_structure);
+if ($action === 'create' && confirm_sesskey() && !empty($savian_cache->get('course_structure'))) {
+    $course_structure = json_decode($savian_cache->get('course_structure'));
 
     $results = $course_builder->add_content_to_course($courseid, $course_structure);
 
-    // Log the course content generation
+    // Log the course content generation.
     $log = new stdClass();
-    $log->request_id = $SESSION->savian_ai_pending_request ?? ('local_' . time());
+    $pending_req = $savian_cache->get('pending_request');
+    $log->request_id = $pending_req ?: ('local_' . time());
     $log->generation_type = 'course_content';
     $log->course_id = $courseid;
     $log->user_id = $USER->id;
-    $log->questions_count = 0; // Not questions, but course content
+    $log->questions_count = 0;
     $log->status = 'completed';
     $log->response_data = json_encode($results);
     $log->timecreated = time();
     $log->timemodified = time();
     $DB->insert_record('local_savian_generations', $log);
 
-    // Store generation data for knowledge feedback loop (v2.2)
-    $SESSION->savian_kb_save_data = [
-        'course_structure' => $SESSION->savian_ai_course_structure,
+    // Store generation data for knowledge feedback loop (v2.2).
+    $savian_cache->set('kb_save_data', [
+        'course_structure' => $savian_cache->get('course_structure'),
         'course_title' => $course->fullname,
         'course_id' => $courseid,
-        'request_id' => $SESSION->savian_ai_pending_request ?? null,
-        'results' => $results
-    ];
+        'request_id' => $pending_req ?: null,
+        'results' => $results,
+    ]);
 
-    unset($SESSION->savian_ai_course_structure);
-    unset($SESSION->savian_ai_pending_request);
-    unset($SESSION->savian_ai_sources);
+    $savian_cache->delete('course_structure');
+    $savian_cache->delete('pending_request');
+    $savian_cache->delete('sources');
 
     // Redirect to success page with save option
     redirect(new moodle_url('/local/savian_ai/create_course.php', [
@@ -67,16 +69,16 @@ if ($action === 'create' && confirm_sesskey() && !empty($SESSION->savian_ai_cour
 }
 
 // Handle polling
-if ($action === 'poll' && !empty($SESSION->savian_ai_pending_request)) {
-    $request_id = $SESSION->savian_ai_pending_request;
+if ($action === 'poll' && !empty($savian_cache->get('pending_request'))) {
+    $request_id = $savian_cache->get('pending_request');
     $status_response = $client->get_generation_status($request_id);
 
     if ($status_response->http_code === 200) {
         if (isset($status_response->status) && $status_response->status === 'completed') {
             if (isset($status_response->course_structure)) {
-                $SESSION->savian_ai_course_structure = json_encode($status_response->course_structure);
-                $SESSION->savian_ai_sources = isset($status_response->sources) ? json_encode($status_response->sources) : null;
-                unset($SESSION->savian_ai_pending_request);
+                $savian_cache->set('course_structure', json_encode($status_response->course_structure));
+                $savian_cache->set('sources', isset($status_response->sources) ? json_encode($status_response->sources) : null);
+                $savian_cache->delete('pending_request');
 
                 redirect(new moodle_url('/local/savian_ai/create_course.php', [
                     'courseid' => $courseid,
@@ -85,7 +87,7 @@ if ($action === 'poll' && !empty($SESSION->savian_ai_pending_request)) {
             }
         } else if (isset($status_response->status) && $status_response->status === 'failed') {
             $error = $status_response->error ?? 'Generation failed';
-            unset($SESSION->savian_ai_pending_request);
+            $savian_cache->delete('pending_request');
             redirect(new moodle_url('/local/savian_ai/create_course.php', ['courseid' => $courseid]),
                      'Generation failed: ' . $error, null, 'error');
         }
@@ -128,8 +130,8 @@ if (data_submitted() && confirm_sesskey()) {
 
         if ($response->http_code === 200 && isset($response->success) && $response->success) {
             if (isset($response->request_id) && isset($response->status) && $response->status === 'pending') {
-                $SESSION->savian_ai_pending_request = $response->request_id;
-                $SESSION->savian_ai_duration = $duration; // For estimated time display
+                $savian_cache->set('pending_request', $response->request_id);
+                $savian_cache->set('duration', $duration);
                 redirect(new moodle_url('/local/savian_ai/create_course.php', [
                     'courseid' => $courseid,
                     'action' => 'poll',
@@ -149,7 +151,7 @@ echo $OUTPUT->header();
 // Consistent header
 echo local_savian_ai_render_header('Generate Course Content', 'Create course sections, pages, and quizzes from documents');
 
-if ($action === 'poll' && !empty($SESSION->savian_ai_pending_request)) {
+if ($action === 'poll' && !empty($savian_cache->get('pending_request'))) {
     // Show progress bar with real-time updates
     echo $OUTPUT->heading(get_string('generating_course_content', 'local_savian_ai'), 3);
 
@@ -176,7 +178,7 @@ if ($action === 'poll' && !empty($SESSION->savian_ai_pending_request)) {
     echo html_writer::tag('p', '', ['id' => 'progress-details', 'class' => 'text-muted mb-2']);
 
     // Estimated time
-    $duration = $SESSION->savian_ai_duration ?? 4;
+    $duration = $savian_cache->get('duration') ?: 4;
     if ($duration <= 4) {
         $est_time = get_string('estimated_time_4weeks', 'local_savian_ai');
     } else if ($duration <= 8) {
@@ -203,7 +205,7 @@ if ($action === 'poll' && !empty($SESSION->savian_ai_pending_request)) {
     );
 
     // AJAX polling with progress updates
-    $request_id = $SESSION->savian_ai_pending_request;
+    $request_id = $savian_cache->get('pending_request');
     $PAGE->requires->js_amd_inline("
 require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notification) {
     var requestId = '{$request_id}';
@@ -288,9 +290,9 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
 });
 ");
 
-} else if ($action === 'preview' && !empty($SESSION->savian_ai_course_structure)) {
+} else if ($action === 'preview' && !empty($savian_cache->get('course_structure'))) {
     // Show enhanced preview
-    $structure = json_decode($SESSION->savian_ai_course_structure);
+    $structure = json_decode($savian_cache->get('course_structure'));
 
     echo html_writer::tag('h3', get_string('preview_course_structure', 'local_savian_ai') . ' (' . count($structure->sections) . ' sections)', ['class' => 'mt-4']);
 
@@ -473,8 +475,8 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
     }
 
     // Show sources if available
-    if (!empty($SESSION->savian_ai_sources)) {
-        $sources = json_decode($SESSION->savian_ai_sources);
+    if (!empty($savian_cache->get('sources'))) {
+        $sources = json_decode($savian_cache->get('sources'));
         echo html_writer::start_div('card mb-3 savian-accent-card');
         echo html_writer::start_div('card-body');
         echo html_writer::tag('strong', '📚 ' . get_string('based_on_documents', 'local_savian_ai') . ': ');
@@ -839,9 +841,9 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
     // Initialize view/edit functionality
     $PAGE->requires->js_call_amd('local_savian_ai/course_content_editor', 'init');
 
-} else if ($action === 'success' && !empty($SESSION->savian_kb_save_data)) {
-    // Success page with Knowledge Feedback Loop option (v2.2)
-    $save_data = $SESSION->savian_kb_save_data;
+} else if ($action === 'success' && !empty($savian_cache->get('kb_save_data'))) {
+    // Success page with Knowledge Feedback Loop option (v2.2).
+    $save_data = $savian_cache->get('kb_save_data');
     $results = $save_data['results'];
 
     // Build success message

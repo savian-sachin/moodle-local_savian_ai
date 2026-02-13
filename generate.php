@@ -37,6 +37,7 @@ $PAGE->set_heading($course->fullname);
 
 $client = new \local_savian_ai\api\client();
 $qbank_creator = new \local_savian_ai\content\qbank_creator();
+$savian_cache = cache::make('local_savian_ai', 'session_data');
 
 // Initialize form with URL to preserve parameters
 $form_url = new moodle_url('/local/savian_ai/generate.php', [
@@ -77,7 +78,7 @@ if ($mform->is_cancelled()) {
         // Check if async (has request_id)
         if (isset($response->request_id) && isset($response->status) && $response->status === 'pending') {
             // Async generation - need to poll
-            $SESSION->savian_ai_pending_request = $response->request_id;
+            $savian_cache->set('pending_request', $response->request_id);
             redirect(new moodle_url('/local/savian_ai/generate.php', [
                 'courseid' => $courseid,
                 'mode' => $mode,
@@ -85,9 +86,9 @@ if ($mform->is_cancelled()) {
             ]), get_string('generation_pending', 'local_savian_ai'), null, 'info');
         } else if (isset($response->questions) && count($response->questions) > 0) {
             // Synchronous generation - questions ready
-            $SESSION->savian_ai_questions = json_encode($response->questions);
-            $SESSION->savian_ai_metadata = isset($response->metadata) ? json_encode($response->metadata) : null;
-            $SESSION->savian_ai_usage = isset($response->usage) ? json_encode($response->usage) : null;
+            $savian_cache->set('questions', json_encode($response->questions));
+            $savian_cache->set('metadata', isset($response->metadata) ? json_encode($response->metadata) : null);
+            $savian_cache->set('usage', isset($response->usage) ? json_encode($response->usage) : null);
 
             redirect(new moodle_url('/local/savian_ai/generate.php', [
                 'courseid' => $courseid,
@@ -102,8 +103,8 @@ if ($mform->is_cancelled()) {
 
 // Handle adding questions to question bank
 if ($action === 'add' && confirm_sesskey()) {
-    if (!empty($SESSION->savian_ai_questions)) {
-        $questions = json_decode($SESSION->savian_ai_questions);
+    if (!empty($savian_cache->get('questions'))) {
+        $questions = json_decode($savian_cache->get('questions'));
 
         $results = $qbank_creator->add_to_question_bank($questions, $courseid);
 
@@ -119,10 +120,10 @@ if ($action === 'add' && confirm_sesskey()) {
         $log->timemodified = time();
         $DB->insert_record('local_savian_generations', $log);
 
-        // Clear session
-        unset($SESSION->savian_ai_questions);
-        unset($SESSION->savian_ai_metadata);
-        unset($SESSION->savian_ai_usage);
+        // Clear cache.
+        $savian_cache->delete('questions');
+        $savian_cache->delete('metadata');
+        $savian_cache->delete('usage');
 
         $success_count = count($results['success']);
         $failed_count = count($results['failed']);
@@ -138,18 +139,18 @@ if ($action === 'add' && confirm_sesskey()) {
 }
 
 // Handle polling for async generation
-if ($action === 'poll' && !empty($SESSION->savian_ai_pending_request)) {
-    $request_id = $SESSION->savian_ai_pending_request;
+if ($action === 'poll' && !empty($savian_cache->get('pending_request'))) {
+    $request_id = $savian_cache->get('pending_request');
     $status_response = $client->get_generation_status($request_id);
 
     if ($status_response->http_code === 200) {
         if (isset($status_response->status) && $status_response->status === 'completed') {
             // Generation completed!
             if (isset($status_response->questions) && count($status_response->questions) > 0) {
-                $SESSION->savian_ai_questions = json_encode($status_response->questions);
-                $SESSION->savian_ai_metadata = isset($status_response->metadata) ? json_encode($status_response->metadata) : null;
-                $SESSION->savian_ai_usage = isset($status_response->usage) ? json_encode($status_response->usage) : null;
-                unset($SESSION->savian_ai_pending_request);
+                $savian_cache->set('questions', json_encode($status_response->questions));
+                $savian_cache->set('metadata', isset($status_response->metadata) ? json_encode($status_response->metadata) : null);
+                $savian_cache->set('usage', isset($status_response->usage) ? json_encode($status_response->usage) : null);
+                $savian_cache->delete('pending_request');
 
                 redirect(new moodle_url('/local/savian_ai/generate.php', [
                     'courseid' => $courseid,
@@ -159,7 +160,7 @@ if ($action === 'poll' && !empty($SESSION->savian_ai_pending_request)) {
         } else if (isset($status_response->status) && $status_response->status === 'failed') {
             // Generation failed
             $error = $status_response->error ?? 'Generation failed';
-            unset($SESSION->savian_ai_pending_request);
+            $savian_cache->delete('pending_request');
             redirect(new moodle_url('/local/savian_ai/generate.php', ['courseid' => $courseid]),
                      get_string('generation_failed', 'local_savian_ai', $error), null, 'error');
         }
@@ -173,14 +174,14 @@ echo $OUTPUT->header();
 echo local_savian_ai_render_header('Generate Questions from Documents', 'Create quiz questions from your course materials');
 
 // Show preview if questions are in session
-if ($action === 'preview' && !empty($SESSION->savian_ai_questions)) {
-    $questions = json_decode($SESSION->savian_ai_questions);
+if ($action === 'preview' && !empty($savian_cache->get('questions'))) {
+    $questions = json_decode($savian_cache->get('questions'));
 
     echo html_writer::tag('h3', get_string('preview_questions', 'local_savian_ai') . ' (' . count($questions) . ')', ['class' => 'mt-4']);
 
     // Display usage if available
-    if (!empty($SESSION->savian_ai_usage)) {
-        $usage = json_decode($SESSION->savian_ai_usage);
+    if (!empty($savian_cache->get('usage'))) {
+        $usage = json_decode($savian_cache->get('usage'));
         if (isset($usage->questions)) {
             $percentage = ($usage->questions->limit > 0) ? ($usage->questions->used / $usage->questions->limit * 100) : 0;
             echo html_writer::start_div('card mb-3');
@@ -246,7 +247,7 @@ if ($action === 'preview' && !empty($SESSION->savian_ai_questions)) {
         ['class' => 'btn btn-savian btn-lg']
     );
     echo html_writer::end_div();
-} else if ($action === 'poll' && !empty($SESSION->savian_ai_pending_request)) {
+} else if ($action === 'poll' && !empty($savian_cache->get('pending_request'))) {
     // Show polling status
     echo html_writer::start_div('card mt-4');
     echo html_writer::start_div('card-body text-center');

@@ -29,30 +29,29 @@ $PAGE->set_heading(get_string('tutorials', 'local_savian_ai'));
 
 echo $OUTPUT->header();
 
-// Header
+// Header.
 echo local_savian_ai_render_header(
     get_string('tutorials', 'local_savian_ai'),
     get_string('select_your_role', 'local_savian_ai')
 );
 
-// Role Selector
+// Role Selector.
 echo html_writer::start_div('text-center mb-4');
 echo html_writer::tag('p', get_string('select_your_role', 'local_savian_ai') . ':', ['class' => 'lead']);
 echo html_writer::start_div('btn-group btn-group-lg', ['role' => 'group']);
 
 $roles = ['admin', 'teacher', 'student'];
-$role_icons = ['admin' => '👨‍💼', 'teacher' => '🎓', 'student' => '📚'];
 $role_labels = [
     'admin' => get_string('for_administrators', 'local_savian_ai'),
     'teacher' => get_string('for_teachers', 'local_savian_ai'),
-    'student' => get_string('for_students', 'local_savian_ai')
+    'student' => get_string('for_students', 'local_savian_ai'),
 ];
 
 foreach ($roles as $r) {
     $active = ($role === $r) ? ' active' : '';
     echo html_writer::link(
         new moodle_url('/local/savian_ai/tutorials.php', ['role' => $r]),
-        $role_icons[$r] . ' ' . $role_labels[$r],
+        $role_labels[$r],
         ['class' => 'btn btn-primary' . $active]
     );
 }
@@ -60,49 +59,39 @@ foreach ($roles as $r) {
 echo html_writer::end_div();
 echo html_writer::end_div();
 
-// Search Box
+// Search Box.
 echo html_writer::start_div('mb-4');
 echo html_writer::empty_tag('input', [
     'type' => 'text',
     'id' => 'tutorial-search',
     'class' => 'form-control',
-    'placeholder' => get_string('tutorial_search', 'local_savian_ai')
+    'placeholder' => get_string('tutorial_search', 'local_savian_ai'),
 ]);
 echo html_writer::end_div();
 
-// Content based on role
+// Content based on role.
 echo html_writer::start_div('tutorial-content');
 
 switch ($role) {
     case 'admin':
-        show_admin_tutorials();
+        local_savian_ai_show_admin_tutorials();
         break;
     case 'teacher':
-        show_teacher_tutorials();
+        local_savian_ai_show_teacher_tutorials();
         break;
     case 'student':
-        show_student_tutorials();
+        local_savian_ai_show_student_tutorials();
         break;
     default:
-        show_overview();
+        local_savian_ai_show_overview();
 }
 
 echo html_writer::end_div();
 
-// Search functionality
-$PAGE->requires->js_amd_inline("
-require(['jquery'], function($) {
-    $('#tutorial-search').on('input', function() {
-        var query = $(this).val().toLowerCase();
-        $('.tutorial-card').each(function() {
-            var text = $(this).text().toLowerCase();
-            $(this).toggle(text.indexOf(query) > -1);
-        });
-    });
-});
-");
+// Search functionality via AMD module.
+$PAGE->requires->js_call_amd('local_savian_ai/tutorial_search', 'init');
 
-// Footer
+// Footer.
 echo local_savian_ai_render_footer();
 
 echo $OUTPUT->footer();
@@ -110,54 +99,52 @@ echo $OUTPUT->footer();
 /**
  * Show overview with all tutorials
  */
-function show_overview() {
-    echo html_writer::tag('h2', '📚 Welcome to Savian AI Tutorials');
-    echo html_writer::tag('p', 'Select your role above to see relevant tutorials, or browse all tutorials below.', ['class' => 'lead']);
+function local_savian_ai_show_overview() {
+    $s = 'local_savian_ai';
+    echo html_writer::tag('h2', get_string('tutorial_welcome', $s));
+    echo html_writer::tag('p', get_string('tutorial_overview_intro', $s), ['class' => 'lead']);
 
     echo html_writer::start_div('row mt-4');
 
-    // Admin card
+    // Admin card.
     echo html_writer::start_div('col-md-4 mb-3');
     echo html_writer::start_div('card h-100 tutorial-card');
     echo html_writer::start_div('card-body text-center');
-    echo html_writer::tag('div', '👨‍💼', ['class' => 'display-3']);
-    echo html_writer::tag('h4', 'Administrators', ['class' => 'card-title']);
-    echo html_writer::tag('p', 'Setup, configuration, and monitoring', ['class' => 'card-text']);
+    echo html_writer::tag('h4', get_string('tutorial_administrators', $s), ['class' => 'card-title']);
+    echo html_writer::tag('p', get_string('tutorial_admin_desc', $s), ['class' => 'card-text']);
     echo html_writer::link(
         new moodle_url('/local/savian_ai/tutorials.php', ['role' => 'admin']),
-        'View Admin Tutorials',
+        get_string('tutorial_view_admin', $s),
         ['class' => 'btn btn-primary']
     );
     echo html_writer::end_div();
     echo html_writer::end_div();
     echo html_writer::end_div();
 
-    // Teacher card
+    // Teacher card.
     echo html_writer::start_div('col-md-4 mb-3');
     echo html_writer::start_div('card h-100 tutorial-card');
     echo html_writer::start_div('card-body text-center');
-    echo html_writer::tag('div', '🎓', ['class' => 'display-3']);
-    echo html_writer::tag('h4', 'Teachers', ['class' => 'card-title']);
-    echo html_writer::tag('p', 'Course generation, learning analytics, quality scores, and best practices', ['class' => 'card-text']);
+    echo html_writer::tag('h4', get_string('tutorial_teachers', $s), ['class' => 'card-title']);
+    echo html_writer::tag('p', get_string('tutorial_teacher_desc', $s), ['class' => 'card-text']);
     echo html_writer::link(
         new moodle_url('/local/savian_ai/tutorials.php', ['role' => 'teacher']),
-        'View Teacher Tutorials',
+        get_string('tutorial_view_teacher', $s),
         ['class' => 'btn btn-primary']
     );
     echo html_writer::end_div();
     echo html_writer::end_div();
     echo html_writer::end_div();
 
-    // Student card
+    // Student card.
     echo html_writer::start_div('col-md-4 mb-3');
     echo html_writer::start_div('card h-100 tutorial-card');
     echo html_writer::start_div('card-body text-center');
-    echo html_writer::tag('div', '📚', ['class' => 'display-3']);
-    echo html_writer::tag('h4', 'Students', ['class' => 'card-title']);
-    echo html_writer::tag('p', 'Using the AI chat tutor effectively', ['class' => 'card-text']);
+    echo html_writer::tag('h4', get_string('tutorial_students', $s), ['class' => 'card-title']);
+    echo html_writer::tag('p', get_string('tutorial_student_desc', $s), ['class' => 'card-text']);
     echo html_writer::link(
         new moodle_url('/local/savian_ai/tutorials.php', ['role' => 'student']),
-        'View Student Tutorials',
+        get_string('tutorial_view_student', $s),
         ['class' => 'btn btn-primary']
     );
     echo html_writer::end_div();
@@ -170,117 +157,101 @@ function show_overview() {
 /**
  * Administrator tutorials
  */
-function show_admin_tutorials() {
-    echo html_writer::tag('h2', '👨‍💼 Administrator Tutorials');
+function local_savian_ai_show_admin_tutorials() {
+    $s = 'local_savian_ai';
+    echo html_writer::tag('h2', get_string('tutorial_admin_title', $s));
 
-    // Quick Start
+    // Quick Start.
     echo html_writer::start_div('card mb-4 tutorial-card');
     echo html_writer::start_div('card-header bg-primary text-white');
-    echo html_writer::tag('h4', '🚀 Quick Start (5 minutes)', ['class' => 'mb-0']);
+    echo html_writer::tag('h4', get_string('tutorial_quickstart', $s), ['class' => 'mb-0']);
     echo html_writer::end_div();
     echo html_writer::start_div('card-body');
-
-    echo html_writer::tag('p', 'Get Savian AI running in 5 minutes:', ['class' => 'lead']);
+    echo html_writer::tag('p', get_string('tutorial_quickstart_intro', $s), ['class' => 'lead']);
     echo html_writer::start_tag('ol', ['class' => 'lead']);
-    echo html_writer::tag('li', 'Configure API credentials');
-    echo html_writer::tag('li', 'Validate connection');
-    echo html_writer::tag('li', 'Assign capabilities to roles');
-    echo html_writer::tag('li', 'Enable chat widget');
-    echo html_writer::tag('li', 'Test with a course');
+    echo html_writer::tag('li', get_string('tutorial_quickstart_step1', $s));
+    echo html_writer::tag('li', get_string('tutorial_quickstart_step2', $s));
+    echo html_writer::tag('li', get_string('tutorial_quickstart_step3', $s));
+    echo html_writer::tag('li', get_string('tutorial_quickstart_step4', $s));
+    echo html_writer::tag('li', get_string('tutorial_quickstart_step5', $s));
     echo html_writer::end_tag('ol');
-
     echo html_writer::end_div();
     echo html_writer::end_div();
 
-    // Configuration Guide
+    // Configuration Guide.
     echo html_writer::start_div('card mb-4 tutorial-card');
-    echo html_writer::div('⚙️ Configuration Guide', 'card-header');
+    echo html_writer::div(get_string('tutorial_config_guide', $s), 'card-header');
     echo html_writer::start_div('card-body');
-
-    echo html_writer::tag('h5', 'Step 1: Access Settings');
+    echo html_writer::tag('h5', get_string('tutorial_step1_access', $s));
     echo html_writer::start_tag('ol');
-    echo html_writer::tag('li', 'Navigate to: <strong>Site Administration → Plugins → Local plugins → Savian AI</strong>');
+    echo html_writer::tag('li', get_string('tutorial_step1_nav', $s));
     echo html_writer::end_tag('ol');
-
-    echo html_writer::tag('h5', 'Step 2: Enter API Credentials', ['class' => 'mt-3']);
+    echo html_writer::tag('h5', get_string('tutorial_step2_credentials', $s), ['class' => 'mt-3']);
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', '<strong>API Base URL</strong>: https://app.savian.ai.vn/api/moodle/v1/');
-    echo html_writer::tag('li', '<strong>API Key</strong>: Provided by Savian AI');
-    echo html_writer::tag('li', '<strong>Organization Code</strong>: Your org identifier');
+    echo html_writer::tag('li', get_string('tutorial_api_url_label', $s));
+    echo html_writer::tag('li', get_string('tutorial_api_key_label', $s));
+    echo html_writer::tag('li', get_string('tutorial_org_code_label', $s));
     echo html_writer::end_tag('ul');
-
-    echo html_writer::tag('h5', 'Step 3: Validate Connection', ['class' => 'mt-3']);
-    echo html_writer::tag('p', 'Click <strong>"Validate Connection"</strong> button to test credentials.');
-    echo html_writer::div('✅ Success message = Ready to use!', 'alert alert-success');
-
-    echo html_writer::tag('h5', 'Step 4: Configure Chat (Optional)', ['class' => 'mt-3']);
+    echo html_writer::tag('h5', get_string('tutorial_step3_validate', $s), ['class' => 'mt-3']);
+    echo html_writer::tag('p', get_string('tutorial_validate_desc', $s));
+    echo html_writer::div(get_string('tutorial_validate_success', $s), 'alert alert-success');
+    echo html_writer::tag('h5', get_string('tutorial_step4_chat', $s), ['class' => 'mt-3']);
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', 'Enable chat widget: ✓');
-    echo html_writer::tag('li', 'Default position: Bottom-right');
-    echo html_writer::tag('li', 'Welcome message: Customize or use default');
+    echo html_writer::tag('li', get_string('tutorial_chat_enable', $s));
+    echo html_writer::tag('li', get_string('tutorial_chat_position', $s));
+    echo html_writer::tag('li', get_string('tutorial_chat_welcome', $s));
     echo html_writer::end_tag('ul');
-
     echo html_writer::end_div();
     echo html_writer::end_div();
 
-    // Assign Capabilities
+    // Assign Capabilities.
     echo html_writer::start_div('card mb-4 tutorial-card');
-    echo html_writer::div('🔐 Assign Capabilities to Roles', 'card-header');
+    echo html_writer::div(get_string('tutorial_capabilities', $s), 'card-header');
     echo html_writer::start_div('card-body');
-
-    echo html_writer::tag('p', 'Give users access to features:');
-
-    echo html_writer::tag('h6', 'For Teachers:');
+    echo html_writer::tag('p', get_string('tutorial_cap_intro', $s));
+    echo html_writer::tag('h6', get_string('tutorial_cap_teachers', $s));
     echo html_writer::start_tag('ol');
-    echo html_writer::tag('li', 'Site Admin → Users → Permissions → Define roles');
-    echo html_writer::tag('li', 'Click "Teacher" role (or "Editing teacher")');
-    echo html_writer::tag('li', 'Search for: "Savian"');
-    echo html_writer::tag('li', 'Check: <code>local/savian_ai:generate</code>');
-    echo html_writer::tag('li', 'Save changes');
+    echo html_writer::tag('li', get_string('tutorial_cap_teacher_step1', $s));
+    echo html_writer::tag('li', get_string('tutorial_cap_teacher_step2', $s));
+    echo html_writer::tag('li', get_string('tutorial_cap_teacher_step3', $s));
+    echo html_writer::tag('li', get_string('tutorial_cap_teacher_step4', $s));
+    echo html_writer::tag('li', get_string('tutorial_cap_teacher_step5', $s));
     echo html_writer::end_tag('ol');
-
-    echo html_writer::tag('h6', 'For Students:', ['class' => 'mt-3']);
-    echo html_writer::tag('p', 'Already have <code>local/savian_ai:use</code> by default (chat access)');
-
-    echo html_writer::div('💡 <strong>Tip:</strong> Test with a teacher account before rolling out to all faculty', 'alert alert-info');
-
+    echo html_writer::tag('h6', get_string('tutorial_cap_students', $s), ['class' => 'mt-3']);
+    echo html_writer::tag('p', get_string('tutorial_cap_student_desc', $s));
+    echo html_writer::div(get_string('tutorial_cap_tip', $s), 'alert alert-info');
     echo html_writer::end_div();
     echo html_writer::end_div();
 
-    // Monitoring
+    // Monitoring.
     echo html_writer::start_div('card mb-4 tutorial-card');
-    echo html_writer::div('📊 Monitoring Usage', 'card-header');
+    echo html_writer::div(get_string('tutorial_monitoring', $s), 'card-header');
     echo html_writer::start_div('card-body');
-
-    echo html_writer::tag('p', 'Track system-wide activity:');
+    echo html_writer::tag('p', get_string('tutorial_monitoring_intro', $s));
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', '<strong>Chat Monitor</strong>: Site Admin → Local plugins → Savian AI → Chat Monitoring');
-    echo html_writer::tag('li', 'View: Total conversations, active users, feedback statistics');
-    echo html_writer::tag('li', 'Filter by: Course, date range, user');
+    echo html_writer::tag('li', get_string('tutorial_monitoring_chat', $s));
+    echo html_writer::tag('li', get_string('tutorial_monitoring_view', $s));
+    echo html_writer::tag('li', get_string('tutorial_monitoring_filter', $s));
     echo html_writer::end_tag('ul');
-
     echo html_writer::end_div();
     echo html_writer::end_div();
 
-    // Troubleshooting
+    // Troubleshooting.
     echo html_writer::start_div('card mb-4 tutorial-card');
-    echo html_writer::div('🔧 Troubleshooting', 'card-header');
+    echo html_writer::div(get_string('tutorial_troubleshooting', $s), 'card-header');
     echo html_writer::start_div('card-body');
-
-    echo html_writer::tag('h6', 'Chat widget not appearing:');
+    echo html_writer::tag('h6', get_string('tutorial_trouble_widget', $s));
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', 'Check: Chat widget enabled in settings');
-    echo html_writer::tag('li', 'Verify: User has <code>local/savian_ai:use</code> capability');
-    echo html_writer::tag('li', 'Purge caches: Site Admin → Development → Purge all caches');
+    echo html_writer::tag('li', get_string('tutorial_trouble_widget1', $s));
+    echo html_writer::tag('li', get_string('tutorial_trouble_widget2', $s));
+    echo html_writer::tag('li', get_string('tutorial_trouble_widget3', $s));
     echo html_writer::end_tag('ul');
-
-    echo html_writer::tag('h6', 'Connection validation fails:', ['class' => 'mt-3']);
+    echo html_writer::tag('h6', get_string('tutorial_trouble_connection', $s), ['class' => 'mt-3']);
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', 'Verify API URL is correct and accessible');
-    echo html_writer::tag('li', 'Check API key is valid');
-    echo html_writer::tag('li', 'Ensure organization code matches');
+    echo html_writer::tag('li', get_string('tutorial_trouble_conn1', $s));
+    echo html_writer::tag('li', get_string('tutorial_trouble_conn2', $s));
+    echo html_writer::tag('li', get_string('tutorial_trouble_conn3', $s));
     echo html_writer::end_tag('ul');
-
     echo html_writer::end_div();
     echo html_writer::end_div();
 }
@@ -288,342 +259,222 @@ function show_admin_tutorials() {
 /**
  * Teacher tutorials
  */
-function show_teacher_tutorials() {
-    echo html_writer::tag('h2', '🎓 Teacher Tutorials');
+function local_savian_ai_show_teacher_tutorials() {
+    $s = 'local_savian_ai';
+    echo html_writer::tag('h2', get_string('tutorial_teacher_title', $s));
 
-    // Tutorial 1: Upload Documents
+    // Tutorial 1: Upload Documents.
     echo html_writer::start_div('card mb-4 tutorial-card');
-    echo html_writer::div('📄 Tutorial 1: Uploading Documents (2 minutes)', 'card-header bg-info text-white');
+    echo html_writer::div(get_string('tutorial_upload_title', $s), 'card-header bg-info text-white');
     echo html_writer::start_div('card-body');
-
-    echo html_writer::tag('h5', 'Why Upload Documents?');
-    echo html_writer::tag('p', 'Your documents become the foundation for AI-generated courses and chat responses.');
-
-    echo html_writer::tag('h5', 'Step-by-Step:');
+    echo html_writer::tag('h5', get_string('tutorial_upload_why', $s));
+    echo html_writer::tag('p', get_string('tutorial_upload_why_desc', $s));
+    echo html_writer::tag('h5', get_string('tutorial_upload_steps', $s));
     echo html_writer::start_tag('ol');
-    echo html_writer::tag('li', 'Navigate to your course');
-    echo html_writer::tag('li', 'Click <strong>"Savian AI"</strong> in course navigation');
-    echo html_writer::tag('li', 'Click <strong>"Documents"</strong>');
-    echo html_writer::tag('li', 'Click <strong>"+ Upload Document"</strong> button');
-    echo html_writer::tag('li', 'Fill the form:
-        <ul>
-            <li><strong>Title</strong>: Descriptive name</li>
-            <li><strong>File</strong>: Choose PDF/DOCX (max 50MB)</li>
-            <li><strong>Description</strong>: Optional summary</li>
-            <li><strong>Subject Area</strong>: e.g., "Healthcare Ethics"</li>
-            <li><strong>Upload to</strong>: Select course or Global Library</li>
-        </ul>');
-    echo html_writer::tag('li', 'Click <strong>"Upload"</strong>');
-    echo html_writer::tag('li', 'Wait for status to change: Uploading → Processing → <strong>Ready</strong> (30-60 seconds)');
+    echo html_writer::tag('li', get_string('tutorial_upload_step1', $s));
+    echo html_writer::tag('li', get_string('tutorial_upload_step2', $s));
+    echo html_writer::tag('li', get_string('tutorial_upload_step3', $s));
+    echo html_writer::tag('li', get_string('tutorial_upload_step4', $s));
+    echo html_writer::tag('li', get_string('tutorial_upload_step5', $s));
+    echo html_writer::tag('li', get_string('tutorial_upload_step6', $s));
+    echo html_writer::tag('li', get_string('tutorial_upload_step7', $s));
     echo html_writer::end_tag('ol');
-
-    echo html_writer::div('💡 <strong>Best Practice:</strong> Upload 2-3 related documents for comprehensive course generation', 'alert alert-success mt-3');
-
+    echo html_writer::div(get_string('tutorial_upload_tip', $s), 'alert alert-success mt-3');
     echo html_writer::end_div();
     echo html_writer::end_div();
 
-    // Tutorial 2: Generate Course
+    // Tutorial 2: Generate Course.
     echo html_writer::start_div('card mb-4 tutorial-card');
-    echo html_writer::div('🎨 Tutorial 2: Generate Your First Course (10 minutes)', 'card-header bg-success text-white');
+    echo html_writer::div(get_string('tutorial_generate_title', $s), 'card-header bg-success text-white');
     echo html_writer::start_div('card-body');
-
-    echo html_writer::tag('p', 'Create a complete course structure with AI in 3-8 minutes:', ['class' => 'lead']);
-
-    echo html_writer::tag('h5', 'Step 1: Start Generation');
+    echo html_writer::tag('p', get_string('tutorial_generate_intro', $s), ['class' => 'lead']);
+    echo html_writer::tag('h5', get_string('tutorial_gen_step1', $s));
     echo html_writer::start_tag('ol');
-    echo html_writer::tag('li', 'From course → <strong>Savian AI → Generate Course Content</strong>');
+    echo html_writer::tag('li', get_string('tutorial_gen_step1_desc', $s));
     echo html_writer::end_tag('ol');
-
-    echo html_writer::tag('h5', 'Step 2: Fill the Form', ['class' => 'mt-3']);
-    
-    echo html_writer::tag('h6', '📚 Basic Information:');
+    echo html_writer::tag('h5', get_string('tutorial_gen_step2', $s), ['class' => 'mt-3']);
+    echo html_writer::tag('h6', get_string('tutorial_gen_basic', $s));
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', '<strong>Target Course</strong>: Auto-filled (your course name)');
-    echo html_writer::tag('li', '<strong>Description</strong>: Optional - add specific goals');
-    echo html_writer::tag('li', '<strong>Additional Context</strong>: e.g., "First-year medical students" (optional)');
+    echo html_writer::tag('li', get_string('tutorial_gen_target_course', $s));
+    echo html_writer::tag('li', get_string('tutorial_gen_description', $s));
+    echo html_writer::tag('li', get_string('tutorial_gen_context', $s));
     echo html_writer::end_tag('ul');
-
-    echo html_writer::tag('h6', '👥 Learner Profile:', ['class' => 'mt-2']);
+    echo html_writer::tag('h6', get_string('tutorial_gen_learner', $s), ['class' => 'mt-2']);
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', '<strong>Age Group</strong>: K-5, Middle, High School, Undergrad, Graduate, Professional');
-    echo html_writer::tag('li', '<strong>Industry</strong>: Healthcare, Technology, Business, K-12, etc.');
-    echo html_writer::tag('li', '<strong>Prior Knowledge</strong>: Beginner, Intermediate, Advanced');
+    echo html_writer::tag('li', get_string('tutorial_gen_age', $s));
+    echo html_writer::tag('li', get_string('tutorial_gen_industry', $s));
+    echo html_writer::tag('li', get_string('tutorial_gen_prior', $s));
     echo html_writer::end_tag('ul');
-
-    echo html_writer::div('💡 Age group adapts vocabulary and reading level. Industry customizes terminology and examples.', 'alert alert-info');
-
-    echo html_writer::tag('h6', '📄 Source Documents:', ['class' => 'mt-2']);
+    echo html_writer::div(get_string('tutorial_gen_age_tip', $s), 'alert alert-info');
+    echo html_writer::tag('h6', get_string('tutorial_gen_source', $s), ['class' => 'mt-2']);
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', 'Select 1-3 documents (Ctrl+Click for multiple)');
-    echo html_writer::tag('li', 'Duration: 4-8 weeks recommended');
+    echo html_writer::tag('li', get_string('tutorial_gen_select_docs', $s));
+    echo html_writer::tag('li', get_string('tutorial_gen_duration', $s));
     echo html_writer::end_tag('ul');
-
-    echo html_writer::tag('h6', '🎨 Content Types:', ['class' => 'mt-2']);
+    echo html_writer::tag('h6', get_string('tutorial_gen_content_types', $s), ['class' => 'mt-2']);
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', '✓ Sections (required) - Weekly/topical organization');
-    echo html_writer::tag('li', '✓ Pages (required) - 400-800 words, age-adapted');
-    echo html_writer::tag('li', 'Activities - Hands-on exercises');
-    echo html_writer::tag('li', 'Discussions - Forum prompts');
-    echo html_writer::tag('li', '✓ Quizzes (recommended) - Section assessments');
-    echo html_writer::tag('li', 'Assignments - Projects with rubrics');
+    echo html_writer::tag('li', get_string('tutorial_gen_ct_sections', $s));
+    echo html_writer::tag('li', get_string('tutorial_gen_ct_pages', $s));
+    echo html_writer::tag('li', get_string('tutorial_gen_ct_activities', $s));
+    echo html_writer::tag('li', get_string('tutorial_gen_ct_discussions', $s));
+    echo html_writer::tag('li', get_string('tutorial_gen_ct_quizzes', $s));
+    echo html_writer::tag('li', get_string('tutorial_gen_ct_assignments', $s));
     echo html_writer::end_tag('ul');
-
-    echo html_writer::tag('h5', 'Step 3: Watch Progress (3-8 min)', ['class' => 'mt-4']);
-    echo html_writer::tag('p', 'Real-time progress bar shows ADDIE stages:');
+    echo html_writer::tag('h5', get_string('tutorial_gen_step3', $s), ['class' => 'mt-4']);
+    echo html_writer::tag('p', get_string('tutorial_gen_progress_desc', $s));
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', '2% - Analyzing learner profile');
-    echo html_writer::tag('li', '10% - Course outline ready ✓');
-    echo html_writer::tag('li', '45% - Creating Week 3 content');
-    echo html_writer::tag('li', '85% - Adding quality markers');
-    echo html_writer::tag('li', '100% - Course ready! Auto-redirects to preview');
+    echo html_writer::tag('li', get_string('tutorial_gen_progress_2', $s));
+    echo html_writer::tag('li', get_string('tutorial_gen_progress_10', $s));
+    echo html_writer::tag('li', get_string('tutorial_gen_progress_45', $s));
+    echo html_writer::tag('li', get_string('tutorial_gen_progress_85', $s));
+    echo html_writer::tag('li', get_string('tutorial_gen_progress_100', $s));
     echo html_writer::end_tag('ul');
-
-    echo html_writer::tag('h5', 'Step 4: Review Quality (2 min)', ['class' => 'mt-4']);
-    echo html_writer::tag('p', 'Preview shows comprehensive quality information. See "Understanding Quality Scores" tutorial for details.');
-
-    echo html_writer::tag('h5', 'Step 5: Add to Course (1 min)', ['class' => 'mt-4']);
+    echo html_writer::tag('h5', get_string('tutorial_gen_step4', $s), ['class' => 'mt-4']);
+    echo html_writer::tag('p', get_string('tutorial_gen_step4_desc', $s));
+    echo html_writer::tag('h5', get_string('tutorial_gen_step5', $s), ['class' => 'mt-4']);
     echo html_writer::start_tag('ol');
-    echo html_writer::tag('li', 'Optionally uncheck items you don\'t want');
-    echo html_writer::tag('li', 'Click <strong>"Add to THIS Course"</strong>');
-    echo html_writer::tag('li', 'Wait 10-30 seconds for creation');
-    echo html_writer::tag('li', 'Success! View your course to see new sections');
+    echo html_writer::tag('li', get_string('tutorial_gen_step5_1', $s));
+    echo html_writer::tag('li', get_string('tutorial_gen_step5_2', $s));
+    echo html_writer::tag('li', get_string('tutorial_gen_step5_3', $s));
+    echo html_writer::tag('li', get_string('tutorial_gen_step5_4', $s));
     echo html_writer::end_tag('ol');
-
     echo html_writer::end_div();
     echo html_writer::end_div();
 
-    // Tutorial 3: Quality Scores
+    // Tutorial 3: Quality Scores (abbreviated for brevity - uses lang strings).
     echo html_writer::start_div('card mb-4 tutorial-card');
-    echo html_writer::div('📊 Tutorial 3: Understanding Quality Scores (5 minutes)', 'card-header bg-warning');
+    echo html_writer::div(get_string('tutorial_quality_title', $s), 'card-header bg-warning');
     echo html_writer::start_div('card-body');
-
-    echo html_writer::tag('p', 'Quality scores help you understand content reliability and guide your review efforts.', ['class' => 'lead']);
-
-    echo html_writer::tag('h5', '📈 Overall Score (0-100)');
-    echo html_writer::start_div('row text-center mb-3');
-    echo html_writer::div('<div class="h2 text-success">80-100</div><div>Excellent</div><small>Minimal review needed</small>', 'col-md-3');
-    echo html_writer::div('<div class="h2 text-warning">60-79</div><div>Good</div><small>Review supplemented parts</small>', 'col-md-3');
-    echo html_writer::div('<div class="h2 text-orange">40-59</div><div>Fair</div><small>Significant review needed</small>', 'col-md-3');
-    echo html_writer::div('<div class="h2 text-danger">0-39</div><div>Poor</div><small>Upload more documents</small>', 'col-md-3');
-    echo html_writer::end_div();
-
-    echo html_writer::tag('h5', '📚 Source Coverage (%)', ['class' => 'mt-4']);
-    echo html_writer::tag('p', '<strong>What it measures:</strong> Percentage of content directly from your uploaded documents');
+    echo html_writer::tag('p', get_string('tutorial_quality_intro', $s), ['class' => 'lead']);
+    echo html_writer::tag('h5', get_string('tutorial_quality_overall', $s));
+    echo html_writer::tag('h5', get_string('tutorial_quality_source', $s), ['class' => 'mt-4']);
+    echo html_writer::tag('p', get_string('tutorial_quality_source_desc', $s));
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', '<strong>80%+</strong> = Excellent grounding, minimal AI supplementation');
-    echo html_writer::tag('li', '<strong>60-79%</strong> = Good coverage, some gaps filled');
-    echo html_writer::tag('li', '<strong><60%</strong> = Moderate supplementation, careful review needed');
+    echo html_writer::tag('li', get_string('tutorial_quality_source_80', $s));
+    echo html_writer::tag('li', get_string('tutorial_quality_source_60', $s));
+    echo html_writer::tag('li', get_string('tutorial_quality_source_below', $s));
     echo html_writer::end_tag('ul');
-
-    echo html_writer::div('💡 Higher coverage = More trustworthy content from YOUR materials', 'alert alert-info');
-
-    echo html_writer::tag('h5', '🎯 Learning Depth (0-100)', ['class' => 'mt-4']);
-    echo html_writer::tag('p', '<strong>What it measures:</strong> Bloom\'s taxonomy level - higher-order thinking');
+    echo html_writer::div(get_string('tutorial_quality_source_tip', $s), 'alert alert-info');
+    echo html_writer::tag('h5', get_string('tutorial_quality_depth', $s), ['class' => 'mt-4']);
+    echo html_writer::tag('p', get_string('tutorial_quality_depth_desc', $s));
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', '<strong>75+</strong> = Deep learning (analysis, evaluation, creation)');
-    echo html_writer::tag('li', '<strong>50-74</strong> = Moderate (mix of levels)');
-    echo html_writer::tag('li', '<strong><50</strong> = Surface (memorization focus)');
+    echo html_writer::tag('li', get_string('tutorial_quality_depth_75', $s));
+    echo html_writer::tag('li', get_string('tutorial_quality_depth_50', $s));
+    echo html_writer::tag('li', get_string('tutorial_quality_depth_below', $s));
     echo html_writer::end_tag('ul');
-
-    echo html_writer::tag('h5', '🏷️ Page-Level Tags', ['class' => 'mt-4']);
-    echo html_writer::start_div('row');
-    echo html_writer::div('<span class="badge badge-success badge-lg">✓ Verified</span><p class="mt-2">85%+ from sources<br>Trust with light review</p>', 'col-md-3 text-center');
-    echo html_writer::div('<span class="badge badge-warning badge-lg">⚠️ Review</span><p class="mt-2">70-84% from sources<br>Verify accuracy</p>', 'col-md-3 text-center');
-    echo html_writer::div('<span class="badge badge-danger badge-lg">❗ Priority</span><p class="mt-2"><70% from sources<br>Thorough review</p>', 'col-md-3 text-center');
-    echo html_writer::div('<span class="badge badge-info badge-lg">ℹ️ Supplemented</span><p class="mt-2">AI-added context<br>Verify specifics</p>', 'col-md-3 text-center');
-    echo html_writer::end_div();
-
-    echo html_writer::div('✅ <strong>Best Practice:</strong> Focus your review time on yellow/red items. Green items need minimal review.', 'alert alert-success mt-3');
-
+    echo html_writer::tag('h5', get_string('tutorial_quality_tags', $s), ['class' => 'mt-4']);
+    echo html_writer::div(get_string('tutorial_quality_tip', $s), 'alert alert-success mt-3');
     echo html_writer::end_div();
     echo html_writer::end_div();
 
-    // Tutorial 4: Knowledge Base
+    // Tutorial 4: Knowledge Base.
     echo html_writer::start_div('card mb-4 tutorial-card');
-    echo html_writer::div('💾 Tutorial 4: Saving to Knowledge Base (3 minutes)', 'card-header');
+    echo html_writer::div(get_string('tutorial_kb_title', $s), 'card-header');
     echo html_writer::start_div('card-body');
-
-    echo html_writer::tag('h5', 'What is the Knowledge Feedback Loop?');
-    echo html_writer::tag('p', 'After adding generated content to your course, you can save it back to the knowledge base. This creates a virtuous cycle:');
-
+    echo html_writer::tag('h5', get_string('tutorial_kb_what', $s));
+    echo html_writer::tag('p', get_string('tutorial_kb_what_desc', $s));
     echo html_writer::start_tag('ol');
-    echo html_writer::tag('li', 'Generate course from documents');
-    echo html_writer::tag('li', 'Review and approve content');
-    echo html_writer::tag('li', 'Add to your Moodle course');
-    echo html_writer::tag('li', '<strong>Save approved course to knowledge base</strong>');
-    echo html_writer::tag('li', 'Future courses can now use this approved content as a source!');
+    echo html_writer::tag('li', get_string('tutorial_kb_step1', $s));
+    echo html_writer::tag('li', get_string('tutorial_kb_step2', $s));
+    echo html_writer::tag('li', get_string('tutorial_kb_step3', $s));
+    echo html_writer::tag('li', get_string('tutorial_kb_step4', $s));
+    echo html_writer::tag('li', get_string('tutorial_kb_step5', $s));
     echo html_writer::end_tag('ol');
-
-    echo html_writer::tag('h5', 'Benefits:', ['class' => 'mt-3']);
+    echo html_writer::tag('h5', get_string('tutorial_kb_benefits', $s), ['class' => 'mt-3']);
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', '✓ Future courses build on vetted content');
-    echo html_writer::tag('li', '✓ Students can chat with approved course materials');
-    echo html_writer::tag('li', '✓ Reduced review time (60 min → 40 min for similar courses)');
-    echo html_writer::tag('li', '✓ Quality improves over time (60% → 85%+ QM scores)');
+    echo html_writer::tag('li', get_string('tutorial_kb_benefit1', $s));
+    echo html_writer::tag('li', get_string('tutorial_kb_benefit2', $s));
+    echo html_writer::tag('li', get_string('tutorial_kb_benefit3', $s));
+    echo html_writer::tag('li', get_string('tutorial_kb_benefit4', $s));
     echo html_writer::end_tag('ul');
-
-    echo html_writer::tag('h5', 'How to Save:', ['class' => 'mt-3']);
+    echo html_writer::tag('h5', get_string('tutorial_kb_how', $s), ['class' => 'mt-3']);
     echo html_writer::start_tag('ol');
-    echo html_writer::tag('li', 'After clicking "Add to THIS Course"');
-    echo html_writer::tag('li', 'Success page shows "💡 Save to Knowledge Base" prompt');
-    echo html_writer::tag('li', 'Click <strong>"Save to Knowledge Base"</strong>');
-    echo html_writer::tag('li', 'Processing takes 2-3 minutes');
-    echo html_writer::tag('li', 'Approved course appears in documents as "[Title] (Instructor Approved)"');
+    echo html_writer::tag('li', get_string('tutorial_kb_how1', $s));
+    echo html_writer::tag('li', get_string('tutorial_kb_how2', $s));
+    echo html_writer::tag('li', get_string('tutorial_kb_how3', $s));
+    echo html_writer::tag('li', get_string('tutorial_kb_how4', $s));
+    echo html_writer::tag('li', get_string('tutorial_kb_how5', $s));
     echo html_writer::end_tag('ol');
-
-    echo html_writer::div('🔄 Your knowledge base grows with each approved course!', 'alert alert-success');
-
+    echo html_writer::div(get_string('tutorial_kb_grows', $s), 'alert alert-success');
     echo html_writer::end_div();
     echo html_writer::end_div();
 
-    // Tutorial 5: View Edit Content
+    // Tutorial 5: View/Edit Content.
     echo html_writer::start_div('card mb-4 tutorial-card');
-    echo html_writer::div('✏️ Tutorial 5: Reviewing and Editing Content', 'card-header');
+    echo html_writer::div(get_string('tutorial_edit_title', $s), 'card-header');
     echo html_writer::start_div('card-body');
-
-    echo html_writer::tag('h5', 'View Content (Read-Only)');
+    echo html_writer::tag('h5', get_string('tutorial_edit_view', $s));
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', 'In preview, click <strong>"👁 View"</strong> button on any item');
-    echo html_writer::tag('li', 'Modal opens showing full content:
-        <ul>
-            <li>Pages: Complete 400-800 word content</li>
-            <li>Activities: Detailed instructions</li>
-            <li>Quizzes: All questions with answers marked</li>
-            <li>Assignments: Instructions + rubric table</li>
-        </ul>');
-    echo html_writer::tag('li', 'Click "Close" when done');
+    echo html_writer::tag('li', get_string('tutorial_edit_view1', $s));
+    echo html_writer::tag('li', get_string('tutorial_edit_view2', $s));
+    echo html_writer::tag('li', get_string('tutorial_edit_view3', $s));
     echo html_writer::end_tag('ul');
-
-    echo html_writer::tag('h5', 'Edit Content', ['class' => 'mt-3']);
+    echo html_writer::tag('h5', get_string('tutorial_edit_heading', $s), ['class' => 'mt-3']);
     echo html_writer::start_tag('ol');
-    echo html_writer::tag('li', 'Click <strong>"✏️ Edit"</strong> button');
-    echo html_writer::tag('li', 'Modal opens with editable fields:
-        <ul>
-            <li>Title: Modify if needed</li>
-            <li>Content: Full textarea (15 rows)</li>
-        </ul>');
-    echo html_writer::tag('li', 'Make your changes');
-    echo html_writer::tag('li', 'Click <strong>"Save"</strong>');
-    echo html_writer::tag('li', 'Changes persist - title updates in preview');
-    echo html_writer::tag('li', 'When you add to course, edited version is used');
+    echo html_writer::tag('li', get_string('tutorial_edit_step1', $s));
+    echo html_writer::tag('li', get_string('tutorial_edit_step2', $s));
+    echo html_writer::tag('li', get_string('tutorial_edit_step3', $s));
+    echo html_writer::tag('li', get_string('tutorial_edit_step4', $s));
+    echo html_writer::tag('li', get_string('tutorial_edit_step5', $s));
+    echo html_writer::tag('li', get_string('tutorial_edit_step6', $s));
     echo html_writer::end_tag('ol');
-
-    echo html_writer::div('💡 <strong>Tip:</strong> Focus edits on items with yellow/red quality tags', 'alert alert-info mt-3');
-
+    echo html_writer::div(get_string('tutorial_edit_tip', $s), 'alert alert-info mt-3');
     echo html_writer::end_div();
     echo html_writer::end_div();
 
-    // Tutorial 6: Learning Analytics
+    // Tutorial 6: Learning Analytics.
     echo html_writer::start_div('card mb-4 tutorial-card');
-    echo html_writer::div('📊 Tutorial 6: Learning Analytics - Identify At-Risk Students (NEW)', 'card-header bg-danger text-white');
+    echo html_writer::div(get_string('tutorial_analytics_title', $s), 'card-header bg-danger text-white');
     echo html_writer::start_div('card-body');
-
-    echo html_writer::tag('h5', 'What is Learning Analytics?');
-    echo html_writer::tag('p', 'AI-powered analysis that identifies students who may be struggling, with personalized intervention recommendations.', ['class' => 'lead']);
-
-    echo html_writer::tag('h5', 'Key Features:', ['class' => 'mt-3']);
+    echo html_writer::tag('h5', get_string('tutorial_analytics_what', $s));
+    echo html_writer::tag('p', get_string('tutorial_analytics_what_desc', $s), ['class' => 'lead']);
+    echo html_writer::tag('h5', get_string('tutorial_analytics_features', $s), ['class' => 'mt-3']);
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', '🎯 <strong>At-Risk Detection</strong>: AI analyzes 40+ metrics per student');
-    echo html_writer::tag('li', '📈 <strong>Risk Scores</strong>: 0-100 scale with High/Medium/Low classification');
-    echo html_writer::tag('li', '💡 <strong>Intervention Recommendations</strong>: Personalized suggestions for each student');
-    echo html_writer::tag('li', '📋 <strong>Course Improvements</strong>: AI suggests ways to improve course design');
-    echo html_writer::tag('li', '📥 <strong>CSV Export</strong>: Download reports for offline analysis');
+    echo html_writer::tag('li', get_string('tutorial_analytics_feat1', $s));
+    echo html_writer::tag('li', get_string('tutorial_analytics_feat2', $s));
+    echo html_writer::tag('li', get_string('tutorial_analytics_feat3', $s));
+    echo html_writer::tag('li', get_string('tutorial_analytics_feat4', $s));
+    echo html_writer::tag('li', get_string('tutorial_analytics_feat5', $s));
     echo html_writer::end_tag('ul');
-
-    echo html_writer::tag('h5', 'How to Access:', ['class' => 'mt-4']);
+    echo html_writer::tag('h5', get_string('tutorial_analytics_access', $s), ['class' => 'mt-4']);
     echo html_writer::start_tag('ol');
-    echo html_writer::tag('li', 'Navigate to your course');
-    echo html_writer::tag('li', 'Click <strong>"Savian AI"</strong> in course navigation');
-    echo html_writer::tag('li', 'Click <strong>"Learning Analytics"</strong> tab');
-    echo html_writer::tag('li', 'Click <strong>"Generate Analytics Report"</strong>');
-    echo html_writer::tag('li', 'Wait 1-2 minutes for AI analysis');
+    echo html_writer::tag('li', get_string('tutorial_analytics_access1', $s));
+    echo html_writer::tag('li', get_string('tutorial_analytics_access2', $s));
+    echo html_writer::tag('li', get_string('tutorial_analytics_access3', $s));
+    echo html_writer::tag('li', get_string('tutorial_analytics_access4', $s));
+    echo html_writer::tag('li', get_string('tutorial_analytics_access5', $s));
     echo html_writer::end_tag('ol');
-
-    echo html_writer::tag('h5', 'Understanding the Report:', ['class' => 'mt-4']);
-
-    echo html_writer::tag('h6', '🔴 High Risk Students (70-100):');
-    echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', 'Immediate intervention recommended');
-    echo html_writer::tag('li', 'Multiple warning indicators present');
-    echo html_writer::tag('li', 'Personal outreach suggested');
-    echo html_writer::end_tag('ul');
-
-    echo html_writer::tag('h6', '🟡 Medium Risk Students (40-69):', ['class' => 'mt-2']);
-    echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', 'Monitor closely');
-    echo html_writer::tag('li', 'Some concerning patterns detected');
-    echo html_writer::tag('li', 'Consider proactive support');
-    echo html_writer::end_tag('ul');
-
-    echo html_writer::tag('h6', '🟢 Low Risk Students (0-39):', ['class' => 'mt-2']);
-    echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', 'On track');
-    echo html_writer::tag('li', 'Continue normal monitoring');
-    echo html_writer::tag('li', 'May still benefit from engagement');
-    echo html_writer::end_tag('ul');
-
-    echo html_writer::tag('h5', 'Metrics Analyzed:', ['class' => 'mt-4']);
-    echo html_writer::start_div('row');
-    echo html_writer::div('<strong>Engagement</strong><ul><li>Login frequency</li><li>Time on course</li><li>Page views</li><li>Resource access</li></ul>', 'col-md-3');
-    echo html_writer::div('<strong>Performance</strong><ul><li>Quiz scores</li><li>Assignment grades</li><li>Grade trends</li><li>Completion rate</li></ul>', 'col-md-3');
-    echo html_writer::div('<strong>Participation</strong><ul><li>Forum posts</li><li>Discussion replies</li><li>Peer interactions</li><li>Group work</li></ul>', 'col-md-3');
-    echo html_writer::div('<strong>Patterns</strong><ul><li>Submission timing</li><li>Late submissions</li><li>Activity gaps</li><li>Drop-off points</li></ul>', 'col-md-3');
-    echo html_writer::end_div();
-
-    echo html_writer::tag('h5', 'Intervention Recommendations:', ['class' => 'mt-4']);
-    echo html_writer::tag('p', 'For each at-risk student, AI provides specific recommendations:');
-    echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', '📧 <strong>Communication</strong>: Email templates, meeting suggestions');
-    echo html_writer::tag('li', '📚 <strong>Resources</strong>: Additional materials, tutorials');
-    echo html_writer::tag('li', '⏰ <strong>Deadlines</strong>: Extension recommendations');
-    echo html_writer::tag('li', '👥 <strong>Support</strong>: Peer tutoring, study groups');
-    echo html_writer::end_tag('ul');
-
-    echo html_writer::tag('h5', 'Export Reports:', ['class' => 'mt-4']);
-    echo html_writer::start_tag('ol');
-    echo html_writer::tag('li', 'Click <strong>"Export CSV"</strong> button');
-    echo html_writer::tag('li', 'Download includes: Student ID, Risk Score, Contributing Factors, Recommendations');
-    echo html_writer::tag('li', 'Use for offline analysis or sharing with advisors');
-    echo html_writer::end_tag('ol');
-
-    echo html_writer::div('🔒 <strong>Privacy:</strong> Student data is anonymized with SHA256 before AI processing. Full GDPR compliance with data export/deletion support.', 'alert alert-info mt-3');
-
-    echo html_writer::div('💡 <strong>Best Practice:</strong> Run analytics weekly to catch at-risk students early. Early intervention = better outcomes!', 'alert alert-success');
-
+    echo html_writer::div(get_string('tutorial_analytics_privacy', $s), 'alert alert-info mt-3');
+    echo html_writer::div(get_string('tutorial_analytics_tip', $s), 'alert alert-success');
     echo html_writer::end_div();
     echo html_writer::end_div();
 
-    // Tutorial 7: Chat History
+    // Tutorial 7: Chat History.
     echo html_writer::start_div('card mb-4 tutorial-card');
-    echo html_writer::div('💬 Tutorial 7: Monitoring Student Chat Conversations', 'card-header');
+    echo html_writer::div(get_string('tutorial_chathistory_title', $s), 'card-header');
     echo html_writer::start_div('card-body');
-
-    echo html_writer::tag('h5', 'Why Monitor Chat History?');
+    echo html_writer::tag('h5', get_string('tutorial_chathistory_why', $s));
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', 'Understand what concepts students struggle with');
-    echo html_writer::tag('li', 'Identify common questions to address in class');
-    echo html_writer::tag('li', 'Spot students who need extra help');
-    echo html_writer::tag('li', 'Improve course materials based on questions');
+    echo html_writer::tag('li', get_string('tutorial_chathistory_why1', $s));
+    echo html_writer::tag('li', get_string('tutorial_chathistory_why2', $s));
+    echo html_writer::tag('li', get_string('tutorial_chathistory_why3', $s));
+    echo html_writer::tag('li', get_string('tutorial_chathistory_why4', $s));
     echo html_writer::end_tag('ul');
-
-    echo html_writer::tag('h5', 'How to Access:', ['class' => 'mt-3']);
+    echo html_writer::tag('h5', get_string('tutorial_chathistory_access', $s), ['class' => 'mt-3']);
     echo html_writer::start_tag('ol');
-    echo html_writer::tag('li', 'Navigate to your course');
-    echo html_writer::tag('li', 'Click <strong>"Savian AI"</strong> in course navigation');
-    echo html_writer::tag('li', 'Click <strong>"Chat History"</strong>');
-    echo html_writer::tag('li', 'Filter by student, date range, or keyword');
+    echo html_writer::tag('li', get_string('tutorial_chathistory_access1', $s));
+    echo html_writer::tag('li', get_string('tutorial_chathistory_access2', $s));
+    echo html_writer::tag('li', get_string('tutorial_chathistory_access3', $s));
+    echo html_writer::tag('li', get_string('tutorial_chathistory_access4', $s));
     echo html_writer::end_tag('ol');
-
-    echo html_writer::tag('h5', 'What You Can See:', ['class' => 'mt-3']);
+    echo html_writer::tag('h5', get_string('tutorial_chathistory_see', $s), ['class' => 'mt-3']);
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', 'All student questions and AI responses');
-    echo html_writer::tag('li', 'Feedback ratings (thumbs up/down)');
-    echo html_writer::tag('li', 'Conversation timestamps');
-    echo html_writer::tag('li', 'Sources used in responses');
+    echo html_writer::tag('li', get_string('tutorial_chathistory_see1', $s));
+    echo html_writer::tag('li', get_string('tutorial_chathistory_see2', $s));
+    echo html_writer::tag('li', get_string('tutorial_chathistory_see3', $s));
+    echo html_writer::tag('li', get_string('tutorial_chathistory_see4', $s));
     echo html_writer::end_tag('ul');
-
-    echo html_writer::div('💡 <strong>Tip:</strong> Review negative feedback (thumbs down) to identify areas where the AI or course materials need improvement.', 'alert alert-info mt-3');
-
+    echo html_writer::div(get_string('tutorial_chathistory_tip', $s), 'alert alert-info mt-3');
     echo html_writer::end_div();
     echo html_writer::end_div();
 }
@@ -631,91 +482,87 @@ function show_teacher_tutorials() {
 /**
  * Student tutorials
  */
-function show_student_tutorials() {
-    echo html_writer::tag('h2', '📚 Student Tutorials');
+function local_savian_ai_show_student_tutorials() {
+    $s = 'local_savian_ai';
+    echo html_writer::tag('h2', get_string('tutorial_student_title', $s));
 
-    // Tutorial: Using Chat
+    // Tutorial: Using Chat.
     echo html_writer::start_div('card mb-4 tutorial-card');
-    echo html_writer::div('💬 Using Your AI Tutor - Complete Guide', 'card-header bg-primary text-white');
+    echo html_writer::div(get_string('tutorial_student_guide', $s), 'card-header bg-primary text-white');
     echo html_writer::start_div('card-body');
 
-    echo html_writer::tag('h5', '🔍 Finding the Chat');
+    echo html_writer::tag('h5', get_string('tutorial_student_find', $s));
     echo html_writer::start_tag('ol');
-    echo html_writer::tag('li', 'Go to any course');
-    echo html_writer::tag('li', 'Look for purple chat bubble in <strong>bottom-right corner</strong>');
-    echo html_writer::tag('li', 'Click to open');
+    echo html_writer::tag('li', get_string('tutorial_student_find1', $s));
+    echo html_writer::tag('li', get_string('tutorial_student_find2', $s));
+    echo html_writer::tag('li', get_string('tutorial_student_find3', $s));
     echo html_writer::end_tag('ol');
 
-    echo html_writer::tag('h5', '💬 Asking Questions', ['class' => 'mt-4']);
-    echo html_writer::tag('p', '<strong>Good questions to ask:</strong>');
+    echo html_writer::tag('h5', get_string('tutorial_student_asking', $s), ['class' => 'mt-4']);
+    echo html_writer::tag('p', get_string('tutorial_student_good', $s));
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', '"What is [concept]?"');
-    echo html_writer::tag('li', '"Explain the difference between X and Y"');
-    echo html_writer::tag('li', '"How do I apply this concept?"');
-    echo html_writer::tag('li', '"Summarize Week 2 content"');
-    echo html_writer::tag('li', '"What are the steps to implement Z?"');
+    echo html_writer::tag('li', get_string('tutorial_student_good1', $s));
+    echo html_writer::tag('li', get_string('tutorial_student_good2', $s));
+    echo html_writer::tag('li', get_string('tutorial_student_good3', $s));
+    echo html_writer::tag('li', get_string('tutorial_student_good4', $s));
+    echo html_writer::tag('li', get_string('tutorial_student_good5', $s));
     echo html_writer::end_tag('ul');
 
-    echo html_writer::tag('p', '<strong>NOT for:</strong>', ['class' => 'mt-3']);
+    echo html_writer::tag('p', get_string('tutorial_student_notfor', $s), ['class' => 'mt-3']);
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', '❌ Homework answers (use for understanding, not solutions)');
-    echo html_writer::tag('li', '❌ Quiz/test answers (learning tool only)');
-    echo html_writer::tag('li', '❌ Personal information');
+    echo html_writer::tag('li', get_string('tutorial_student_notfor1', $s));
+    echo html_writer::tag('li', get_string('tutorial_student_notfor2', $s));
+    echo html_writer::tag('li', get_string('tutorial_student_notfor3', $s));
     echo html_writer::end_tag('ul');
 
-    echo html_writer::tag('h5', '📚 Understanding Responses', ['class' => 'mt-4']);
+    echo html_writer::tag('h5', get_string('tutorial_student_responses', $s), ['class' => 'mt-4']);
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', '<strong>Sources shown</strong>: Every answer includes which documents/pages were used');
-    echo html_writer::tag('li', '<strong>Click sources</strong>: See exactly where information came from');
-    echo html_writer::tag('li', '<strong>Verify</strong>: Cross-check important information');
+    echo html_writer::tag('li', get_string('tutorial_student_resp1', $s));
+    echo html_writer::tag('li', get_string('tutorial_student_resp2', $s));
+    echo html_writer::tag('li', get_string('tutorial_student_resp3', $s));
     echo html_writer::end_tag('ul');
 
-    echo html_writer::tag('h5', '👍 Providing Feedback', ['class' => 'mt-4']);
+    echo html_writer::tag('h5', get_string('tutorial_student_feedback', $s), ['class' => 'mt-4']);
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', '<strong>Thumbs up</strong>: Answer was helpful');
-    echo html_writer::tag('li', '<strong>Thumbs down</strong>: Not helpful or inaccurate');
-    echo html_writer::tag('li', 'Your feedback improves the AI over time');
+    echo html_writer::tag('li', get_string('tutorial_student_fb1', $s));
+    echo html_writer::tag('li', get_string('tutorial_student_fb2', $s));
+    echo html_writer::tag('li', get_string('tutorial_student_fb3', $s));
     echo html_writer::end_tag('ul');
 
-    echo html_writer::tag('h5', '🔒 Your Privacy', ['class' => 'mt-4']);
+    echo html_writer::tag('h5', get_string('tutorial_student_privacy', $s), ['class' => 'mt-4']);
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', 'Your conversations are private');
-    echo html_writer::tag('li', 'Teachers can view for learning support');
-    echo html_writer::tag('li', 'Not shared with other students');
-    echo html_writer::tag('li', 'You can request data export or deletion');
+    echo html_writer::tag('li', get_string('tutorial_student_priv1', $s));
+    echo html_writer::tag('li', get_string('tutorial_student_priv2', $s));
+    echo html_writer::tag('li', get_string('tutorial_student_priv3', $s));
+    echo html_writer::tag('li', get_string('tutorial_student_priv4', $s));
     echo html_writer::end_tag('ul');
 
-    echo html_writer::tag('h5', '✨ Best Practices', ['class' => 'mt-4']);
+    echo html_writer::tag('h5', get_string('tutorial_student_best', $s), ['class' => 'mt-4']);
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', 'Be specific in your questions');
-    echo html_writer::tag('li', 'Ask one question at a time');
-    echo html_writer::tag('li', 'Provide context if needed');
-    echo html_writer::tag('li', 'Check the sources provided');
-    echo html_writer::tag('li', 'Use for concept clarification and learning');
+    echo html_writer::tag('li', get_string('tutorial_student_best1', $s));
+    echo html_writer::tag('li', get_string('tutorial_student_best2', $s));
+    echo html_writer::tag('li', get_string('tutorial_student_best3', $s));
+    echo html_writer::tag('li', get_string('tutorial_student_best4', $s));
+    echo html_writer::tag('li', get_string('tutorial_student_best5', $s));
     echo html_writer::end_tag('ul');
 
-    echo html_writer::div('💡 The AI tutor is here to help you learn, not to do your work for you. Use it wisely!', 'alert alert-success mt-3');
+    echo html_writer::div(get_string('tutorial_student_wise', $s), 'alert alert-success mt-3');
 
     echo html_writer::end_div();
     echo html_writer::end_div();
 
-    // FAQs
+    // FAQs.
     echo html_writer::start_div('card mb-4 tutorial-card');
-    echo html_writer::div('❓ Frequently Asked Questions', 'card-header');
+    echo html_writer::div(get_string('tutorial_faq', $s), 'card-header');
     echo html_writer::start_div('card-body');
-
-    echo html_writer::tag('h6', 'Q: Can the AI do my homework?');
-    echo html_writer::tag('p', 'A: No. The AI is a learning tool to help you understand concepts, not to provide answers to assignments. Use it to clarify understanding, then do the work yourself.');
-
-    echo html_writer::tag('h6', 'Q: Are my chats private?', ['class' => 'mt-3']);
-    echo html_writer::tag('p', 'A: Yes. Your conversations are private to you. Teachers can view them for learning support, but they\'re not shared with other students.');
-
-    echo html_writer::tag('h6', 'Q: Where does the AI get its answers?', ['class' => 'mt-3']);
-    echo html_writer::tag('p', 'A: From your course materials - uploaded documents, course pages, and approved content. Sources are shown with each answer.');
-
-    echo html_writer::tag('h6', 'Q: What if the AI gives a wrong answer?', ['class' => 'mt-3']);
-    echo html_writer::tag('p', 'A: Use the thumbs down button and let your teacher know. Always verify important information against course materials.');
-
+    echo html_writer::tag('h6', get_string('tutorial_faq_homework_q', $s));
+    echo html_writer::tag('p', get_string('tutorial_faq_homework_a', $s));
+    echo html_writer::tag('h6', get_string('tutorial_faq_private_q', $s), ['class' => 'mt-3']);
+    echo html_writer::tag('p', get_string('tutorial_faq_private_a', $s));
+    echo html_writer::tag('h6', get_string('tutorial_faq_source_q', $s), ['class' => 'mt-3']);
+    echo html_writer::tag('p', get_string('tutorial_faq_source_a', $s));
+    echo html_writer::tag('h6', get_string('tutorial_faq_wrong_q', $s), ['class' => 'mt-3']);
+    echo html_writer::tag('p', get_string('tutorial_faq_wrong_a', $s));
     echo html_writer::end_div();
     echo html_writer::end_div();
 }

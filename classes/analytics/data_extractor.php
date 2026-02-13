@@ -84,7 +84,7 @@ class data_extractor {
     public function get_user_activity($course_id, $user_id, $date_from = 0, $date_to = 0) {
         $params = [
             'courseid' => $course_id,
-            'userid' => $user_id
+            'userid' => $user_id,
         ];
 
         $where_time = '';
@@ -97,7 +97,13 @@ class data_extractor {
             $params['dateto'] = $date_to;
         }
 
-        // Get activity counts (PostgreSQL compatible)
+        // Default time-range filter: cap at last 90 days if no date_from specified.
+        if ($date_from <= 0) {
+            $where_time .= ' AND timecreated >= :mintime';
+            $params['mintime'] = time() - (90 * 86400);
+        }
+
+        // Get activity counts using indexed columns (courseid, userid, timecreated).
         $sql = "SELECT COUNT(*) as total_actions,
                        SUM(CASE WHEN action = 'viewed' THEN 1 ELSE 0 END) as total_views,
                        SUM(CASE WHEN crud = 'c' THEN 1 ELSE 0 END) as create_actions,
@@ -359,17 +365,20 @@ class data_extractor {
      * @return int Estimated minutes spent
      */
     public function estimate_time_spent($course_id, $user_id) {
-        // Get all access timestamps ordered
+        // Get access timestamps for the last 90 days, limited to 10000 rows.
+        $mintime = time() - (90 * 86400);
         $sql = "SELECT timecreated
                 FROM {logstore_standard_log}
                 WHERE courseid = :courseid
                   AND userid = :userid
+                  AND timecreated >= :mintime
                 ORDER BY timecreated ASC";
 
         $logs = $this->db->get_records_sql($sql, [
             'courseid' => $course_id,
-            'userid' => $user_id
-        ]);
+            'userid' => $user_id,
+            'mintime' => $mintime,
+        ], 0, 10000);
 
         if (empty($logs)) {
             return 0;

@@ -9,11 +9,11 @@
 defined('MOODLE_INTERNAL') || die;
 
 if ($hassiteconfig) {
-    global $SESSION;
-    // Store current org_code in session for comparison when settings are saved
+    // Store current org_code in cache for comparison when settings are saved.
     $currentorgcode = get_config('local_savian_ai', 'org_code');
     if (!empty($currentorgcode)) {
-        $SESSION->savian_previous_org_code = $currentorgcode;
+        $cache = \cache::make('local_savian_ai', 'session_data');
+        $cache->set('previous_org_code', $currentorgcode);
     }
     $settings = new admin_settingpage('local_savian_ai', get_string('pluginname', 'local_savian_ai'));
 

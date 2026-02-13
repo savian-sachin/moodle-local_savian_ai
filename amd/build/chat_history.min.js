@@ -72,7 +72,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/templates'], function(
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-striped" id="conversations-table">
+                            <table class="table table-striped" id="savian-conversations-table">
                                 <thead>
                                     <tr>
                                         <th>Student</th>
@@ -115,7 +115,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/templates'], function(
                             <td>${conv.message_count}</td>
                             <td>${lastActive}</td>
                             <td>
-                                <button class="btn btn-sm btn-primary view-conversation" data-conversation-id="${conv.id}">
+                                <button class="btn btn-sm btn-primary savian-view-conversation" data-conversation-id="${conv.id}">
                                     <i class="fa fa-eye"></i> View
                                 </button>
                             </td>
@@ -127,7 +127,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/templates'], function(
                     tbody = '<tr><td colspan="4" class="text-center text-muted">No conversations yet</td></tr>';
                 }
 
-                $('#conversations-table tbody').html(tbody);
+                $('#savian-conversations-table tbody').html(tbody);
             }
         }).fail(function(error) {
             console.error('Failed to load conversations:', error);

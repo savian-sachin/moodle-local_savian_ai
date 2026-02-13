@@ -46,7 +46,7 @@ class generation extends external_api {
      * @return array Status response
      */
     public static function get_generation_status($requestid) {
-        global $USER, $SESSION;
+        global $USER;
 
         // Validate parameters
         $params = self::validate_parameters(self::get_generation_status_parameters(), [
@@ -57,6 +57,8 @@ class generation extends external_api {
         $context = \context_system::instance();
         self::validate_context($context);
         require_capability('local/savian_ai:generate', $context);
+
+        $savian_cache = \cache::make('local_savian_ai', 'session_data');
 
         // Call API
         $client = new \local_savian_ai\api\client();
@@ -69,9 +71,9 @@ class generation extends external_api {
 
             // CRITICAL: Save course_structure to session when completed
             if ($status === 'completed' && isset($response->course_structure)) {
-                $SESSION->savian_ai_course_structure = json_encode($response->course_structure);
-                $SESSION->savian_ai_sources = isset($response->sources) ? json_encode($response->sources) : null;
-                unset($SESSION->savian_ai_pending_request);
+                $savian_cache->set('course_structure', json_encode($response->course_structure));
+                $savian_cache->set('sources', isset($response->sources) ? json_encode($response->sources) : null);
+                $savian_cache->delete('pending_request');
             }
 
             return [
@@ -134,8 +136,6 @@ class generation extends external_api {
      * @return array Success response
      */
     public static function save_course_structure($structure) {
-        global $SESSION;
-
         // Validate parameters
         $params = self::validate_parameters(self::save_course_structure_parameters(), [
             'structure' => $structure
@@ -155,8 +155,9 @@ class generation extends external_api {
             ];
         }
 
-        // Save to session
-        $SESSION->savian_ai_course_structure = $params['structure'];
+        // Save to cache
+        $savian_cache = \cache::make('local_savian_ai', 'session_data');
+        $savian_cache->set('course_structure', $params['structure']);
 
         return [
             'success' => true,

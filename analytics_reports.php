@@ -11,6 +11,8 @@ require_once($CFG->dirroot . '/local/savian_ai/classes/analytics/report_builder.
 
 require_login();
 
+$savian_cache = cache::make('local_savian_ai', 'session_data');
+
 $courseid = required_param('courseid', PARAM_INT);
 $action = optional_param('action', '', PARAM_ALPHA);
 
@@ -45,8 +47,8 @@ if ($action === 'send' && confirm_sesskey()) {
         // Check if async processing (Django processing started)
         if ($report_result->success && !isset($report_result->insights)) {
             // Async processing - use /latest/ endpoint to poll
-            $SESSION->savian_ai_analytics_polling_course = $courseid;
-            $SESSION->savian_ai_analytics_polling_started = time();
+            $savian_cache->set('analytics_polling_course', $courseid);
+            $savian_cache->set('analytics_polling_started', time());
 
             redirect(new moodle_url('/local/savian_ai/analytics_reports.php', [
                 'courseid' => $courseid,
@@ -62,8 +64,8 @@ if ($action === 'send' && confirm_sesskey()) {
 }
 
 // Handle polling for async processing
-if ($action === 'poll' && !empty($SESSION->savian_ai_analytics_polling_course)) {
-    $polling_start_time = $SESSION->savian_ai_analytics_polling_started ?? time();
+if ($action === 'poll' && $savian_cache->get('analytics_polling_course')) {
+    $polling_start_time = $savian_cache->get('analytics_polling_started') ?: time();
 
     // Use /latest/ endpoint
     $client = new \local_savian_ai\api\client();
@@ -91,16 +93,16 @@ if ($action === 'poll' && !empty($SESSION->savian_ai_analytics_polling_course)) 
                 $DB->update_record('local_savian_analytics_reports', $update);
             }
 
-            unset($SESSION->savian_ai_analytics_polling_course);
-            unset($SESSION->savian_ai_analytics_polling_started);
+            $savian_cache->delete('analytics_polling_course');
+            $savian_cache->delete('analytics_polling_started');
 
             redirect(new moodle_url('/local/savian_ai/analytics_reports.php', [
                 'courseid' => $courseid
             ]), 'Analytics insights generated! Scroll down to view.', null, 'success');
         }
     } else if ($latest_response->http_code >= 400) {
-        unset($SESSION->savian_ai_analytics_polling_course);
-        unset($SESSION->savian_ai_analytics_polling_started);
+        $savian_cache->delete('analytics_polling_course');
+        $savian_cache->delete('analytics_polling_started');
 
         redirect(new moodle_url('/local/savian_ai/analytics_reports.php', ['courseid' => $courseid]),
                  'Error retrieving analytics: ' . ($latest_response->error ?? 'Unknown error'), null, 'error');
@@ -108,8 +110,8 @@ if ($action === 'poll' && !empty($SESSION->savian_ai_analytics_polling_course)) 
 
     // Check timeout (5 minutes max)
     if (time() - $polling_start_time > 300) {
-        unset($SESSION->savian_ai_analytics_polling_course);
-        unset($SESSION->savian_ai_analytics_polling_started);
+        $savian_cache->delete('analytics_polling_course');
+        $savian_cache->delete('analytics_polling_started');
 
         redirect(new moodle_url('/local/savian_ai/analytics_reports.php', ['courseid' => $courseid]),
                  'Analytics generation timeout. Please try again or contact support.', null, 'warning');
@@ -138,8 +140,8 @@ require(['jquery'], function($) {
 echo local_savian_ai_render_header('Learning Analytics Dashboard', 'Generate new reports and view insights');
 
 // Show polling status with progress (if action=poll)
-if ($action === 'poll' && !empty($SESSION->savian_ai_analytics_polling_course)) {
-    $polling_start_time = $SESSION->savian_ai_analytics_polling_started ?? time();
+if ($action === 'poll' && $savian_cache->get('analytics_polling_course')) {
+    $polling_start_time = $savian_cache->get('analytics_polling_started') ?: time();
     $elapsed_seconds = time() - $polling_start_time;
 
     // Get student count

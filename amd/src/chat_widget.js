@@ -106,21 +106,21 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
                 <!-- Maximized chat window -->
                 <div class="savian-chat-window" role="dialog" aria-label="Savian AI Chat">
                     <div class="savian-chat-header">
-                        <div class="chat-title">
+                        <div class="savian-chat-title">
                             <i class="fa fa-graduation-cap"></i>
                             <span>Savian AI Tutor</span>
                         </div>
-                        <div class="chat-actions">
-                            <button class="btn-icon" id="savian-chat-new" title="${this.strings.newconversation}">
+                        <div class="savian-chat-actions">
+                            <button class="savian-btn-icon" id="savian-chat-new" title="${this.strings.newconversation}">
                                 <i class="fa fa-plus"></i>
                             </button>
-                            ${this.config.canViewHistory ? `<button class="btn-icon" id="savian-chat-history" title="${this.strings.history}">
+                            ${this.config.canViewHistory ? `<button class="savian-btn-icon" id="savian-chat-history" title="${this.strings.history}">
                                 <i class="fa fa-history"></i>
                             </button>` : ''}
-                            <button class="btn-icon" id="savian-chat-fullscreen" title="${this.strings.maximize}">
+                            <button class="savian-btn-icon" id="savian-chat-fullscreen" title="${this.strings.maximize}">
                                 <i class="fa fa-expand"></i>
                             </button>
-                            <button class="btn-icon" id="savian-chat-minimize" title="${this.strings.minimize}">
+                            <button class="savian-btn-icon" id="savian-chat-minimize" title="${this.strings.minimize}">
                                 <i class="fa fa-minus"></i>
                             </button>
                         </div>
@@ -129,8 +129,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
                     <div class="savian-chat-body">
                         <div class="savian-chat-messages" id="savian-chat-messages">
                             <!-- Welcome message -->
-                            <div class="chat-message assistant">
-                                <div class="message-content">${welcomeMsg}</div>
+                            <div class="savian-chat-message assistant">
+                                <div class="savian-message-content">${welcomeMsg}</div>
                             </div>
                         </div>
 
@@ -138,19 +138,19 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
                     </div>
 
                     <div class="savian-chat-footer">
-                        <div class="chat-input-wrapper">
+                        <div class="savian-chat-input-wrapper">
                             <textarea
                                 id="savian-chat-input"
-                                class="chat-input"
+                                class="savian-chat-input"
                                 placeholder="${this.strings.typemessage}"
                                 rows="1"
                                 aria-label="Chat message input"
                             ></textarea>
-                            <button id="savian-chat-send" class="btn-send" aria-label="${this.strings.send}">
+                            <button id="savian-chat-send" class="savian-btn-send" aria-label="${this.strings.send}">
                                 <i class="fa fa-paper-plane"></i>
                             </button>
                         </div>
-                        <div class="chat-status" id="savian-chat-status"></div>
+                        <div class="savian-chat-status" id="savian-chat-status"></div>
                     </div>
                 </div>
             </div>
@@ -209,12 +209,12 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
                 <!-- Restricted message window -->
                 <div class="savian-chat-window restricted-window" role="dialog" aria-label="Chat Restricted">
                     <div class="savian-chat-header restricted-header">
-                        <div class="chat-title">
+                        <div class="savian-chat-title">
                             <i class="fa fa-clock-o"></i>
                             <span>Chat Temporarily Unavailable</span>
                         </div>
-                        <div class="chat-actions">
-                            <button class="btn-icon" id="savian-chat-minimize" title="Minimize">
+                        <div class="savian-chat-actions">
+                            <button class="savian-btn-icon" id="savian-chat-minimize" title="Minimize">
                                 <i class="fa fa-minus"></i>
                             </button>
                         </div>
@@ -391,9 +391,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
         });
 
         // Feedback buttons (delegated event for dynamic content)
-        $(document).on('click', '.btn-feedback', function() {
+        $(document).on('click', '.savian-btn-feedback', function() {
             var $btn = $(this);
-            var messageid = $btn.closest('.message-feedback').data('message-id');
+            var messageid = $btn.closest('.savian-message-feedback').data('message-id');
             var feedback = parseInt($btn.data('feedback'));
             self.submitFeedback(messageid, feedback, $btn);
         });
@@ -530,21 +530,21 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
         }
 
         var messageHtml = `
-            <div class="chat-message ${role}" data-message-id="${options.messageId || ''}">
-                <div class="message-content">
+            <div class="savian-chat-message ${role}" data-message-id="${options.messageId || ''}">
+                <div class="savian-message-content">
                     ${content}
                 </div>
                 ${sources && sources.length > 0 ? this.renderSources(sources) : ''}
                 ${role === 'assistant' && options.messageId && this.config.enableFeedback ?
                     this.renderFeedback(options.messageId) : ''}
-                <div class="message-time">${this.formatTime(new Date())}</div>
+                <div class="savian-message-time">${this.formatTime(new Date())}</div>
             </div>
         `;
 
         $('#savian-chat-messages').append(messageHtml);
 
         // Apply syntax highlighting and LaTeX rendering
-        this.enhanceMessage($('#savian-chat-messages .chat-message').last());
+        this.enhanceMessage($('#savian-chat-messages .savian-chat-message').last());
 
         // Scroll to bottom
         this.scrollToBottom();
@@ -555,7 +555,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
             return '';
         }
 
-        var sourcesHtml = '<div class="message-sources"><i class="fa fa-book"></i> Sources: ';
+        var sourcesHtml = '<div class="savian-message-sources"><i class="fa fa-book"></i> Sources: ';
         sources.forEach(function(source, idx) {
             var title = '';
             if (typeof source === 'object' && source !== null) {
@@ -565,7 +565,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
             } else {
                 title = 'Document ' + (idx + 1);
             }
-            sourcesHtml += `<span class="source-badge">${title}</span>`;
+            sourcesHtml += `<span class="savian-source-badge">${title}</span>`;
         });
         sourcesHtml += '</div>';
 
@@ -574,11 +574,11 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
 
     ChatWidget.prototype.renderFeedback = function(messageId) {
         return `
-            <div class="message-feedback" data-message-id="${messageId}">
-                <button class="btn-feedback" data-feedback="1" aria-label="${this.strings.helpful}">
+            <div class="savian-message-feedback" data-message-id="${messageId}">
+                <button class="savian-btn-feedback" data-feedback="1" aria-label="${this.strings.helpful}">
                     <i class="fa fa-thumbs-up"></i>
                 </button>
-                <button class="btn-feedback" data-feedback="-1" aria-label="${this.strings.nothelpful}">
+                <button class="savian-btn-feedback" data-feedback="-1" aria-label="${this.strings.nothelpful}">
                     <i class="fa fa-thumbs-down"></i>
                 </button>
             </div>
@@ -603,11 +603,11 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
 
     ChatWidget.prototype.showTypingIndicator = function() {
         var typingHtml = `
-            <div class="chat-message assistant typing-indicator" id="typing-indicator">
-                <div class="message-content">
-                    <span class="typing-dot"></span>
-                    <span class="typing-dot"></span>
-                    <span class="typing-dot"></span>
+            <div class="savian-chat-message assistant savian-typing-indicator" id="savian-typing-indicator">
+                <div class="savian-message-content">
+                    <span class="savian-typing-dot"></span>
+                    <span class="savian-typing-dot"></span>
+                    <span class="savian-typing-dot"></span>
                 </div>
             </div>
         `;
@@ -616,7 +616,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
     };
 
     ChatWidget.prototype.hideTypingIndicator = function() {
-        $('#typing-indicator').remove();
+        $('#savian-typing-indicator').remove();
     };
 
     ChatWidget.prototype.scrollToBottom = function() {
