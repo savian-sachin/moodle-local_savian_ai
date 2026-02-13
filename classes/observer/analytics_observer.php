@@ -92,13 +92,15 @@ class analytics_observer {
 
         // Queue ad-hoc task instead of calling API directly.
         $task = new \local_savian_ai\task\send_analytics_adhoc();
-        $task->set_custom_data([
-            'courseid' => $courseid,
-            'report_type' => 'end_of_course',
-            'trigger_type' => 'completion',
-            'date_from' => 0,
-            'date_to' => time(),
-        ]);
+        $task->set_custom_data(
+            [
+                'courseid' => $courseid,
+                'report_type' => 'end_of_course',
+                'trigger_type' => 'completion',
+                'date_from' => 0,
+                'date_to' => time(),
+            ]
+        );
         \core\task\manager::queue_adhoc_task($task, true);
     }
 
@@ -137,21 +139,26 @@ class analytics_observer {
             $eventrecord->course_id = $courseid;
             $eventrecord->user_id = $userid;
             $eventrecord->event_name = $event::class;
-            $eventrecord->event_context = json_encode([
-                'event_type' => $eventtype,
-                'context_id' => $event->contextid,
-                'time' => $event->timecreated,
-            ]);
+            $eventrecord->event_context = json_encode(
+                [
+                    'event_type' => $eventtype,
+                    'context_id' => $event->contextid,
+                    'time' => $event->timecreated,
+                ]
+            );
             $eventrecord->processed = 0;
             $eventrecord->timecreated = time();
 
             $DB->insert_record('local_savian_analytics_events', $eventrecord);
 
             // Check if threshold reached for this course.
-            $unprocessedcount = $DB->count_records('local_savian_analytics_events', [
-                'course_id' => $courseid,
-                'processed' => 0,
-            ]);
+            $unprocessedcount = $DB->count_records(
+                'local_savian_analytics_events',
+                [
+                    'course_id' => $courseid,
+                    'processed' => 0,
+                ]
+            );
 
             if ($unprocessedcount >= self::EVENT_THRESHOLD) {
                 self::queue_batched_events($courseid);
@@ -173,10 +180,14 @@ class analytics_observer {
 
         try {
             // Get unprocessed events.
-            $events = $DB->get_records('local_savian_analytics_events', [
-                'course_id' => $courseid,
-                'processed' => 0,
-            ], 'timecreated ASC');
+            $events = $DB->get_records(
+                'local_savian_analytics_events',
+                [
+                    'course_id' => $courseid,
+                    'processed' => 0,
+                ],
+                'timecreated ASC'
+            );
 
             if (empty($events)) {
                 return;
@@ -190,14 +201,16 @@ class analytics_observer {
 
             // Queue ad-hoc task instead of calling API directly.
             $task = new \local_savian_ai\task\send_analytics_adhoc();
-            $task->set_custom_data([
-                'courseid' => $courseid,
-                'report_type' => 'real_time',
-                'trigger_type' => 'event',
-                'date_from' => $datefrom,
-                'date_to' => $dateto,
-                'event_ids' => $eventids,
-            ]);
+            $task->set_custom_data(
+                [
+                    'courseid' => $courseid,
+                    'report_type' => 'real_time',
+                    'trigger_type' => 'event',
+                    'date_from' => $datefrom,
+                    'date_to' => $dateto,
+                    'event_ids' => $eventids,
+                ]
+            );
             \core\task\manager::queue_adhoc_task($task, true);
 
         } catch (\Exception $e) {

@@ -32,7 +32,6 @@ namespace local_savian_ai\hook_callbacks;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class before_standard_head_html {
-
     /**
      * Callback to inject Savian AI CSS and JavaScript libraries.
      *
@@ -44,7 +43,8 @@ class before_standard_head_html {
         // Inject CSS link tags.
         $csslink1 = '<link rel="stylesheet" type="text/css" href="' . $CFG->wwwroot . '/local/savian_ai/styles/savian.css" />';
         $csslink2 = '<link rel="stylesheet" type="text/css" href="' . $CFG->wwwroot . '/local/savian_ai/styles/chat_widget.css" />';
-        $csslink3 = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />';
+        $highlightcssurl = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css';
+        $csslink3 = '<link rel="stylesheet" href="' . $highlightcssurl . '" />';
 
         $hook->add_html($csslink1 . "\n" . $csslink2 . "\n" . $csslink3);
 

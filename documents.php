@@ -57,12 +57,20 @@ if ($action === 'delete' && $docid && confirm_sesskey()) {
     if ($response->http_code >= 200 && $response->http_code < 300 && (!isset($response->success) || $response->success)) {
         // Update local record.
         $DB->set_field('local_savian_documents', 'is_active', 0, ['savian_doc_id' => $docid]);
-        redirect(new moodle_url('/local/savian_ai/documents.php', ['courseid' => $courseid]),
-                 get_string('document_deleted', 'local_savian_ai'), null, 'success');
+        redirect(
+            new moodle_url('/local/savian_ai/documents.php', ['courseid' => $courseid]),
+            get_string('document_deleted', 'local_savian_ai'),
+            null,
+            'success'
+        );
     } else {
         $error = $response->error ?? $response->message ?? $response->detail ?? 'Unknown error';
-        redirect(new moodle_url('/local/savian_ai/documents.php', ['courseid' => $courseid]),
-                 get_string('document_delete_failed', 'local_savian_ai', $error), null, 'error');
+        redirect(
+            new moodle_url('/local/savian_ai/documents.php', ['courseid' => $courseid]),
+            get_string('document_delete_failed', 'local_savian_ai', $error),
+            null,
+            'error'
+        );
     }
 }
 
@@ -130,8 +138,12 @@ if ($mform->is_cancelled()) {
 
             $DB->insert_record('local_savian_documents', $record);
 
-            redirect(new moodle_url('/local/savian_ai/documents.php', ['courseid' => $courseid]),
-                     get_string('document_uploaded', 'local_savian_ai'), null, 'success');
+            redirect(
+                new moodle_url('/local/savian_ai/documents.php', ['courseid' => $courseid]),
+                get_string('document_uploaded', 'local_savian_ai'),
+                null,
+                'success'
+            );
         } else {
             $error = $response->error ?? $response->message ?? 'Unknown error';
             echo $OUTPUT->notification(
@@ -337,7 +349,7 @@ if (empty($documents)) {
             'alert alert-info small mt-3'
         );
         $PAGE->requires->js_amd_inline("
-            setTimeout(function() {
+            setTimeout(function () {
                 window.location.reload();
             }, 30000);
         ");

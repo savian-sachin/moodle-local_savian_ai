@@ -66,10 +66,15 @@ if ($action === 'send' && confirm_sesskey()) {
             $saviancache->set('analytics_polling_course', $courseid);
             $saviancache->set('analytics_polling_started', time());
 
-            redirect(new moodle_url('/local/savian_ai/analytics_reports.php', [
-                'courseid' => $courseid,
-                'action' => 'poll',
-            ]), 'Generating analytics...', null, 'info');
+            redirect(
+                new moodle_url('/local/savian_ai/analytics_reports.php', [
+                    'courseid' => $courseid,
+                    'action' => 'poll',
+                ]),
+                'Generating analytics...',
+                null,
+                'info'
+            );
         }
     } catch (Exception $e) {
         $reportresult = (object)[
@@ -112,16 +117,25 @@ if ($action === 'poll' && $saviancache->get('analytics_polling_course')) {
             $saviancache->delete('analytics_polling_course');
             $saviancache->delete('analytics_polling_started');
 
-            redirect(new moodle_url('/local/savian_ai/analytics_reports.php', [
-                'courseid' => $courseid
-            ]), 'Analytics insights generated! Scroll down to view.', null, 'success');
+            redirect(
+                new moodle_url('/local/savian_ai/analytics_reports.php', [
+                    'courseid' => $courseid,
+                ]),
+                'Analytics insights generated! Scroll down to view.',
+                null,
+                'success'
+            );
         }
     } else if ($latestresponse->http_code >= 400) {
         $saviancache->delete('analytics_polling_course');
         $saviancache->delete('analytics_polling_started');
 
-        redirect(new moodle_url('/local/savian_ai/analytics_reports.php', ['courseid' => $courseid]),
-                 'Error retrieving analytics: ' . ($latestresponse->error ?? 'Unknown error'), null, 'error');
+        redirect(
+            new moodle_url('/local/savian_ai/analytics_reports.php', ['courseid' => $courseid]),
+            'Error retrieving analytics: ' . ($latestresponse->error ?? 'Unknown error'),
+            null,
+            'error'
+        );
     }
 
     // Check timeout (5 minutes max).
@@ -129,8 +143,12 @@ if ($action === 'poll' && $saviancache->get('analytics_polling_course')) {
         $saviancache->delete('analytics_polling_course');
         $saviancache->delete('analytics_polling_started');
 
-        redirect(new moodle_url('/local/savian_ai/analytics_reports.php', ['courseid' => $courseid]),
-                 'Analytics generation timeout. Please try again or contact support.', null, 'warning');
+        redirect(
+            new moodle_url('/local/savian_ai/analytics_reports.php', ['courseid' => $courseid]),
+            'Analytics generation timeout. Please try again or contact support.',
+            null,
+            'warning'
+        );
     }
 }
 
@@ -207,11 +225,15 @@ if ($action === 'poll' && $saviancache->get('analytics_polling_course')) {
     echo html_writer::start_div('card-body text-center p-4');
 
     // Spinner.
-    echo html_writer::tag('div', '', [
-        'class' => 'spinner-border text-primary mb-3',
-        'role' => 'status',
-        'style' => 'width: 4rem; height: 4rem;',
-    ]);
+    echo html_writer::tag(
+        'div',
+        '',
+        [
+            'class' => 'spinner-border text-primary mb-3',
+            'role' => 'status',
+            'style' => 'width: 4rem; height: 4rem;',
+        ]
+    );
 
     // Main heading.
     echo html_writer::tag('h4', 'AI-Powered Analytics Processing');
@@ -236,7 +258,8 @@ if ($action === 'poll' && $saviancache->get('analytics_polling_course')) {
 
     // Student progress.
     if ($studentsprocessed > 0) {
-        echo html_writer::tag('p',
+        echo html_writer::tag(
+            'p',
             "Students Analyzed: {$studentsprocessed} / {$studentcount}",
             ['class' => 'text-muted']
         );
@@ -245,15 +268,17 @@ if ($action === 'poll' && $saviancache->get('analytics_polling_course')) {
     // Time elapsed.
     $minutes = floor($elapsedseconds / 60);
     $seconds = $elapsedseconds % 60;
-    echo html_writer::tag('p',
+    echo html_writer::tag(
+        'p',
         sprintf('Time Elapsed: %dm %ds', $minutes, $seconds),
         ['class' => 'text-muted small']
     );
 
     // Estimated total time.
     $estimatedtotalminutes = ceil(($studentcount * 4.5) / 60);
-    echo html_writer::tag('p',
-        "⏱️ Estimated Total Time: {$estimatedtotalminutes} minutes ({$studentcount} students × ~4-5 sec each)",
+    echo html_writer::tag(
+        'p',
+        "Estimated Total Time: {$estimatedtotalminutes} minutes ({$studentcount} students x ~4-5 sec each)",
         ['class' => 'badge badge-info']
     );
 
@@ -270,7 +295,8 @@ if ($action === 'poll' && $saviancache->get('analytics_polling_course')) {
     echo html_writer::end_div();
 
     // Auto-refresh message.
-    echo html_writer::tag('p',
+    echo html_writer::tag(
+        'p',
         'This page will automatically refresh every 5 seconds.',
         ['class' => 'text-muted small mt-3']
     );
@@ -292,7 +318,8 @@ if ($action !== 'poll') {
     echo html_writer::div('📊 Generate New Analytics Report', 'card-header bg-primary text-white');
     echo html_writer::start_div('card-body');
 
-    echo html_writer::tag('p',
+    echo html_writer::tag(
+        'p',
         'Generate an AI-powered analytics report for this course. The system will analyze student engagement, ' .
         'performance, and identify at-risk students who need intervention.'
     );
@@ -311,37 +338,54 @@ if ($action !== 'poll') {
     if ($studentcount == 0) {
         echo html_writer::start_div('alert alert-warning mt-3');
         echo html_writer::tag('strong', 'No Students Enrolled');
-        echo html_writer::tag('p', 'There are no students enrolled in this course. Please enroll students before generating analytics.');
+        echo html_writer::tag(
+            'p',
+            'There are no students enrolled in this course. '
+            . 'Please enroll students before generating analytics.'
+        );
         echo html_writer::end_div();
     } else {
         echo html_writer::start_div('alert alert-info mt-3');
-        echo html_writer::tag('p',
+        echo html_writer::tag(
+            'p',
             '<strong>' . $studentcount . ' students</strong> enrolled in this course will be analyzed.'
         );
         echo html_writer::end_div();
 
         // Form.
-        echo html_writer::start_tag('form', [
-            'method' => 'post',
-            'action' => new moodle_url('/local/savian_ai/analytics_reports.php', ['courseid' => $courseid]),
-            'class' => 'mt-3',
-        ]);
+        echo html_writer::start_tag(
+            'form',
+            [
+                'method' => 'post',
+                'action' => new moodle_url('/local/savian_ai/analytics_reports.php', ['courseid' => $courseid]),
+                'class' => 'mt-3',
+            ]
+        );
 
-        echo html_writer::empty_tag('input', [
-            'type' => 'hidden',
-            'name' => 'courseid',
-            'value' => $courseid,
-        ]);
-        echo html_writer::empty_tag('input', [
-            'type' => 'hidden',
-            'name' => 'action',
-            'value' => 'send',
-        ]);
-        echo html_writer::empty_tag('input', [
-            'type' => 'hidden',
-            'name' => 'sesskey',
-            'value' => sesskey(),
-        ]);
+        echo html_writer::empty_tag(
+            'input',
+            [
+                'type' => 'hidden',
+                'name' => 'courseid',
+                'value' => $courseid,
+            ]
+        );
+        echo html_writer::empty_tag(
+            'input',
+            [
+                'type' => 'hidden',
+                'name' => 'action',
+                'value' => 'send',
+            ]
+        );
+        echo html_writer::empty_tag(
+            'input',
+            [
+                'type' => 'hidden',
+                'name' => 'sesskey',
+                'value' => sesskey(),
+            ]
+        );
 
         // Date range selector.
         echo html_writer::start_div('form-group');
@@ -352,7 +396,8 @@ if ($action !== 'poll') {
         echo html_writer::tag('option', 'Last 60 Days', ['value' => (time() - 60 * 86400)]);
         echo html_writer::tag('option', 'Last 90 Days', ['value' => (time() - 90 * 86400)]);
         echo html_writer::end_tag('select');
-        echo html_writer::tag('small',
+        echo html_writer::tag(
+            'small',
             'Select the time period for activity analysis. "All Time" is recommended for most accurate insights.',
             ['class' => 'form-text text-muted']
         );
@@ -360,8 +405,9 @@ if ($action !== 'poll') {
 
         // Submit button.
         echo html_writer::start_div('text-center mt-4');
-        echo html_writer::tag('button',
-            '📊 Generate Analytics Report',
+        echo html_writer::tag(
+            'button',
+            'Generate Analytics Report',
             ['type' => 'submit', 'class' => 'btn btn-savian btn-lg']
         );
         echo html_writer::end_div();
@@ -413,7 +459,8 @@ if ($latestresponse->http_code === 200 && isset($latestresponse->insights) && $l
 }
 
 // Get reports from Moodle database (now synced).
-$reports = $DB->get_records('local_savian_analytics_reports',
+$reports = $DB->get_records(
+    'local_savian_analytics_reports',
     ['course_id' => $courseid],
     'timecreated DESC'
 );
@@ -423,11 +470,12 @@ if (empty($reports)) {
     echo html_writer::tag('h4', 'No Reports Yet');
     echo html_writer::tag('p', get_string('no_reports', 'local_savian_ai'));
     echo html_writer::div(
-        html_writer::tag('button',
+        html_writer::tag(
+            'button',
             'Generate Your First Analytics Report',
             [
                 'class' => 'btn btn-savian mt-2',
-                'onclick' => 'window.scrollTo({top: 0, behavior: \'smooth\'});'
+                'onclick' => 'window.scrollTo({top: 0, behavior: \'smooth\'});',
             ]
         ),
         'text-center'
@@ -480,7 +528,8 @@ if (empty($reports)) {
                 $typebadge = 'success';
                 break;
         }
-        echo html_writer::tag('span',
+        echo html_writer::tag(
+            'span',
             ucfirst(str_replace('_', ' ', $report->report_type)),
             ['class' => "badge badge-{$typebadge}"]
         );
@@ -538,7 +587,8 @@ if (empty($reports)) {
             }
         }
 
-        echo html_writer::tag('span',
+        echo html_writer::tag(
+            'span',
             $statusicon . ' ' . $statustext,
             ['class' => "badge badge-{$statusclass}", 'id' => "status-badge-{$report->id}"]
         );
@@ -551,10 +601,13 @@ if (empty($reports)) {
             $response = json_decode($report->api_response);
             if ($response && isset($response->insights)) {
                 // View insights button.
-                echo html_writer::start_tag('button', [
-                    'class' => 'btn btn-sm btn-outline-primary mr-1',
-                    'onclick' => "toggleInsights('insights-{$report->id}')",
-                ]);
+                echo html_writer::start_tag(
+                    'button',
+                    [
+                        'class' => 'btn btn-sm btn-outline-primary mr-1',
+                        'onclick' => "toggleInsights('insights-{$report->id}')",
+                    ]
+                );
                 echo 'View';
                 echo html_writer::end_tag('button');
 
@@ -577,10 +630,13 @@ if (empty($reports)) {
         if ($report->status == 'sent' && !empty($report->api_response)) {
             $response = json_decode($report->api_response);
             if ($response && isset($response->insights)) {
-                echo html_writer::start_tag('tr', [
-                    'id' => "insights-{$report->id}",
-                    'style' => 'display: none;',
-                ]);
+                echo html_writer::start_tag(
+                    'tr',
+                    [
+                        'id' => "insights-{$report->id}",
+                        'style' => 'display: none;',
+                    ]
+                );
                 echo html_writer::start_tag('td', ['colspan' => '5']);
                 echo html_writer::start_div('p-4 bg-white border');
 
@@ -607,17 +663,23 @@ if (empty($reports)) {
                 // Report metadata header.
                 echo html_writer::start_div('mb-4 pb-3 border-bottom');
                 echo html_writer::tag('h4', '📊 Detailed Analytics Report');
-                echo html_writer::tag('p',
-                    'Report ID: ' . ($response->report_id ?? $report->id) . ' | ' .
-                    'Generated: ' . userdate($report->timecreated, '%d %B %Y at %H:%M') . ' | ' .
-                    'Students: ' . $report->student_count,
+                echo html_writer::tag(
+                    'p',
+                    'Report ID: ' . ($response->report_id ?? $report->id) . ' | '
+                    . 'Generated: ' . userdate($report->timecreated, '%d %B %Y at %H:%M')
+                    . ' | Students: ' . $report->student_count,
                     ['class' => 'text-muted small mb-0']
                 );
                 echo html_writer::end_div();
 
                 // At-Risk Students Section.
                 if (isset($insights->at_risk_students) && !empty($insights->at_risk_students)) {
-                    echo html_writer::tag('h5', '🚨 At-Risk Students (' . count($insights->at_risk_students) . ')', ['class' => 'text-danger mb-3']);
+                    $atriskcount = count($insights->at_risk_students);
+                    echo html_writer::tag(
+                        'h5',
+                        'At-Risk Students (' . $atriskcount . ')',
+                        ['class' => 'text-danger mb-3']
+                    );
 
                     // Show first 5 at-risk students, or all if 5 or fewer.
                     $studentstoshow = array_slice($insights->at_risk_students, 0, 5);
@@ -632,8 +694,11 @@ if (empty($reports)) {
                         echo html_writer::start_div('card-body p-2');
 
                         // Risk badge.
-                        $badgeclass = $student->risk_level == 'high' ? 'danger' : ($student->risk_level == 'medium' ? 'warning' : 'info');
-                        echo html_writer::tag('span',
+                        $badgeclass = $student->risk_level == 'high'
+                            ? 'danger'
+                            : ($student->risk_level == 'medium' ? 'warning' : 'info');
+                        echo html_writer::tag(
+                            'span',
                             strtoupper($student->risk_level) . ' RISK',
                             ['class' => "badge badge-{$badgeclass} float-right"]
                         );
@@ -643,14 +708,37 @@ if (empty($reports)) {
                             $studentname = fullname($user);
                             $profileurl = new moodle_url('/user/view.php', ['id' => $user->id, 'course' => $courseid]);
 
-                            echo html_writer::link($profileurl, $studentname, ['class' => 'font-weight-bold small', 'target' => '_blank']);
+                            echo html_writer::link(
+                                $profileurl,
+                                $studentname,
+                                ['class' => 'font-weight-bold small', 'target' => '_blank']
+                            );
                             echo html_writer::empty_tag('br');
-                            echo html_writer::tag('small', $user->email, ['class' => 'text-muted']);
-                            echo html_writer::tag('span', ' | Risk Score: ' . round($student->risk_score * 100) . '%', ['class' => 'text-muted small']);
+                            echo html_writer::tag(
+                                'small',
+                                $user->email,
+                                ['class' => 'text-muted']
+                            );
+                            $riskscorepct = round($student->risk_score * 100);
+                            echo html_writer::tag(
+                                'span',
+                                ' | Risk Score: ' . $riskscorepct . '%',
+                                ['class' => 'text-muted small']
+                            );
                         } else {
                             // Fallback if reverse lookup fails.
-                            echo html_writer::tag('strong', 'Student ' . substr($student->anon_id, 0, 12) . '...', ['class' => 'small']);
-                            echo html_writer::tag('span', ' Risk Score: ' . round($student->risk_score * 100) . '%', ['class' => 'text-muted small']);
+                            $anonlabel = substr($student->anon_id, 0, 12);
+                            echo html_writer::tag(
+                                'strong',
+                                'Student ' . $anonlabel . '...',
+                                ['class' => 'small']
+                            );
+                            $riskscorepct = round($student->risk_score * 100);
+                            echo html_writer::tag(
+                                'span',
+                                ' Risk Score: ' . $riskscorepct . '%',
+                                ['class' => 'text-muted small']
+                            );
                         }
 
                         // Risk factors (show first 3).
@@ -661,7 +749,12 @@ if (empty($reports)) {
                                 echo html_writer::tag('li', $factor, ['class' => 'text-danger']);
                             }
                             if (count($student->risk_factors) > 3) {
-                                echo html_writer::tag('li', '+ ' . (count($student->risk_factors) - 3) . ' more factors...', ['class' => 'text-muted']);
+                                $morefactors = count($student->risk_factors) - 3;
+                                echo html_writer::tag(
+                                    'li',
+                                    '+ ' . $morefactors . ' more factors...',
+                                    ['class' => 'text-muted']
+                                );
                             }
                             echo html_writer::end_tag('ul');
                         }
@@ -682,14 +775,24 @@ if (empty($reports)) {
 
                 // Course Recommendations.
                 if (isset($insights->course_recommendations) && !empty($insights->course_recommendations)) {
-                    echo html_writer::tag('h5', '💡 Course Recommendations (' . count($insights->course_recommendations) . ')', ['class' => 'text-info mt-4 mb-3']);
+                    $reccount = count($insights->course_recommendations);
+                    echo html_writer::tag(
+                        'h5',
+                        'Course Recommendations (' . $reccount . ')',
+                        ['class' => 'text-info mt-4 mb-3']
+                    );
                     echo html_writer::start_tag('ol', ['class' => 'small']);
                     $recstoshow = array_slice($insights->course_recommendations, 0, 6);
                     foreach ($recstoshow as $rec) {
                         echo html_writer::tag('li', $rec, ['class' => 'mb-2']);
                     }
                     if (count($insights->course_recommendations) > 6) {
-                        echo html_writer::tag('li', '+ ' . (count($insights->course_recommendations) - 6) . ' more recommendations...', ['class' => 'text-muted']);
+                        $morerecs = count($insights->course_recommendations) - 6;
+                        echo html_writer::tag(
+                            'li',
+                            '+ ' . $morerecs . ' more recommendations...',
+                            ['class' => 'text-muted']
+                        );
                     }
                     echo html_writer::end_tag('ol');
                 }
@@ -702,7 +805,12 @@ if (empty($reports)) {
                     echo html_writer::start_div('row');
                     if (isset($engagement->average_engagement_score)) {
                         echo html_writer::start_div('col-md-4 text-center mb-2');
-                        echo html_writer::tag('div', round($engagement->average_engagement_score * 100) . '%', ['class' => 'h4 text-primary']);
+                        $avgengagement = round($engagement->average_engagement_score * 100) . '%';
+                        echo html_writer::tag(
+                            'div',
+                            $avgengagement,
+                            ['class' => 'h4 text-primary']
+                        );
                         echo html_writer::tag('small', 'Avg Engagement', ['class' => 'text-muted']);
                         echo html_writer::end_div();
                     }
@@ -714,7 +822,12 @@ if (empty($reports)) {
                     }
                     if (isset($engagement->peak_activity_days)) {
                         echo html_writer::start_div('col-md-4 text-center mb-2');
-                        echo html_writer::tag('div', implode(', ', $engagement->peak_activity_days), ['class' => 'small font-weight-bold']);
+                        $peakdays = implode(', ', $engagement->peak_activity_days);
+                        echo html_writer::tag(
+                            'div',
+                            $peakdays,
+                            ['class' => 'small font-weight-bold']
+                        );
                         echo html_writer::tag('small', 'Peak Days', ['class' => 'text-muted']);
                         echo html_writer::end_div();
                     }
@@ -771,11 +884,12 @@ if ($hasprocessing) {
 // Scroll to top button (to access generate form).
 if ($action !== 'poll') {
     echo html_writer::start_div('text-center mt-4');
-    echo html_writer::tag('button',
-        '⬆️ Generate New Report',
+    echo html_writer::tag(
+        'button',
+        'Generate New Report',
         [
             'class' => 'btn btn-outline-primary',
-            'onclick' => 'window.scrollTo({top: 0, behavior: \'smooth\'});'
+            'onclick' => 'window.scrollTo({top: 0, behavior: \'smooth\'});',
         ]
     );
     echo html_writer::end_div();

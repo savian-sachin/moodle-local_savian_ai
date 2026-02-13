@@ -34,7 +34,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class manager {
-
     /**
      * Send a chat message.
      *
@@ -56,8 +55,12 @@ class manager {
         // Get or create conversation.
         $isnewconversation = false;
         if ($conversationid) {
-            $conversation = $DB->get_record('local_savian_chat_conversations',
-                ['id' => $conversationid, 'user_id' => $USER->id], '*', MUST_EXIST);
+            $conversation = $DB->get_record(
+                'local_savian_chat_conversations',
+                ['id' => $conversationid, 'user_id' => $USER->id],
+                '*',
+                MUST_EXIST
+            );
             $conversationuuid = $conversation->conversation_uuid;
         } else {
             // New conversation - create locally but send null to API (let API create it).
@@ -95,15 +98,21 @@ class manager {
 
         // Call Savian AI API.
         $client = new \local_savian_ai\api\client();
-        $response = $client->chat_send($message, $conversationuuid, [
-            'user_id' => $USER->id,
-            'user_email' => $USER->email,
-            'user_role' => $userrole,
-            'course_id' => $courseid,
-            'course_name' => $courseid ? $DB->get_field('course', 'fullname', ['id' => $courseid]) : null,
-            'document_ids' => $documentids ?: json_decode($conversation->document_ids, true),
-            'language' => current_language(),
-        ]);
+        $coursename = $courseid ? $DB->get_field('course', 'fullname', ['id' => $courseid]) : null;
+        $docids = $documentids ?: json_decode($conversation->document_ids, true);
+        $response = $client->chat_send(
+            $message,
+            $conversationuuid,
+            [
+                'user_id' => $USER->id,
+                'user_email' => $USER->email,
+                'user_role' => $userrole,
+                'course_id' => $courseid,
+                'course_name' => $coursename,
+                'document_ids' => $docids,
+                'language' => current_language(),
+            ]
+        );
 
         if ($response->http_code !== 200 || (!isset($response->message) && !isset($response->response))) {
             // Get detailed error message.
@@ -121,8 +130,12 @@ class manager {
 
         // Update conversation UUID if this was a new conversation.
         if ($isnewconversation && isset($response->conversation_id)) {
-            $DB->set_field('local_savian_chat_conversations', 'conversation_uuid',
-                $response->conversation_id, ['id' => $conversation->id]);
+            $DB->set_field(
+                'local_savian_chat_conversations',
+                'conversation_uuid',
+                $response->conversation_id,
+                ['id' => $conversation->id]
+            );
             $conversation->conversation_uuid = $response->conversation_id;
         }
 
@@ -133,6 +146,7 @@ class manager {
         $airesponsetext = $response->response ?? $response->message ?? '';
 
         // Save assistant response to DB.
+        $tokensused = isset($response->metadata->tokens_used) ? (int) $response->metadata->tokens_used : 0;
         $assistantmessage = $this->save_message(
             $conversation->id,
             'assistant',
@@ -141,17 +155,29 @@ class manager {
                 'sources' => $response->sources ?? [],
                 'response_time_ms' => $responsetime,
                 'message_uuid' => $response->message_id ?? null,
-                'token_count' => isset($response->metadata->tokens_used) ? (int)$response->metadata->tokens_used : 0,
+                'token_count' => $tokensused,
             ]
         );
 
         // Update conversation metadata.
-        $DB->set_field('local_savian_chat_conversations', 'message_count',
-            $conversation->message_count + 2, ['id' => $conversation->id]);
-        $DB->set_field('local_savian_chat_conversations', 'last_message_at',
-            time(), ['id' => $conversation->id]);
-        $DB->set_field('local_savian_chat_conversations', 'timemodified',
-            time(), ['id' => $conversation->id]);
+        $DB->set_field(
+            'local_savian_chat_conversations',
+            'message_count',
+            $conversation->message_count + 2,
+            ['id' => $conversation->id]
+        );
+        $DB->set_field(
+            'local_savian_chat_conversations',
+            'last_message_at',
+            time(),
+            ['id' => $conversation->id]
+        );
+        $DB->set_field(
+            'local_savian_chat_conversations',
+            'timemodified',
+            time(),
+            ['id' => $conversation->id]
+        );
 
         // Format response for frontend.
         return [
@@ -239,11 +265,18 @@ class manager {
     public function get_conversation($conversationid) {
         global $DB, $USER;
 
-        $conversation = $DB->get_record('local_savian_chat_conversations',
-            ['id' => $conversationid, 'user_id' => $USER->id], '*', MUST_EXIST);
+        $conversation = $DB->get_record(
+            'local_savian_chat_conversations',
+            ['id' => $conversationid, 'user_id' => $USER->id],
+            '*',
+            MUST_EXIST
+        );
 
-        $messages = $DB->get_records('local_savian_chat_messages',
-            ['conversation_id' => $conversationid], 'timecreated ASC');
+        $messages = $DB->get_records(
+            'local_savian_chat_messages',
+            ['conversation_id' => $conversationid],
+            'timecreated ASC'
+        );
 
         return [
             'conversation' => $conversation,
@@ -265,8 +298,14 @@ class manager {
             $params['course_id'] = $courseid;
         }
 
-        $conversations = $DB->get_records('local_savian_chat_conversations',
-            $params, 'last_message_at DESC', '*', 0, 50);
+        $conversations = $DB->get_records(
+            'local_savian_chat_conversations',
+            $params,
+            'last_message_at DESC',
+            '*',
+            0,
+            50
+        );
 
         return array_values($conversations);
     }
@@ -286,8 +325,12 @@ class manager {
         $message = $DB->get_record('local_savian_chat_messages', ['id' => $messageid], '*', MUST_EXIST);
 
         // Verify user owns this conversation.
-        $conversation = $DB->get_record('local_savian_chat_conversations',
-            ['id' => $message->conversation_id, 'user_id' => $USER->id], '*', MUST_EXIST);
+        $conversation = $DB->get_record(
+            'local_savian_chat_conversations',
+            ['id' => $message->conversation_id, 'user_id' => $USER->id],
+            '*',
+            MUST_EXIST
+        );
 
         // Update message.
         $DB->set_field('local_savian_chat_messages', 'feedback', $feedback, ['id' => $messageid]);
@@ -314,8 +357,12 @@ class manager {
     public function archive_conversation($conversationid) {
         global $DB, $USER;
 
-        $conversation = $DB->get_record('local_savian_chat_conversations',
-            ['id' => $conversationid, 'user_id' => $USER->id], '*', MUST_EXIST);
+        $conversation = $DB->get_record(
+            'local_savian_chat_conversations',
+            ['id' => $conversationid, 'user_id' => $USER->id],
+            '*',
+            MUST_EXIST
+        );
 
         $DB->set_field('local_savian_chat_conversations', 'is_archived', 1, ['id' => $conversationid]);
         $DB->set_field('local_savian_chat_conversations', 'timemodified', time(), ['id' => $conversationid]);
@@ -377,12 +424,16 @@ class manager {
      * @return string UUID
      */
     private function generate_uuid() {
-        return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+        return sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
             mt_rand(0, 0xffff),
             mt_rand(0, 0x0fff) | 0x4000,
             mt_rand(0, 0x3fff) | 0x8000,
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff)
         );
     }
 }

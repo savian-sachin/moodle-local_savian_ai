@@ -66,30 +66,42 @@ class generate_questions_form extends \moodleform {
         // Document selection (only for RAG mode) - simple dropdown.
         if ($mode === 'documents') {
             // Get only current course documents.
-            $documents = $DB->get_records_menu('local_savian_documents',
+            $documents = $DB->get_records_menu(
+                'local_savian_documents',
                 ['is_active' => 1, 'status' => 'completed', 'course_id' => $courseid],
                 'title ASC',
-                'savian_doc_id, title');
+                'savian_doc_id, title'
+            );
 
             if (empty($documents)) {
-                $mform->addElement('static', 'no_documents', '',
-                    \html_writer::div(get_string('no_documents', 'local_savian_ai'), 'alert alert-warning'));
+                $nodocsmsg = \html_writer::div(
+                    get_string('no_documents', 'local_savian_ai'),
+                    'alert alert-warning'
+                );
+                $mform->addElement('static', 'no_documents', '', $nodocsmsg);
             } else {
                 $options = [
                     'multiple' => true,
                     'size' => min(8, count($documents)),
                 ];
-                $select = $mform->addElement('select', 'document_ids',
+                $select = $mform->addElement(
+                    'select',
+                    'document_ids',
                     get_string('select_documents', 'local_savian_ai'),
-                    $documents, $options);
+                    $documents,
+                    $options
+                );
                 $mform->addRule('document_ids', get_string('required'), 'required', null, 'client');
             }
         }
 
         // Learning objectives.
-        $mform->addElement('textarea', 'learning_objectives',
+        $mform->addElement(
+            'textarea',
+            'learning_objectives',
             get_string('learning_objectives', 'local_savian_ai'),
-            ['rows' => 3, 'cols' => 60]);
+            ['rows' => 3, 'cols' => 60]
+        );
         $mform->setType('learning_objectives', PARAM_TEXT);
         $mform->addHelpButton('learning_objectives', 'learning_objectives', 'local_savian_ai');
 
@@ -101,17 +113,23 @@ class generate_questions_form extends \moodleform {
             'essay' => get_string('qtype_essay', 'local_savian_ai'),
             'matching' => get_string('qtype_matching', 'local_savian_ai'),
         ];
-        $select = $mform->addElement('select', 'question_types',
+        $select = $mform->addElement(
+            'select',
+            'question_types',
             get_string('question_types', 'local_savian_ai'),
-            $questiontypes);
+            $questiontypes
+        );
         $select->setMultiple(true);
         $select->setSelected(['multichoice', 'truefalse']);
         $mform->addRule('question_types', get_string('required'), 'required', null, 'client');
 
         // Question count.
-        $mform->addElement('select', 'count',
+        $mform->addElement(
+            'select',
+            'count',
             get_string('question_count', 'local_savian_ai'),
-            [5 => 5, 10 => 10, 15 => 15, 20 => 20, 25 => 25]);
+            [5 => 5, 10 => 10, 15 => 15, 20 => 20, 25 => 25]
+        );
         $mform->setDefault('count', 5);
 
         // Difficulty.
@@ -120,9 +138,12 @@ class generate_questions_form extends \moodleform {
             'medium' => get_string('difficulty_medium', 'local_savian_ai'),
             'hard' => get_string('difficulty_hard', 'local_savian_ai'),
         ];
-        $mform->addElement('select', 'difficulty',
+        $mform->addElement(
+            'select',
+            'difficulty',
             get_string('difficulty', 'local_savian_ai'),
-            $difficulties);
+            $difficulties
+        );
         $mform->setDefault('difficulty', 'medium');
 
         // Bloom's level.
@@ -134,9 +155,12 @@ class generate_questions_form extends \moodleform {
             'evaluate' => get_string('bloom_evaluate', 'local_savian_ai'),
             'create' => get_string('bloom_create', 'local_savian_ai'),
         ];
-        $mform->addElement('select', 'bloom_level',
+        $mform->addElement(
+            'select',
+            'bloom_level',
             get_string('bloom_level', 'local_savian_ai'),
-            $bloomlevels);
+            $bloomlevels
+        );
         $mform->setDefault('bloom_level', 'understand');
 
         // Language.
@@ -144,9 +168,12 @@ class generate_questions_form extends \moodleform {
             'en' => 'English',
             'vi' => 'Vietnamese',
         ];
-        $mform->addElement('select', 'language',
+        $mform->addElement(
+            'select',
+            'language',
             get_string('language', 'local_savian_ai'),
-            $languages);
+            $languages
+        );
         $mform->setDefault('language', 'en');
 
         // Action buttons.

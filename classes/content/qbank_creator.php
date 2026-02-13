@@ -90,10 +90,13 @@ class qbank_creator {
         global $DB;
 
         // Try to find existing category.
-        $category = $DB->get_record('question_categories', [
-            'contextid' => $contextid,
-            'name' => 'Savian AI Generated',
-        ]);
+        $category = $DB->get_record(
+            'question_categories',
+            [
+                'contextid' => $contextid,
+                'name' => 'Savian AI Generated',
+            ]
+        );
 
         if ($category) {
             return $category->id;
@@ -138,7 +141,8 @@ class qbank_creator {
         $fromform = new \stdClass();
         $fromform->category = $categoryid . ',' . $context->id;
         $fromform->name = $this->truncate_name($data->name ?? $data->question_text ?? $data->questiontext ?? '');
-        $fromform->questiontext = ['text' => $this->extract_string($data->question_text ?? $data->questiontext ?? ''), 'format' => FORMAT_HTML];
+        $questiontext = $this->extract_string($data->question_text ?? $data->questiontext ?? '');
+        $fromform->questiontext = ['text' => $questiontext, 'format' => FORMAT_HTML];
         $fromform->generalfeedback = ['text' => $this->extract_string($data->generalfeedback ?? ''), 'format' => FORMAT_HTML];
         $fromform->defaultmark = 1;
         $fromform->penalty = 0.3333333;

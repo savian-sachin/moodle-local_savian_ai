@@ -68,7 +68,13 @@ if ($response && isset($response->insights)) {
     // At-risk students section.
     if (isset($insights->at_risk_students) && !empty($insights->at_risk_students)) {
         fputcsv($output, ['AT-RISK STUDENTS']);
-        fputcsv($output, ['Student ID (Anonymized)', 'Risk Level', 'Risk Score', 'Risk Factors', 'Recommended Actions']);
+        fputcsv($output, [
+            'Student ID (Anonymized)',
+            'Risk Level',
+            'Risk Score',
+            'Risk Factors',
+            'Recommended Actions',
+        ]);
 
         foreach ($insights->at_risk_students as $student) {
             $riskfactors = isset($student->risk_factors) && is_array($student->risk_factors) ?
@@ -120,7 +126,10 @@ if ($response && isset($response->insights)) {
 
         fputcsv($output, ['ENGAGEMENT INSIGHTS']);
         fputcsv($output, ['Metric', 'Value']);
-        fputcsv($output, ['Average Engagement', round($engagement->average_engagement_score * 100) . '%']);
+        fputcsv($output, [
+            'Average Engagement',
+            round($engagement->average_engagement_score * 100) . '%',
+        ]);
         fputcsv($output, ['Low Engagement Count', $engagement->low_engagement_count ?? 0]);
 
         if (isset($engagement->peak_activity_days) && is_array($engagement->peak_activity_days)) {
@@ -128,7 +137,10 @@ if ($response && isset($response->insights)) {
         }
 
         if (isset($engagement->peak_activity_hours) && is_array($engagement->peak_activity_hours)) {
-            fputcsv($output, ['Peak Activity Hours', implode(', ', $engagement->peak_activity_hours)]);
+            fputcsv($output, [
+                'Peak Activity Hours',
+                implode(', ', $engagement->peak_activity_hours),
+            ]);
         }
 
         fputcsv($output, []);
@@ -144,7 +156,6 @@ if ($response && isset($response->insights)) {
             count($insights->at_risk_students) : 0;
         fputcsv($output, ['At-Risk Students', $atriskcount]);
     }
-
 } else {
     // No insights available.
     fputcsv($output, ['No insights data available for this report.']);

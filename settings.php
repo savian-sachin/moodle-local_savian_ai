@@ -84,7 +84,7 @@ if ($hassiteconfig) {
         'local_savian_ai/api_url',
         get_string('api_url', 'local_savian_ai'),
         get_string('api_url_desc', 'local_savian_ai'),
-        'https://app.savian.ai.vn/api/moodle/v1/',  // Production default.
+        'https://app.savian.ai.vn/api/moodle/v1/', // Production default.
         PARAM_URL
     ));
 
@@ -93,11 +93,12 @@ if ($hassiteconfig) {
         'local_savian_ai/org_code',
         get_string('org_code', 'local_savian_ai'),
         get_string('org_code_desc', 'local_savian_ai') . ' ' .
-            html_writer::tag('strong',
+            html_writer::tag(
+                'strong',
                 get_string('org_code_warning', 'local_savian_ai'),
                 ['class' => 'text-warning']
             ),
-        '',  // No default - must be configured.
+        '', // No default - must be configured.
         PARAM_ALPHANUMEXT
     );
     $orgcodesetting->set_updatedcallback('local_savian_ai_org_code_updated');

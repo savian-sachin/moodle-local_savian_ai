@@ -326,12 +326,15 @@ class metrics_calculator {
                 ORDER BY date DESC
                 LIMIT :limit";
 
-        $records = $DB->get_records_sql($sql, [
-            'courseid' => $courseid,
-            'userid' => $userid,
-            'datefrom' => $datefrom,
-            'limit' => $days,
-        ]);
+        $records = $DB->get_records_sql(
+            $sql,
+            [
+                'courseid' => $courseid,
+                'userid' => $userid,
+                'datefrom' => $datefrom,
+                'limit' => $days,
+            ]
+        );
 
         $timeline = [];
         foreach ($records as $record) {

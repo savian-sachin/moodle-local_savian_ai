@@ -438,10 +438,10 @@ class course_builder {
         $label->course = $courseid;
         $label->coursemodule = $cm->id;
         $label->name = $this->extract_string($activitydata->title ?? 'Activity');
-        $label->intro = '<div class="alert alert-info">' .
-                        '<h4>🎯 ' . $this->extract_string($activitydata->title ?? 'Activity') . '</h4>' .
-                        $this->extract_string($activitydata->instructions ?? $activitydata->content ?? '') .
-                        '</div>';
+        $label->intro = '<div class="alert alert-info">'
+            . '<h4>' . $this->extract_string($activitydata->title ?? 'Activity') . '</h4>'
+            . $this->extract_string($activitydata->instructions ?? $activitydata->content ?? '')
+            . '</div>';
         $label->introformat = FORMAT_HTML;
         $label->timemodified = time();
 
@@ -569,11 +569,11 @@ class course_builder {
         if (isset($formativedata->questions)) {
             foreach ($formativedata->questions as $idx => $q) {
                 $content .= '<div class="mb-3 p-2 bg-light rounded">';
-                $content .= '<p><strong>Q' . ($idx + 1) . ':</strong> ' .
-                            $this->extract_string($q->question) . '</p>';
+                $content .= '<p><strong>Q' . ($idx + 1) . ':</strong> '
+                    . $this->extract_string($q->question) . '</p>';
                 $content .= '<details><summary class="btn btn-sm btn-outline-primary">Show Answer</summary>';
-                $content .= '<div class="alert alert-success mt-2 mb-0">' .
-                            $this->extract_string($q->answer) . '</div>';
+                $content .= '<div class="alert alert-success mt-2 mb-0">'
+                    . $this->extract_string($q->answer) . '</div>';
                 $content .= '</details></div>';
             }
         }

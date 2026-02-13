@@ -50,9 +50,11 @@ class generation extends external_api {
      * Parameters for get_generation_status.
      */
     public static function get_generation_status_parameters() {
-        return new external_function_parameters([
-            'requestid' => new external_value(PARAM_TEXT, 'Generation request ID'),
-        ]);
+        return new external_function_parameters(
+            [
+                'requestid' => new external_value(PARAM_TEXT, 'Generation request ID'),
+            ]
+        );
     }
 
     /**
@@ -65,9 +67,12 @@ class generation extends external_api {
         global $USER;
 
         // Validate parameters.
-        $params = self::validate_parameters(self::get_generation_status_parameters(), [
-            'requestid' => $requestid,
-        ]);
+        $params = self::validate_parameters(
+            self::get_generation_status_parameters(),
+            [
+                'requestid' => $requestid,
+            ]
+        );
 
         // Validate context - require login.
         $context = \context_system::instance();
@@ -88,7 +93,10 @@ class generation extends external_api {
             // Save course_structure to session when completed.
             if ($status === 'completed' && isset($response->course_structure)) {
                 $saviancache->set('course_structure', json_encode($response->course_structure));
-                $saviancache->set('sources', isset($response->sources) ? json_encode($response->sources) : null);
+                $saviancache->set(
+                    'sources',
+                    isset($response->sources) ? json_encode($response->sources) : null
+                );
                 $saviancache->delete('pending_request');
             }
 
@@ -103,6 +111,8 @@ class generation extends external_api {
                 'error' => null,
             ];
         } else {
+            $errormsg = $response->error
+                ?? 'Failed to get status (HTTP ' . $response->http_code . ')';
             return [
                 'success' => false,
                 'status' => 'error',
@@ -111,7 +121,7 @@ class generation extends external_api {
                     'stage' => '',
                     'current_section' => '',
                 ],
-                'error' => $response->error ?? 'Failed to get status (HTTP ' . $response->http_code . ')',
+                'error' => $errormsg,
             ];
         }
     }
@@ -120,16 +130,27 @@ class generation extends external_api {
      * Returns description of get_generation_status return value.
      */
     public static function get_generation_status_returns() {
-        return new external_single_structure([
-            'success' => new external_value(PARAM_BOOL, 'Success flag'),
-            'status' => new external_value(PARAM_TEXT, 'Generation status: pending, processing, completed, failed'),
-            'progress' => new external_value(PARAM_INT, 'Progress percentage (0-100)'),
-            'details' => new external_single_structure([
-                'stage' => new external_value(PARAM_TEXT, 'Current stage'),
-                'current_section' => new external_value(PARAM_TEXT, 'Current section being generated', VALUE_OPTIONAL),
-            ]),
-            'error' => new external_value(PARAM_TEXT, 'Error message if failed', VALUE_OPTIONAL),
-        ]);
+        return new external_single_structure(
+            [
+                'success' => new external_value(PARAM_BOOL, 'Success flag'),
+                'status' => new external_value(
+                    PARAM_TEXT,
+                    'Generation status: pending, processing, completed, failed'
+                ),
+                'progress' => new external_value(PARAM_INT, 'Progress percentage (0-100)'),
+                'details' => new external_single_structure(
+                    [
+                        'stage' => new external_value(PARAM_TEXT, 'Current stage'),
+                        'current_section' => new external_value(
+                            PARAM_TEXT,
+                            'Current section being generated',
+                            VALUE_OPTIONAL
+                        ),
+                    ]
+                ),
+                'error' => new external_value(PARAM_TEXT, 'Error message if failed', VALUE_OPTIONAL),
+            ]
+        );
     }
 
     // ========================================
@@ -140,9 +161,11 @@ class generation extends external_api {
      * Parameters for save_course_structure.
      */
     public static function save_course_structure_parameters() {
-        return new external_function_parameters([
-            'structure' => new external_value(PARAM_RAW, 'Course structure JSON'),
-        ]);
+        return new external_function_parameters(
+            [
+                'structure' => new external_value(PARAM_RAW, 'Course structure JSON'),
+            ]
+        );
     }
 
     /**
@@ -153,9 +176,12 @@ class generation extends external_api {
      */
     public static function save_course_structure($structure) {
         // Validate parameters.
-        $params = self::validate_parameters(self::save_course_structure_parameters(), [
-            'structure' => $structure,
-        ]);
+        $params = self::validate_parameters(
+            self::save_course_structure_parameters(),
+            [
+                'structure' => $structure,
+            ]
+        );
 
         // Validate context.
         $context = \context_system::instance();
@@ -185,9 +211,11 @@ class generation extends external_api {
      * Returns description of save_course_structure return value.
      */
     public static function save_course_structure_returns() {
-        return new external_single_structure([
-            'success' => new external_value(PARAM_BOOL, 'Success flag'),
-            'error' => new external_value(PARAM_TEXT, 'Error message', VALUE_OPTIONAL),
-        ]);
+        return new external_single_structure(
+            [
+                'success' => new external_value(PARAM_BOOL, 'Success flag'),
+                'error' => new external_value(PARAM_TEXT, 'Error message', VALUE_OPTIONAL),
+            ]
+        );
     }
 }

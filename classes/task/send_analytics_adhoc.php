@@ -24,8 +24,6 @@
 
 namespace local_savian_ai\task;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Ad-hoc task for sending analytics reports.
  *
@@ -37,7 +35,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class send_analytics_adhoc extends \core\task\adhoc_task {
-
     /**
      * Get component name.
      *
@@ -51,7 +48,7 @@ class send_analytics_adhoc extends \core\task\adhoc_task {
      * Execute the task.
      */
     public function execute() {
-        global $CFG;
+        global $CFG, $DB;
 
         require_once($CFG->dirroot . '/local/savian_ai/classes/analytics/report_builder.php');
 
@@ -86,7 +83,6 @@ class send_analytics_adhoc extends \core\task\adhoc_task {
 
                 // Mark batched events as processed if this was a real_time report.
                 if ($reporttype === 'real_time' && !empty($data->event_ids)) {
-                    global $DB;
                     $eventids = $data->event_ids;
                     list($insql, $params) = $DB->get_in_or_equal($eventids);
                     $DB->execute(

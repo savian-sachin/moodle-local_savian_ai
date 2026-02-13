@@ -37,7 +37,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restriction_manager {
-
     /**
      * Check if chat is restricted for a user in a course.
      *
@@ -68,12 +67,13 @@ class restriction_manager {
 
             // Check if currently active.
             if ($times->timestart <= $now && ($times->timeend == 0 || $times->timeend > $now)) {
-                return (object)[
+                $restrictionname = $restriction->name ?: $this->get_restriction_display_name($restriction);
+                return (object) [
                     'is_restricted' => true,
                     'message' => $restriction->restriction_message ?: $this->get_default_message($restriction),
                     'resumes_at' => $times->timeend,
                     'restriction_type' => $restriction->restriction_type,
-                    'restriction_name' => $restriction->name ?: $this->get_restriction_display_name($restriction),
+                    'restriction_name' => $restrictionname,
                 ];
             }
         }
@@ -99,7 +99,7 @@ class restriction_manager {
                 require_once($CFG->dirroot . '/mod/quiz/lib.php');
                 // Apply user-specific overrides (group and user level).
                 $quiz = quiz_update_effective_access($quiz, $userid);
-                return (object)[
+                return (object) [
                     'timestart' => $quiz->timeopen ?: 0,
                     'timeend' => $quiz->timeclose ?: 0,
                 ];
@@ -107,7 +107,7 @@ class restriction_manager {
         }
 
         // Manual restriction or fallback.
-        return (object)[
+        return (object) [
             'timestart' => $restriction->timestart ?: 0,
             'timeend' => $restriction->timeend ?: 0,
         ];
@@ -191,14 +191,15 @@ class restriction_manager {
     public function get_course_quizzes(int $courseid): array {
         global $DB;
 
-        return $DB->get_records_sql("
-            SELECT q.id, q.name, q.timeopen, q.timeclose, cm.id as cmid
-            FROM {quiz} q
-            JOIN {course_modules} cm ON cm.instance = q.id
-            JOIN {modules} m ON m.id = cm.module AND m.name = 'quiz'
-            WHERE q.course = ? AND cm.visible = 1
-            ORDER BY q.timeopen ASC, q.name ASC
-        ", [$courseid]);
+        return $DB->get_records_sql(
+            "SELECT q.id, q.name, q.timeopen, q.timeclose, cm.id as cmid
+               FROM {quiz} q
+               JOIN {course_modules} cm ON cm.instance = q.id
+               JOIN {modules} m ON m.id = cm.module AND m.name = 'quiz'
+              WHERE q.course = ? AND cm.visible = 1
+           ORDER BY q.timeopen ASC, q.name ASC",
+            [$courseid]
+        );
     }
 
     /**
@@ -247,7 +248,11 @@ class restriction_manager {
 
             // Get effective times and quiz name.
             if ($restriction->restriction_type === 'quiz' && $restriction->quiz_id) {
-                $quiz = $DB->get_record('quiz', ['id' => $restriction->quiz_id], 'id, name, timeopen, timeclose');
+                $quiz = $DB->get_record(
+                    'quiz',
+                    ['id' => $restriction->quiz_id],
+                    'id, name, timeopen, timeclose'
+                );
                 if ($quiz) {
                     $restriction->quiz_name = $quiz->name;
                     $restriction->effective_timestart = $quiz->timeopen;
@@ -419,12 +424,15 @@ class restriction_manager {
 
         $newstatus = $restriction->is_enabled ? 0 : 1;
 
-        $DB->update_record('local_savian_chat_restrictions', (object)[
-            'id' => $restrictionid,
-            'is_enabled' => $newstatus,
-            'timemodified' => time(),
-            'usermodified' => $userid,
-        ]);
+        $DB->update_record(
+            'local_savian_chat_restrictions',
+            (object) [
+                'id' => $restrictionid,
+                'is_enabled' => $newstatus,
+                'timemodified' => time(),
+                'usermodified' => $userid,
+            ]
+        );
 
         return $newstatus;
     }
@@ -480,8 +488,11 @@ class restriction_manager {
             $days = floor($hours / 24);
             return get_string('days_remaining', 'local_savian_ai', $days);
         } else if ($hours > 0) {
-            return get_string('hours_minutes_remaining', 'local_savian_ai',
-                (object)['hours' => $hours, 'minutes' => $minutes]);
+            return get_string(
+                'hours_minutes_remaining',
+                'local_savian_ai',
+                (object) ['hours' => $hours, 'minutes' => $minutes]
+            );
         } else {
             return get_string('minutes_remaining', 'local_savian_ai', $minutes);
         }

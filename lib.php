@@ -77,12 +77,18 @@ function local_savian_ai_render_header($title, $subtitle = '') {
  * @return string HTML.
  */
 function local_savian_ai_render_footer() {
+    $link = html_writer::link(
+        'https://savian.ai.vn/',
+        'Savian AI',
+        [
+            'target' => '_blank',
+            'class' => 'savian-text-primary',
+        ]
+    );
     return html_writer::div(
-        html_writer::tag('small',
-            'Powered by ' . html_writer::link('https://savian.ai.vn/', 'Savian AI', [
-                'target' => '_blank',
-                'class' => 'savian-text-primary',
-            ]),
+        html_writer::tag(
+            'small',
+            'Powered by ' . $link,
             ['class' => 'text-muted']
         ),
         'text-center mt-4 mb-3'
@@ -95,8 +101,6 @@ function local_savian_ai_render_footer() {
  * @param global_navigation $navigation Navigation object.
  */
 function local_savian_ai_extend_navigation(global_navigation $navigation) {
-    global $PAGE;
-
     // Only add to navigation if user has permission.
     if (has_capability('local/savian_ai:use', context_system::instance())) {
         $node = $navigation->add(

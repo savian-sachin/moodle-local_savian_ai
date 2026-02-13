@@ -105,8 +105,14 @@ class report_builder {
      * @param int|null $userid User who triggered (if manual).
      * @return object Result with success status and report_id.
      */
-    public function build_and_send_report($courseid, $reporttype = 'on_demand', $triggertype = 'manual',
-                                         $datefrom = 0, $dateto = 0, $userid = null) {
+    public function build_and_send_report(
+        $courseid,
+        $reporttype = 'on_demand',
+        $triggertype = 'manual',
+        $datefrom = 0,
+        $dateto = 0,
+        $userid = null
+    ) {
         global $USER;
 
         $dateto = $dateto > 0 ? $dateto : time();
@@ -135,10 +141,18 @@ class report_builder {
             $reportdata = $this->build_report_data($courseid, $reporttype, $datefrom, $dateto);
 
             // Update student and activity counts.
-            $this->db->set_field('local_savian_analytics_reports', 'student_count',
-                                count($reportdata['students']), ['id' => $reportid]);
-            $this->db->set_field('local_savian_analytics_reports', 'activity_count',
-                                $reportdata['course_summary']['total_activities'], ['id' => $reportid]);
+            $this->db->set_field(
+                'local_savian_analytics_reports',
+                'student_count',
+                count($reportdata['students']),
+                ['id' => $reportid]
+            );
+            $this->db->set_field(
+                'local_savian_analytics_reports',
+                'activity_count',
+                $reportdata['course_summary']['total_activities'],
+                ['id' => $reportid]
+            );
 
             // Send to API with retry logic.
             $result = $this->send_with_retry($reportid, $reportdata);
@@ -215,8 +229,10 @@ class report_builder {
                 'plugin_version' => get_config('local_savian_ai', 'version') ?? '1.1.0',
             ],
             'course_summary' => [
-                'start_date' => $courseinfo->start_date > 0 ? date('Y-m-d\TH:i:s\Z', $courseinfo->start_date) : null,
-                'end_date' => $courseinfo->end_date > 0 ? date('Y-m-d\TH:i:s\Z', $courseinfo->end_date) : null,
+                'start_date' => $courseinfo->start_date > 0
+                    ? date('Y-m-d\TH:i:s\Z', $courseinfo->start_date) : null,
+                'end_date' => $courseinfo->end_date > 0
+                    ? date('Y-m-d\TH:i:s\Z', $courseinfo->end_date) : null,
                 'total_students' => $studentcount,
                 'total_activities' => $courseinfo->total_activities,
                 'total_assessments' => 0, // TODO: Count quizzes + assignments.

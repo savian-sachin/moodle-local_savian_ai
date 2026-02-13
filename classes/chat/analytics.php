@@ -34,7 +34,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class analytics {
-
     /**
      * Get conversation statistics for a course.
      *
@@ -128,7 +127,8 @@ class analytics {
 
         // Calculate feedback rate.
         if ($stats && $stats->total_assistant_messages > 0) {
-            $stats->feedback_rate = round(($stats->total_feedback / $stats->total_assistant_messages) * 100, 1);
+            $feedbackpct = ($stats->total_feedback / $stats->total_assistant_messages) * 100;
+            $stats->feedback_rate = round($feedbackpct, 1);
         } else {
             $stats->feedback_rate = 0;
         }

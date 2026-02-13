@@ -65,23 +65,25 @@ if ($action === 'create' && confirm_sesskey() && !empty($saviancache->get('cours
     $DB->insert_record('local_savian_generations', $log);
 
     // Store generation data for knowledge feedback loop (v2.2).
-    $saviancache->set('kb_save_data', [
+    $kbsavedata = [
         'course_structure' => $saviancache->get('course_structure'),
         'course_title' => $course->fullname,
         'course_id' => $courseid,
         'request_id' => $pendingreq ?: null,
         'results' => $results,
-    ]);
+    ];
+    $saviancache->set('kb_save_data', $kbsavedata);
 
     $saviancache->delete('course_structure');
     $saviancache->delete('pending_request');
     $saviancache->delete('sources');
 
     // Redirect to success page with save option.
-    redirect(new moodle_url('/local/savian_ai/create_course.php', [
+    $successurl = new moodle_url('/local/savian_ai/create_course.php', [
         'courseid' => $courseid,
         'action' => 'success',
-    ]));
+    ]);
+    redirect($successurl);
 }
 
 // Handle polling.
@@ -96,16 +98,21 @@ if ($action === 'poll' && !empty($saviancache->get('pending_request'))) {
                 $saviancache->set('sources', isset($statusresponse->sources) ? json_encode($statusresponse->sources) : null);
                 $saviancache->delete('pending_request');
 
-                redirect(new moodle_url('/local/savian_ai/create_course.php', [
+                $previewurl = new moodle_url('/local/savian_ai/create_course.php', [
                     'courseid' => $courseid,
                     'action' => 'preview',
-                ]), 'Course structure generated!', null, 'success');
+                ]);
+                redirect($previewurl, 'Course structure generated!', null, 'success');
             }
         } else if (isset($statusresponse->status) && $statusresponse->status === 'failed') {
             $error = $statusresponse->error ?? 'Generation failed';
             $saviancache->delete('pending_request');
-            redirect(new moodle_url('/local/savian_ai/create_course.php', ['courseid' => $courseid]),
-                     'Generation failed: ' . $error, null, 'error');
+            redirect(
+                new moodle_url('/local/savian_ai/create_course.php', ['courseid' => $courseid]),
+                'Generation failed: ' . $error,
+                null,
+                'error'
+            );
         }
     }
 }
@@ -126,13 +133,17 @@ if (data_submitted() && confirm_sesskey()) {
 
     // Validate required fields.
     if (empty($docids)) {
-        redirect(new moodle_url('/local/savian_ai/create_course.php', ['courseid' => $courseid]),
-                 get_string('no_documents_selected', 'local_savian_ai'), null, 'error');
+        redirect(
+            new moodle_url('/local/savian_ai/create_course.php', ['courseid' => $courseid]),
+            get_string('no_documents_selected', 'local_savian_ai'),
+            null,
+            'error'
+        );
     }
 
     if (!empty($docids)) {
         // RAG-based generation with ADDIE v2.0.
-        $response = $client->generate_course_from_documents($docids, $title, [
+        $options = [
             'course_id' => $courseid,
             'description' => $description,
             'target_audience' => $targetaudience,
@@ -142,22 +153,28 @@ if (data_submitted() && confirm_sesskey()) {
             'prior_knowledge_level' => $priorknowledge,
             'content_types' => $contenttypes,
             'language' => 'en',
-        ]);
+        ];
+        $response = $client->generate_course_from_documents($docids, $title, $options);
 
         if ($response->http_code === 200 && isset($response->success) && $response->success) {
             if (isset($response->request_id) && isset($response->status) && $response->status === 'pending') {
                 $saviancache->set('pending_request', $response->request_id);
                 $saviancache->set('duration', $duration);
-                redirect(new moodle_url('/local/savian_ai/create_course.php', [
+                $pollurl = new moodle_url('/local/savian_ai/create_course.php', [
                     'courseid' => $courseid,
                     'action' => 'poll',
-                ]), 'Generating course content...', null, 'info');
+                ]);
+                redirect($pollurl, 'Generating course content...', null, 'info');
             }
         } else {
             // Error or synchronous response.
             $error = $response->error ?? $response->message ?? 'Unknown error (HTTP: ' . $response->http_code . ')';
-            redirect(new moodle_url('/local/savian_ai/create_course.php', ['courseid' => $courseid]),
-                     'Generation failed: ' . $error, null, 'error');
+            redirect(
+                new moodle_url('/local/savian_ai/create_course.php', ['courseid' => $courseid]),
+                'Generation failed: ' . $error,
+                null,
+                'error'
+            );
         }
     }
 }
@@ -180,14 +197,19 @@ if ($action === 'poll' && !empty($saviancache->get('pending_request'))) {
 
     // Progress bar (30px height).
     echo html_writer::start_div('progress mb-3', ['style' => 'height: 30px;']);
-    echo html_writer::div('0%', 'progress-bar bg-primary progress-bar-striped progress-bar-animated', [
+    $progressattrs = [
         'id' => 'progress-bar',
         'role' => 'progressbar',
         'style' => 'width: 0%',
         'aria-valuenow' => '0',
         'aria-valuemin' => '0',
         'aria-valuemax' => '100',
-    ]);
+    ];
+    echo html_writer::div(
+        '0%',
+        'progress-bar bg-primary progress-bar-striped progress-bar-animated',
+        $progressattrs
+    );
     echo html_writer::end_div();
 
     // Progress details (current section).
@@ -208,12 +230,13 @@ if ($action === 'poll' && !empty($saviancache->get('pending_request'))) {
     echo html_writer::end_div();
 
     // Cancel button.
+    $cancelurl = new moodle_url('/local/savian_ai/create_course.php', [
+        'courseid' => $courseid,
+        'action' => 'cancel',
+    ]);
     echo html_writer::div(
         html_writer::link(
-            new moodle_url('/local/savian_ai/create_course.php', [
-                'courseid' => $courseid,
-                'action' => 'cancel',
-            ]),
+            $cancelurl,
             get_string('cancel_generation', 'local_savian_ai'),
             ['class' => 'btn btn-outline-danger']
         ),
@@ -253,10 +276,13 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
 
                 // Check if completed.
                 if (response.status === 'completed') {
-                    window.location.href = '{$CFG->wwwroot}/local/savian_ai/create_course.php?courseid=' + courseid + '&action=preview';
+                    window.location.href = M.cfg.wwwroot +
+                        '/local/savian_ai/create_course.php?courseid=' +
+                        courseid + '&action=preview';
                 } else if (response.status === 'failed') {
                     Notification.alert('Generation Failed', response.error || 'Unknown error', 'OK');
-                    window.location.href = '{$CFG->wwwroot}/local/savian_ai/create_course.php?courseid=' + courseid;
+                    window.location.href = M.cfg.wwwroot +
+                        '/local/savian_ai/create_course.php?courseid=' + courseid;
                 } else {
                     // Continue polling.
                     setTimeout(updateProgress, pollInterval);
@@ -305,12 +331,13 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
     setTimeout(updateProgress, 1000);
 });
 ");
-
 } else if ($action === 'preview' && !empty($saviancache->get('course_structure'))) {
     // Show enhanced preview.
     $structure = json_decode($saviancache->get('course_structure'));
 
-    echo html_writer::tag('h3', get_string('preview_course_structure', 'local_savian_ai') . ' (' . count($structure->sections) . ' sections)', ['class' => 'mt-4']);
+    $previewtitle = get_string('preview_course_structure', 'local_savian_ai')
+        . ' (' . count($structure->sections) . ' sections)';
+    echo html_writer::tag('h3', $previewtitle, ['class' => 'mt-4']);
 
     // ADDIE v2.0: AI Transparency Notice.
     if (isset($structure->ai_transparency_notice)) {
@@ -325,9 +352,10 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
         echo html_writer::start_div('card mb-3 border-' . $scoreclass);
         echo html_writer::start_div('card-body');
         echo html_writer::tag('h5', '📊 ' . get_string('qm_alignment', 'local_savian_ai'), ['class' => 'card-title']);
-        echo html_writer::tag('p', get_string('qm_score', 'local_savian_ai') . ': ' .
-             html_writer::tag('strong', $qm->total_score . '%') .
-             ' (' . $qm->standards_met . '/' . $qm->standards_total . ' standards met)');
+        $qmscorecontent = get_string('qm_score', 'local_savian_ai') . ': '
+            . html_writer::tag('strong', $qm->total_score . '%')
+            . ' (' . $qm->standards_met . '/' . $qm->standards_total . ' standards met)';
+        echo html_writer::tag('p', $qmscorecontent);
 
         if ($qm->qm_certified_ready) {
             echo html_writer::div('✅ ' . get_string('qm_certified_ready', 'local_savian_ai'), 'alert alert-success mb-2');
@@ -336,7 +364,8 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
         }
 
         if (isset($qm->recommendations) && !empty($qm->recommendations)) {
-            echo html_writer::tag('strong', get_string('qm_recommendations', 'local_savian_ai') . ':', ['class' => 'd-block mt-2 mb-1']);
+            $qmreclabel = get_string('qm_recommendations', 'local_savian_ai') . ':';
+            echo html_writer::tag('strong', $qmreclabel, ['class' => 'd-block mt-2 mb-1']);
             echo html_writer::start_tag('ul', ['class' => 'small mb-0']);
             foreach ($qm->recommendations as $rec) {
                 echo html_writer::tag('li', s($rec));
@@ -496,7 +525,7 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
         echo html_writer::start_div('card mb-3 savian-accent-card');
         echo html_writer::start_div('card-body');
         echo html_writer::tag('strong', '📚 ' . get_string('based_on_documents', 'local_savian_ai') . ': ');
-        $sourcenames = array_map(function($s) {
+        $sourcenames = array_map(function ($s) {
             $title = $s->title ?? 'Unknown';
             $chunks = $s->chunks_used ?? 0;
             return "{$title} (" . get_string('chunks_used', 'local_savian_ai', $chunks) . ")";
@@ -598,18 +627,14 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
 
     // Expand/Collapse controls.
     echo html_writer::start_div('mb-3 text-right');
-    echo html_writer::tag('button', get_string('expand_all', 'local_savian_ai'), [
-        'id' => 'expand-all',
-        'class' => 'btn btn-sm btn-outline-secondary mr-2',
-    ]);
-    echo html_writer::tag('button', get_string('collapse_all', 'local_savian_ai'), [
-        'id' => 'collapse-all',
-        'class' => 'btn btn-sm btn-outline-secondary',
-    ]);
+    $expandattrs = ['id' => 'expand-all', 'class' => 'btn btn-sm btn-outline-secondary mr-2'];
+    echo html_writer::tag('button', get_string('expand_all', 'local_savian_ai'), $expandattrs);
+    $collapseattrs = ['id' => 'collapse-all', 'class' => 'btn btn-sm btn-outline-secondary'];
+    echo html_writer::tag('button', get_string('collapse_all', 'local_savian_ai'), $collapseattrs);
     echo html_writer::end_div();
 
     // Helper function for content icons.
-    $geticon = function($type) {
+    $geticon = function ($type) {
         $icons = [
             'page' => '📄',
             'activity' => '🎯',
@@ -630,13 +655,14 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
         echo html_writer::start_div('card-header d-flex justify-content-between align-items-center');
 
         echo html_writer::start_div('d-flex align-items-center flex-wrap');
-        echo html_writer::empty_tag('input', [
+        $sectioncheckattrs = [
             'type' => 'checkbox',
             'name' => 'include_section_' . $idx,
             'checked' => 'checked',
             'class' => 'mr-2',
             'title' => get_string('include_item', 'local_savian_ai'),
-        ]);
+        ];
+        echo html_writer::empty_tag('input', $sectioncheckattrs);
         echo html_writer::tag('strong', "📖 Section " . ($idx + 1) . ": " . s($section->title ?? ''));
 
         // ADDIE v2.1: Section coverage badge.
@@ -648,7 +674,7 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
             if ($status === 'excellent' || $scorepct >= 80) {
                 $badgeclass = 'success';
                 $badgetext = "✅ {$scorepct}%";
-            } elseif ($status === 'good' || $scorepct >= 60) {
+            } else if ($status === 'good' || $scorepct >= 60) {
                 $badgeclass = 'info';
                 $badgetext = "📊 {$scorepct}%";
             } else {
@@ -656,10 +682,11 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
                 $badgetext = "⚠️ {$scorepct}%";
             }
 
-            echo html_writer::tag('span', $badgetext, [
+            $coverageattrs = [
                 'class' => "badge badge-{$badgeclass} ml-2",
                 'title' => 'Source coverage for this section',
-            ]);
+            ];
+            echo html_writer::tag('span', $badgetext, $coverageattrs);
         }
 
         // ADDIE v2.1: Learning depth badge.
@@ -669,22 +696,24 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
             $depthscore = $depth->depth_score ?? 0;
 
             $depthicon = $depthlevel === 'deep' ? '🎯' : ($depthlevel === 'moderate' ? '📚' : '📖');
-            echo html_writer::tag('span', "{$depthicon} {$depthscore}", [
+            $depthattrs = [
                 'class' => 'badge badge-primary ml-1',
                 'title' => "Learning depth: {$depthlevel}",
-            ]);
+            ];
+            echo html_writer::tag('span', "{$depthicon} {$depthscore}", $depthattrs);
         }
 
         echo html_writer::end_div();
 
         // Toggle button.
-        echo html_writer::tag('button', '<i class="fa fa-chevron-down"></i>', [
+        $toggleattrs = [
             'class' => 'btn btn-sm btn-link text-dark',
             'data-toggle' => 'collapse',
             'data-target' => '#' . $sectionid,
             'aria-expanded' => 'true',
             'aria-controls' => $sectionid,
-        ]);
+        ];
+        echo html_writer::tag('button', '<i class="fa fa-chevron-down"></i>', $toggleattrs);
 
         echo html_writer::end_div();
 
@@ -699,7 +728,8 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
 
         // ADDIE v2.0: Prerequisites.
         if (isset($section->prerequisites) && !empty($section->prerequisites)) {
-            echo html_writer::tag('strong', '⚠️ ' . get_string('prerequisites', 'local_savian_ai') . ':', ['class' => 'd-block mb-1']);
+            $prereqlabel = get_string('prerequisites', 'local_savian_ai') . ':';
+            echo html_writer::tag('strong', $prereqlabel, ['class' => 'd-block mb-1']);
             echo html_writer::start_tag('ul', ['class' => 'small mb-2']);
             foreach ($section->prerequisites as $prereq) {
                 echo html_writer::tag('li', s($prereq));
@@ -709,8 +739,11 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
 
         // ADDIE v2.0: Estimated hours.
         if (isset($section->estimated_hours)) {
-            echo html_writer::tag('p', '⏱️ ' . get_string('estimated_hours', 'local_savian_ai', $section->estimated_hours),
-                ['class' => 'small text-muted mb-2']);
+            echo html_writer::tag(
+                'p',
+                get_string('estimated_hours', 'local_savian_ai', $section->estimated_hours),
+                ['class' => 'small text-muted mb-2']
+            );
         }
 
         // ADDIE v2.0: QM alignment notes.
@@ -731,7 +764,8 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
 
         // Learning objectives.
         if (isset($section->learning_objectives) && !empty($section->learning_objectives)) {
-            echo html_writer::tag('strong', get_string('learning_objectives', 'local_savian_ai') . ':', ['class' => 'd-block mb-2']);
+            $objlabel = get_string('learning_objectives', 'local_savian_ai') . ':';
+            echo html_writer::tag('strong', $objlabel, ['class' => 'd-block mb-2']);
             echo html_writer::start_tag('ul', ['class' => 'small mb-3']);
             foreach ($section->learning_objectives as $obj) {
                 echo html_writer::tag('li', s($obj));
@@ -764,13 +798,14 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
 
                 // Checkbox + icon + title + badge + quality tag.
                 echo html_writer::start_div('d-flex align-items-center flex-wrap');
-                echo html_writer::empty_tag('input', [
+                $itemcheckattrs = [
                     'type' => 'checkbox',
                     'name' => "include_item_{$idx}_{$itemidx}",
                     'checked' => 'checked',
                     'class' => 'mr-2',
                     'title' => get_string('include_item', 'local_savian_ai'),
-                ]);
+                ];
+                echo html_writer::empty_tag('input', $itemcheckattrs);
                 echo "{$icon} " . html_writer::tag('span', s($displaytitle), ['class' => 'mr-2']);
                 echo $typebadge;
 
@@ -780,28 +815,26 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
                     $confidence = $tags->source_confidence ?? 'medium';
 
                     if ($confidence === 'high') {
-                        echo html_writer::tag('span', '✓ Verified', [
-                            'class' => 'badge badge-success ml-2',
-                            'title' => $tags->instructor_note ?? 'High confidence - well-grounded in sources',
-                        ]);
-                    } elseif ($confidence === 'medium') {
-                        echo html_writer::tag('span', '⚠️ Review', [
-                            'class' => 'badge badge-warning ml-2',
-                            'title' => $tags->instructor_note ?? 'Medium confidence - recommended review',
-                        ]);
+                        $confnote = $tags->instructor_note ?? 'High confidence - well-grounded in sources';
+                        $confattrs = ['class' => 'badge badge-success ml-2', 'title' => $confnote];
+                        echo html_writer::tag('span', '✓ Verified', $confattrs);
+                    } else if ($confidence === 'medium') {
+                        $confnote = $tags->instructor_note ?? 'Medium confidence - recommended review';
+                        $confattrs = ['class' => 'badge badge-warning ml-2', 'title' => $confnote];
+                        echo html_writer::tag('span', 'Review', $confattrs);
                     } else {
-                        echo html_writer::tag('span', '❗ Priority', [
-                            'class' => 'badge badge-danger ml-2',
-                            'title' => $tags->instructor_note ?? 'Low confidence - priority review needed',
-                        ]);
+                        $confnote = $tags->instructor_note ?? 'Low confidence - priority review needed';
+                        $confattrs = ['class' => 'badge badge-danger ml-2', 'title' => $confnote];
+                        echo html_writer::tag('span', 'Priority', $confattrs);
                     }
 
                     // Supplemented content indicator.
                     if (isset($tags->supplemented_content) && $tags->supplemented_content) {
-                        echo html_writer::tag('span', 'ℹ️ Supplemented', [
+                        $suppattrs = [
                             'class' => 'badge badge-info ml-1',
                             'title' => 'Includes AI-supplemented content - verify against your context',
-                        ]);
+                        ];
+                        echo html_writer::tag('span', 'Supplemented', $suppattrs);
                     }
                 }
 
@@ -809,20 +842,22 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
 
                 // View and Edit buttons.
                 echo html_writer::start_div('btn-group btn-group-sm');
-                echo html_writer::tag('button', '<i class="fa fa-eye"></i> View', [
+                $viewattrs = [
                     'class' => 'btn btn-outline-info',
                     'data-action' => 'view-item',
                     'data-section' => $idx,
                     'data-item' => $itemidx,
                     'title' => 'View full content',
-                ]);
-                echo html_writer::tag('button', '<i class="fa fa-edit"></i> Edit', [
+                ];
+                echo html_writer::tag('button', '<i class="fa fa-eye"></i> View', $viewattrs);
+                $editattrs = [
                     'class' => 'btn btn-outline-primary',
                     'data-action' => 'edit-item',
                     'data-section' => $idx,
                     'data-item' => $itemidx,
                     'title' => 'Edit before adding to course',
-                ]);
+                ];
+                echo html_writer::tag('button', '<i class="fa fa-edit"></i> Edit', $editattrs);
                 echo html_writer::end_div();
 
                 echo html_writer::end_div();
@@ -839,18 +874,20 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
     // Action buttons.
     echo html_writer::start_div('text-center mt-4');
 
+    $createurl = new moodle_url('/local/savian_ai/create_course.php', [
+        'courseid' => $courseid,
+        'action' => 'create',
+        'sesskey' => sesskey(),
+    ]);
     echo html_writer::link(
-        new moodle_url('/local/savian_ai/create_course.php', [
-            'courseid' => $courseid,
-            'action' => 'create',
-            'sesskey' => sesskey(),
-        ]),
+        $createurl,
         get_string('add_to_this_course', 'local_savian_ai'),
         ['class' => 'btn btn-savian btn-lg mr-2']
     );
 
+    $regenurl = new moodle_url('/local/savian_ai/create_course.php', ['courseid' => $courseid]);
     echo html_writer::link(
-        new moodle_url('/local/savian_ai/create_course.php', ['courseid' => $courseid]),
+        $regenurl,
         get_string('regenerate', 'local_savian_ai'),
         ['class' => 'btn btn-outline-secondary']
     );
@@ -858,11 +895,12 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
     echo html_writer::end_div();
 
     // Store course structure in data attribute for JavaScript access.
-    echo html_writer::div('', '', [
+    $structureattrs = [
         'id' => 'course-structure-data',
         'data-structure' => json_encode($structure),
         'style' => 'display:none;',
-    ]);
+    ];
+    echo html_writer::div('', '', $structureattrs);
 
     // Initialize view/edit functionality.
     $PAGE->requires->js_call_amd('local_savian_ai/course_content_editor', 'init');
@@ -916,15 +954,19 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
     echo html_writer::tag('li', '✓ Preserves your teaching expertise');
     echo html_writer::end_tag('ul');
 
-    echo html_writer::tag('p', '<small class="text-muted">The course will be processed (chunked and embedded) and available in 2-3 minutes.</small>');
+    $kbnotice = '<small class="text-muted">'
+        . 'The course will be processed (chunked and embedded) and available in 2-3 minutes.'
+        . '</small>';
+    echo html_writer::tag('p', $kbnotice);
 
     // Buttons.
     echo html_writer::start_div('mt-4');
+    $kburl = new moodle_url('/local/savian_ai/save_to_knowledge_base.php', [
+        'courseid' => $courseid,
+        'sesskey' => sesskey(),
+    ]);
     echo html_writer::link(
-        new moodle_url('/local/savian_ai/save_to_knowledge_base.php', [
-            'courseid' => $courseid,
-            'sesskey' => sesskey(),
-        ]),
+        $kburl,
         '<i class="fa fa-save mr-2"></i>Save to Knowledge Base',
         ['class' => 'btn btn-primary btn-lg mr-2']
     );
@@ -940,16 +982,18 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
 
 } else {
     // Show enhanced form with Moodle standards.
-    echo html_writer::div(
-        '<strong>🚀 AI-Powered Course Generator</strong> - Create professional-grade course content using the ADDIE instructional design framework.',
-        'alert alert-info mb-4'
-    );
+    $generatorintro = '<strong>AI-Powered Course Generator</strong>'
+        . ' - Create professional-grade course content'
+        . ' using the ADDIE instructional design framework.';
+    echo html_writer::div($generatorintro, 'alert alert-info mb-4');
 
     // Show only current course completed documents.
-    $documents = $DB->get_records_menu('local_savian_documents',
+    $documents = $DB->get_records_menu(
+        'local_savian_documents',
         ['is_active' => 1, 'status' => 'completed', 'course_id' => $courseid],
         'title ASC',
-        'savian_doc_id, title');
+        'savian_doc_id, title'
+    );
 
     if (empty($documents)) {
         echo $OUTPUT->notification('No completed documents available. Upload documents first.', 'warning');
@@ -967,103 +1011,123 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
         echo html_writer::tag('div', '📖 ' . s($course->fullname), ['class' => 'h5 mb-0 text-primary']);
         echo html_writer::end_div();
 
-        echo html_writer::div(
-            html_writer::tag('label', 'Description: <span class="text-muted">(Optional)</span>', ['class' => 'font-weight-bold', 'for' => 'course-desc']) .
-            html_writer::tag('textarea', '', [
-                'id' => 'course-desc',
-                'name' => 'description',
-                'class' => 'form-control',
-                'rows' => 2,
-                'placeholder' => 'Optional: Add specific learning goals or scope details...',
-            ]),
-            'form-group'
-        );
+        $desclabel = 'Description: <span class="text-muted">(Optional)</span>';
+        $desctextareaattrs = [
+            'id' => 'course-desc',
+            'name' => 'description',
+            'class' => 'form-control',
+            'rows' => 2,
+            'placeholder' => 'Optional: Add specific learning goals or scope details...',
+        ];
+        $descfield = html_writer::tag('label', $desclabel, ['class' => 'font-weight-bold', 'for' => 'course-desc'])
+            . html_writer::tag('textarea', '', $desctextareaattrs);
+        echo html_writer::div($descfield, 'form-group');
 
-        echo html_writer::div(
-            html_writer::tag('label', 'Additional Context: <span class="text-muted">(Optional)</span>', ['class' => 'font-weight-bold', 'for' => 'target-aud']) .
-            html_writer::empty_tag('input', [
-                'type' => 'text',
-                'id' => 'target-aud',
-                'name' => 'target_audience',
-                'class' => 'form-control',
-                'placeholder' => 'E.g., "First-year medical students" or "Entry-level developers"',
-            ]) .
-            html_writer::tag('small', 'Provides extra context beyond the structured Learner Profile below.', ['class' => 'form-text text-muted']),
-            'form-group'
-        );
+        $contextlabel = 'Additional Context: <span class="text-muted">(Optional)</span>';
+        $contexthelp = 'Provides extra context beyond the structured Learner Profile below.';
+        $contextinputattrs = [
+            'type' => 'text',
+            'id' => 'target-aud',
+            'name' => 'target_audience',
+            'class' => 'form-control',
+            'placeholder' => 'E.g., "First-year medical students" or "Entry-level developers"',
+        ];
+        $contextfield = html_writer::tag('label', $contextlabel, ['class' => 'font-weight-bold', 'for' => 'target-aud'])
+            . html_writer::empty_tag('input', $contextinputattrs)
+            . html_writer::tag('small', $contexthelp, ['class' => 'form-text text-muted']);
+        echo html_writer::div($contextfield, 'form-group');
 
         echo html_writer::end_tag('fieldset');
 
         // FIELDSET 2: Learner Profile (ADDIE v2.0) - Improved Alignment.
         echo html_writer::start_tag('fieldset', ['class' => 'mb-4']);
         echo html_writer::tag('legend', '👥 Learner Profile', ['class' => 'font-weight-bold text-primary']);
-        echo html_writer::div(
-            '<small class="text-muted">These settings adapt content to your learners\' age, background, and industry context.</small>',
-            'mb-3'
-        );
+        $profilehelp = '<small class="text-muted">'
+            . 'These settings adapt content to your learners\' age, background, and industry context.'
+            . '</small>';
+        echo html_writer::div($profilehelp, 'mb-3');
 
         echo html_writer::start_div('row');
 
         // Age Group.
         echo html_writer::start_div('col-md-4');
         echo html_writer::start_div('form-group');
-        echo html_writer::tag('label', get_string('age_group', 'local_savian_ai') . ': <span class="text-danger">*</span>',
-            ['class' => 'font-weight-bold d-block', 'for' => 'age-group']);
-        echo html_writer::select([
-            'k5' => '📝 Elementary (K-5)',
-            'middle' => '📚 Middle School (6-8)',
-            'high' => '🎓 High School (9-12)',
-            'undergrad' => '🎯 Undergraduate',
-            'graduate' => '👨‍🎓 Graduate',
-            'professional' => '💼 Professional',
-        ], 'age_group', 'undergrad', false, [
-            'class' => 'form-control',
-            'id' => 'age-group',
-            'required' => true,
-        ]);
-        echo html_writer::tag('small', get_string('age_group_help', 'local_savian_ai'),
-            ['class' => 'form-text text-muted d-block mt-2']);
+        $agegrouplabel = get_string('age_group', 'local_savian_ai') . ': <span class="text-danger">*</span>';
+        echo html_writer::tag('label', $agegrouplabel, ['class' => 'font-weight-bold d-block', 'for' => 'age-group']);
+        $ageoptions = [
+            'k5' => 'Elementary (K-5)',
+            'middle' => 'Middle School (6-8)',
+            'high' => 'High School (9-12)',
+            'undergrad' => 'Undergraduate',
+            'graduate' => 'Graduate',
+            'professional' => 'Professional',
+        ];
+        echo html_writer::select(
+            $ageoptions,
+            'age_group',
+            'undergrad',
+            false,
+            ['class' => 'form-control', 'id' => 'age-group', 'required' => true]
+        );
+        echo html_writer::tag(
+            'small',
+            get_string('age_group_help', 'local_savian_ai'),
+            ['class' => 'form-text text-muted d-block mt-2']
+        );
         echo html_writer::end_div();
         echo html_writer::end_div();
 
         // Industry.
         echo html_writer::start_div('col-md-4');
         echo html_writer::start_div('form-group');
-        echo html_writer::tag('label', get_string('industry', 'local_savian_ai') . ': <span class="text-danger">*</span>',
-            ['class' => 'font-weight-bold d-block', 'for' => 'industry']);
-        echo html_writer::select([
-            'general' => '🎓 General Academic',
-            'k12' => '🏫 K-12 Education',
-            'higher_ed' => '🏛️ Higher Education',
-            'healthcare' => '⚕️ Healthcare',
-            'technology' => '💻 Technology/IT',
-            'business' => '💼 Business',
-            'corporate' => '🏢 Corporate Training',
-        ], 'industry', 'general', false, [
-            'class' => 'form-control',
-            'id' => 'industry',
-            'required' => true,
-        ]);
-        echo html_writer::tag('small', get_string('industry_help', 'local_savian_ai'),
-            ['class' => 'form-text text-muted d-block mt-2']);
+        $industrylabel = get_string('industry', 'local_savian_ai') . ': <span class="text-danger">*</span>';
+        echo html_writer::tag('label', $industrylabel, ['class' => 'font-weight-bold d-block', 'for' => 'industry']);
+        $industryoptions = [
+            'general' => 'General Academic',
+            'k12' => 'K-12 Education',
+            'higher_ed' => 'Higher Education',
+            'healthcare' => 'Healthcare',
+            'technology' => 'Technology/IT',
+            'business' => 'Business',
+            'corporate' => 'Corporate Training',
+        ];
+        echo html_writer::select(
+            $industryoptions,
+            'industry',
+            'general',
+            false,
+            ['class' => 'form-control', 'id' => 'industry', 'required' => true]
+        );
+        echo html_writer::tag(
+            'small',
+            get_string('industry_help', 'local_savian_ai'),
+            ['class' => 'form-text text-muted d-block mt-2']
+        );
         echo html_writer::end_div();
         echo html_writer::end_div();
 
         // Prior Knowledge.
         echo html_writer::start_div('col-md-4');
         echo html_writer::start_div('form-group');
-        echo html_writer::tag('label', get_string('prior_knowledge', 'local_savian_ai') . ':',
-            ['class' => 'font-weight-bold d-block', 'for' => 'prior-knowledge']);
-        echo html_writer::select([
-            'beginner' => '🌱 Beginner',
-            'intermediate' => '📈 Intermediate',
-            'advanced' => '⭐ Advanced',
-        ], 'prior_knowledge_level', 'beginner', false, [
-            'class' => 'form-control',
-            'id' => 'prior-knowledge',
-        ]);
-        echo html_writer::tag('small', get_string('prior_knowledge_help', 'local_savian_ai'),
-            ['class' => 'form-text text-muted d-block mt-2']);
+        $priorlabel = get_string('prior_knowledge', 'local_savian_ai') . ':';
+        echo html_writer::tag('label', $priorlabel, ['class' => 'font-weight-bold d-block', 'for' => 'prior-knowledge']);
+        $prioroptions = [
+            'beginner' => 'Beginner',
+            'intermediate' => 'Intermediate',
+            'advanced' => 'Advanced',
+        ];
+        echo html_writer::select(
+            $prioroptions,
+            'prior_knowledge_level',
+            'beginner',
+            false,
+            ['class' => 'form-control', 'id' => 'prior-knowledge']
+        );
+        echo html_writer::tag(
+            'small',
+            get_string('prior_knowledge_help', 'local_savian_ai'),
+            ['class' => 'form-text text-muted d-block mt-2']
+        );
         echo html_writer::end_div();
         echo html_writer::end_div();
 
@@ -1080,22 +1144,26 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
         echo html_writer::start_div('col-md-8');
         // Document selection with visual cards.
         echo html_writer::start_div('form-group');
-        echo html_writer::tag('label', 'Select Documents: <span class="text-danger">*</span>', ['class' => 'font-weight-bold d-block mb-2']);
-        echo html_writer::tag('small', count($documents) . ' documents available in this course', ['class' => 'text-muted d-block mb-3']);
+        $doclabel = 'Select Documents: <span class="text-danger">*</span>';
+        echo html_writer::tag('label', $doclabel, ['class' => 'font-weight-bold d-block mb-2']);
+        $doccount = count($documents) . ' documents available in this course';
+        echo html_writer::tag('small', $doccount, ['class' => 'text-muted d-block mb-3']);
 
         if (count($documents) > 0) {
             // Add "Select All" / "Deselect All" buttons.
             echo html_writer::start_div('mb-2');
-            echo html_writer::tag('button', 'Select All', [
+            $selectallattrs = [
                 'type' => 'button',
                 'class' => 'btn btn-sm btn-outline-primary mr-2',
                 'onclick' => 'document.querySelectorAll(".doc-checkbox").forEach(el => el.checked = true);',
-            ]);
-            echo html_writer::tag('button', 'Deselect All', [
+            ];
+            echo html_writer::tag('button', 'Select All', $selectallattrs);
+            $deselectallattrs = [
                 'type' => 'button',
                 'class' => 'btn btn-sm btn-outline-secondary',
                 'onclick' => 'document.querySelectorAll(".doc-checkbox").forEach(el => el.checked = false);',
-            ]);
+            ];
+            echo html_writer::tag('button', 'Deselect All', $deselectallattrs);
             echo html_writer::end_div();
 
             // Document cards in grid.
@@ -1107,18 +1175,20 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
                 echo html_writer::start_div('card h-100');
                 echo html_writer::start_div('card-body p-2');
                 echo html_writer::start_div('custom-control custom-checkbox');
-                echo html_writer::empty_tag('input', [
+                $doccheckattrs = [
                     'type' => 'checkbox',
                     'name' => 'document_ids[]',
                     'value' => $docid,
                     'id' => 'doc_' . $docid,
                     'class' => 'custom-control-input doc-checkbox',
                     'checked' => $count <= 3 ? 'checked' : null,
-                ]);
-                echo html_writer::tag('label', '📄 ' . s($doctitle), [
+                ];
+                echo html_writer::empty_tag('input', $doccheckattrs);
+                $doclabelattrs = [
                     'for' => 'doc_' . $docid,
                     'class' => 'custom-control-label font-weight-normal',
-                ]);
+                ];
+                echo html_writer::tag('label', s($doctitle), $doclabelattrs);
                 echo html_writer::end_div();
                 echo html_writer::end_div();
                 echo html_writer::end_div();
@@ -1134,22 +1204,28 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
 
         // Duration (right side - 4 columns).
         echo html_writer::start_div('col-md-4');
-        echo html_writer::div(
-            html_writer::tag('label', 'Course Duration: <span class="text-danger">*</span>', ['class' => 'font-weight-bold', 'for' => 'duration']) .
-            html_writer::start_div('input-group') .
-            html_writer::select(array_combine(range(1, 12), range(1, 12)), 'duration_weeks', 4, false, [
-                'class' => 'form-control',
-                'id' => 'duration',
-                'required' => true,
-            ]) .
-            html_writer::div(
-                html_writer::tag('span', 'weeks', ['class' => 'input-group-text']),
-                'input-group-append'
-            ) .
-            html_writer::end_div() .
-            html_writer::tag('small', 'Recommended: 4-8 weeks', ['class' => 'form-text text-muted']),
-            'form-group'
+        $durationlabel = html_writer::tag(
+            'label',
+            'Course Duration: <span class="text-danger">*</span>',
+            ['class' => 'font-weight-bold', 'for' => 'duration']
         );
+        $durationoptions = array_combine(range(1, 12), range(1, 12));
+        $durationselect = html_writer::select(
+            $durationoptions,
+            'duration_weeks',
+            4,
+            false,
+            ['class' => 'form-control', 'id' => 'duration', 'required' => true]
+        );
+        $weeksappend = html_writer::div(
+            html_writer::tag('span', 'weeks', ['class' => 'input-group-text']),
+            'input-group-append'
+        );
+        $durationinput = html_writer::start_div('input-group')
+            . $durationselect . $weeksappend
+            . html_writer::end_div();
+        $durationhelp = html_writer::tag('small', 'Recommended: 4-8 weeks', ['class' => 'form-text text-muted']);
+        echo html_writer::div($durationlabel . $durationinput . $durationhelp, 'form-group');
         echo html_writer::end_div();
 
         echo html_writer::end_div(); // End row.
@@ -1165,12 +1241,38 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
         );
 
         $contenttypesdef = [
-            'sections' => ['label' => '📖 Course Sections', 'desc' => 'Weekly or topical sections with summaries', 'default' => true, 'required' => true],
-            'pages' => ['label' => '📄 Teaching Pages', 'desc' => '400-800 words of instructional content', 'default' => true, 'required' => true],
-            'activities' => ['label' => '🎯 Hands-on Activities', 'desc' => 'Practice exercises and learning tasks', 'default' => false],
-            'discussions' => ['label' => '💬 Discussion Forums', 'desc' => 'Critical thinking prompts', 'default' => false],
-            'quiz_questions' => ['label' => '❓ Section Quizzes', 'desc' => 'Graded assessments with feedback', 'default' => true],
-            'assignments' => ['label' => '📝 Assignments', 'desc' => 'Projects with rubrics', 'default' => false],
+            'sections' => [
+                'label' => 'Course Sections',
+                'desc' => 'Weekly or topical sections with summaries',
+                'default' => true,
+                'required' => true,
+            ],
+            'pages' => [
+                'label' => 'Teaching Pages',
+                'desc' => '400-800 words of instructional content',
+                'default' => true,
+                'required' => true,
+            ],
+            'activities' => [
+                'label' => 'Hands-on Activities',
+                'desc' => 'Practice exercises and learning tasks',
+                'default' => false,
+            ],
+            'discussions' => [
+                'label' => 'Discussion Forums',
+                'desc' => 'Critical thinking prompts',
+                'default' => false,
+            ],
+            'quiz_questions' => [
+                'label' => 'Section Quizzes',
+                'desc' => 'Graded assessments with feedback',
+                'default' => true,
+            ],
+            'assignments' => [
+                'label' => 'Assignments',
+                'desc' => 'Projects with rubrics',
+                'default' => false,
+            ],
         ];
 
         echo html_writer::start_div('row');
@@ -1180,7 +1282,7 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
             echo html_writer::start_div('card h-100' . ($isrequired ? ' border-primary' : ''));
             echo html_writer::start_div('card-body p-3');
             echo html_writer::start_div('custom-control custom-checkbox');
-            echo html_writer::empty_tag('input', [
+            $typecheckattrs = [
                 'type' => 'checkbox',
                 'name' => 'content_types[]',
                 'value' => $type,
@@ -1188,18 +1290,21 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
                 'class' => 'custom-control-input',
                 'checked' => ($info['default'] ?? false) ? 'checked' : null,
                 'disabled' => $isrequired ? 'disabled' : null,
-            ]);
+            ];
+            echo html_writer::empty_tag('input', $typecheckattrs);
             if ($isrequired) {
-                echo html_writer::empty_tag('input', [
+                $hiddenattrs = [
                     'type' => 'hidden',
                     'name' => 'content_types[]',
                     'value' => $type,
-                ]);
+                ];
+                echo html_writer::empty_tag('input', $hiddenattrs);
             }
-            echo html_writer::tag('label', $info['label'], [
+            $typelabelattrs = [
                 'for' => 'content_' . $type,
                 'class' => 'custom-control-label font-weight-bold',
-            ]);
+            ];
+            echo html_writer::tag('label', $info['label'], $typelabelattrs);
             echo html_writer::tag('small', $info['desc'], ['class' => 'd-block text-muted mt-1']);
             echo html_writer::end_div(); // End custom-control.
             echo html_writer::end_div(); // End card-body.
@@ -1229,20 +1334,20 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
         echo html_writer::end_div();
 
         // Main generate button with gradient effect.
-        echo html_writer::div(
-            html_writer::tag('button',
-                '<i class="fa fa-magic mr-2"></i> Generate Course Content',
-                [
-                    'type' => 'submit',
-                    'class' => 'btn btn-savian btn-lg px-5 py-3',
-                    'style' => 'font-size: 1.2em; box-shadow: 0 4px 6px rgba(108, 59, 170, 0.3);',
-                ]
-            ),
-            'd-block mb-2'
+        $submitbutton = html_writer::tag(
+            'button',
+            '<i class="fa fa-magic mr-2"></i> Generate Course Content',
+            [
+                'type' => 'submit',
+                'class' => 'btn btn-savian btn-lg px-5 py-3',
+                'style' => 'font-size: 1.2em; box-shadow: 0 4px 6px rgba(108, 59, 170, 0.3);',
+            ]
         );
+        echo html_writer::div($submitbutton, 'd-block mb-2');
 
         // Subtitle.
-        echo html_writer::tag('small',
+        echo html_writer::tag(
+            'small',
             'You\'ll be able to preview and edit all content before adding to your course.',
             ['class' => 'text-muted']
         );
@@ -1266,7 +1371,11 @@ echo html_writer::div(
 // Coming Soon Features (Collapsible).
 echo html_writer::start_div('mt-5 mb-4');
 echo html_writer::start_tag('details', ['class' => 'border rounded p-3 bg-light']);
-echo html_writer::tag('summary', '🔮 Coming Soon: Exciting New Features', ['class' => 'font-weight-bold text-primary', 'style' => 'cursor: pointer;']);
+echo html_writer::tag(
+    'summary',
+    'Coming Soon: Exciting New Features',
+    ['class' => 'font-weight-bold text-primary', 'style' => 'cursor: pointer;']
+);
 echo html_writer::start_div('mt-3');
 
 echo html_writer::tag('h6', '📌 Insert Content Between Existing Topics', ['class' => 'text-primary']);

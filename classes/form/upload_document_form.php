@@ -49,17 +49,28 @@ class upload_document_form extends \moodleform {
         $mform->addRule('title', get_string('required'), 'required', null, 'client');
 
         // File picker.
-        $mform->addElement('filepicker', 'document', get_string('upload_document', 'local_savian_ai'), null, [
-            'accepted_types' => ['.pdf', '.docx', '.txt'],
-            'maxbytes' => 50 * 1024 * 1024,
-        ]);
+        $mform->addElement(
+            'filepicker',
+            'document',
+            get_string('upload_document', 'local_savian_ai'),
+            null,
+            [
+                'accepted_types' => ['.pdf', '.docx', '.txt'],
+                'maxbytes' => 50 * 1024 * 1024,
+            ]
+        );
         $mform->addRule('document', get_string('required'), 'required', null, 'client');
 
         // Description.
-        $mform->addElement('textarea', 'description', get_string('document_description', 'local_savian_ai'), [
-            'rows' => 4,
-            'cols' => 60,
-        ]);
+        $mform->addElement(
+            'textarea',
+            'description',
+            get_string('document_description', 'local_savian_ai'),
+            [
+                'rows' => 4,
+                'cols' => 60,
+            ]
+        );
         $mform->setType('description', PARAM_TEXT);
 
         // Subject area.

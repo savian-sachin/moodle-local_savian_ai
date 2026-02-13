@@ -44,8 +44,8 @@ defined('MOODLE_INTERNAL') || die();
  */
 class provider implements
     \core_privacy\local\metadata\provider,
-    \core_privacy\local\request\plugin\provider,
-    \core_privacy\local\request\core_userlist_provider {
+    \core_privacy\local\request\core_userlist_provider,
+    \core_privacy\local\request\plugin\provider {
 
     /**
      * Declare what user data this plugin stores.
@@ -54,66 +54,93 @@ class provider implements
      * @return collection The updated collection.
      */
     public static function get_metadata(collection $collection): collection {
-
         // Chat conversations.
-        $collection->add_database_table('local_savian_chat_conversations', [
-            'user_id' => 'privacy:metadata:conversations:user_id',
-            'course_id' => 'privacy:metadata:conversations:course_id',
-            'title' => 'privacy:metadata:conversations:title',
-            'timecreated' => 'privacy:metadata:conversations:timecreated',
-        ], 'privacy:metadata:conversations');
+        $collection->add_database_table(
+            'local_savian_chat_conversations',
+            [
+                'user_id' => 'privacy:metadata:conversations:user_id',
+                'course_id' => 'privacy:metadata:conversations:course_id',
+                'title' => 'privacy:metadata:conversations:title',
+                'timecreated' => 'privacy:metadata:conversations:timecreated',
+            ],
+            'privacy:metadata:conversations'
+        );
 
         // Chat messages.
-        $collection->add_database_table('local_savian_chat_messages', [
-            'conversation_id' => 'privacy:metadata:messages:conversation_id',
-            'role' => 'privacy:metadata:messages:role',
-            'content' => 'privacy:metadata:messages:content',
-            'feedback' => 'privacy:metadata:messages:feedback',
-            'feedback_comment' => 'privacy:metadata:messages:feedback_comment',
-            'timecreated' => 'privacy:metadata:messages:timecreated',
-        ], 'privacy:metadata:messages');
+        $collection->add_database_table(
+            'local_savian_chat_messages',
+            [
+                'conversation_id' => 'privacy:metadata:messages:conversation_id',
+                'role' => 'privacy:metadata:messages:role',
+                'content' => 'privacy:metadata:messages:content',
+                'feedback' => 'privacy:metadata:messages:feedback',
+                'feedback_comment' => 'privacy:metadata:messages:feedback_comment',
+                'timecreated' => 'privacy:metadata:messages:timecreated',
+            ],
+            'privacy:metadata:messages'
+        );
 
         // Chat settings.
-        $collection->add_database_table('local_savian_chat_settings', [
-            'user_id' => 'privacy:metadata:settings:user_id',
-            'widget_position' => 'privacy:metadata:settings:widget_position',
-            'widget_minimized' => 'privacy:metadata:settings:widget_minimized',
-        ], 'privacy:metadata:settings');
+        $collection->add_database_table(
+            'local_savian_chat_settings',
+            [
+                'user_id' => 'privacy:metadata:settings:user_id',
+                'widget_position' => 'privacy:metadata:settings:widget_position',
+                'widget_minimized' => 'privacy:metadata:settings:widget_minimized',
+            ],
+            'privacy:metadata:settings'
+        );
 
         // Generation history.
-        $collection->add_database_table('local_savian_generations', [
-            'user_id' => 'privacy:metadata:generations:user_id',
-            'course_id' => 'privacy:metadata:generations:course_id',
-            'generation_type' => 'privacy:metadata:generations:generation_type',
-            'status' => 'privacy:metadata:generations:status',
-            'timecreated' => 'privacy:metadata:generations:timecreated',
-        ], 'privacy:metadata:generations');
+        $collection->add_database_table(
+            'local_savian_generations',
+            [
+                'user_id' => 'privacy:metadata:generations:user_id',
+                'course_id' => 'privacy:metadata:generations:course_id',
+                'generation_type' => 'privacy:metadata:generations:generation_type',
+                'status' => 'privacy:metadata:generations:status',
+                'timecreated' => 'privacy:metadata:generations:timecreated',
+            ],
+            'privacy:metadata:generations'
+        );
 
         // Analytics reports (who triggered manual reports).
-        $collection->add_database_table('local_savian_analytics_reports', [
-            'course_id' => 'privacy:metadata:analytics_reports:course_id',
-            'user_id' => 'privacy:metadata:analytics_reports:user_id',
-            'report_type' => 'privacy:metadata:analytics_reports:report_type',
-            'timecreated' => 'privacy:metadata:analytics_reports:timecreated',
-        ], 'privacy:metadata:analytics_reports');
+        $collection->add_database_table(
+            'local_savian_analytics_reports',
+            [
+                'course_id' => 'privacy:metadata:analytics_reports:course_id',
+                'user_id' => 'privacy:metadata:analytics_reports:user_id',
+                'report_type' => 'privacy:metadata:analytics_reports:report_type',
+                'timecreated' => 'privacy:metadata:analytics_reports:timecreated',
+            ],
+            'privacy:metadata:analytics_reports'
+        );
 
         // Analytics events (real-time tracking).
-        $collection->add_database_table('local_savian_analytics_events', [
-            'course_id' => 'privacy:metadata:analytics_events:course_id',
-            'user_id' => 'privacy:metadata:analytics_events:user_id',
-            'event_name' => 'privacy:metadata:analytics_events:event_name',
-            'timecreated' => 'privacy:metadata:analytics_events:timecreated',
-        ], 'privacy:metadata:analytics_events');
+        $collection->add_database_table(
+            'local_savian_analytics_events',
+            [
+                'course_id' => 'privacy:metadata:analytics_events:course_id',
+                'user_id' => 'privacy:metadata:analytics_events:user_id',
+                'event_name' => 'privacy:metadata:analytics_events:event_name',
+                'timecreated' => 'privacy:metadata:analytics_events:timecreated',
+            ],
+            'privacy:metadata:analytics_events'
+        );
 
         // External service data.
-        $collection->add_external_location_link('savian_api', [
-            'user_id' => 'privacy:metadata:external:user_id',
-            'user_email' => 'privacy:metadata:external:user_email',
-            'course_id' => 'privacy:metadata:external:course_id',
-            'chat_message' => 'privacy:metadata:external:chat_message',
-            'document_content' => 'privacy:metadata:external:document_content',
-            'anonymized_analytics' => 'privacy:metadata:external:anonymized_analytics',
-        ], 'privacy:metadata:external');
+        $collection->add_external_location_link(
+            'savian_api',
+            [
+                'user_id' => 'privacy:metadata:external:user_id',
+                'user_email' => 'privacy:metadata:external:user_email',
+                'course_id' => 'privacy:metadata:external:course_id',
+                'chat_message' => 'privacy:metadata:external:chat_message',
+                'document_content' => 'privacy:metadata:external:document_content',
+                'anonymized_analytics' => 'privacy:metadata:external:anonymized_analytics',
+            ],
+            'privacy:metadata:external'
+        );
 
         return $collection;
     }
@@ -159,29 +186,35 @@ class provider implements
 
         foreach ($contextlist->get_contexts() as $context) {
             // Export chat conversations.
-            $conversations = $DB->get_records('local_savian_chat_conversations', [
-                'user_id' => $userid,
-            ]);
+            $conversations = $DB->get_records(
+                'local_savian_chat_conversations',
+                ['user_id' => $userid]
+            );
 
             foreach ($conversations as $conversation) {
                 // Get messages for this conversation.
-                $messages = $DB->get_records('local_savian_chat_messages', [
-                    'conversation_id' => $conversation->id,
-                ], 'timecreated ASC');
+                $messages = $DB->get_records(
+                    'local_savian_chat_messages',
+                    ['conversation_id' => $conversation->id],
+                    'timecreated ASC'
+                );
 
                 $conversationdata = (object) [
                     'title' => $conversation->title,
                     'course_id' => $conversation->course_id,
                     'created' => \core_privacy\local\request\transform::datetime($conversation->timecreated),
-                    'messages' => array_map(function($msg) {
-                        return [
-                            'role' => $msg->role,
-                            'content' => $msg->content,
-                            'feedback' => $msg->feedback,
-                            'feedback_comment' => $msg->feedback_comment,
-                            'created' => \core_privacy\local\request\transform::datetime($msg->timecreated),
-                        ];
-                    }, array_values($messages)),
+                    'messages' => array_map(
+                        function ($msg) {
+                            return [
+                                'role' => $msg->role,
+                                'content' => $msg->content,
+                                'feedback' => $msg->feedback,
+                                'feedback_comment' => $msg->feedback_comment,
+                                'created' => \core_privacy\local\request\transform::datetime($msg->timecreated),
+                            ];
+                        },
+                        array_values($messages)
+                    ),
                 ];
 
                 writer::with_context($context)->export_data(
@@ -235,14 +268,17 @@ class provider implements
             // Export analytics events (real-time tracking).
             $analyticsevents = $DB->get_records('local_savian_analytics_events', ['user_id' => $userid]);
             if (!empty($analyticsevents)) {
-                $eventsdata = array_map(function($event) {
-                    return [
-                        'course_id' => $event->course_id,
-                        'event_name' => $event->event_name,
-                        'processed' => $event->processed ? 'Yes' : 'No',
-                        'created' => \core_privacy\local\request\transform::datetime($event->timecreated),
-                    ];
-                }, array_values($analyticsevents));
+                $eventsdata = array_map(
+                    function ($event) {
+                        return [
+                            'course_id' => $event->course_id,
+                            'event_name' => $event->event_name,
+                            'processed' => $event->processed ? 'Yes' : 'No',
+                            'created' => \core_privacy\local\request\transform::datetime($event->timecreated),
+                        ];
+                    },
+                    array_values($analyticsevents)
+                );
 
                 writer::with_context($context)->export_data(
                     [get_string('privacy:analyticsevents', 'local_savian_ai')],

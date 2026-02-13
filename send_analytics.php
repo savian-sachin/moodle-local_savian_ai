@@ -33,4 +33,6 @@ if (!empty($action)) {
     $urlparams['action'] = $action;
 }
 
-redirect(new moodle_url('/local/savian_ai/analytics_reports.php', $urlparams));
+redirect(
+    new moodle_url('/local/savian_ai/analytics_reports.php', $urlparams)
+);

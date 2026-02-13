@@ -68,9 +68,11 @@ class client {
      * @return object Response object.
      */
     public function validate() {
-        return $this->request('POST', 'auth/validate/', [
-            'org_code' => $this->orgcode,
-        ]);
+        return $this->request(
+            'POST',
+            'auth/validate/',
+            ['org_code' => $this->orgcode]
+        );
     }
 
     /**
@@ -449,8 +451,13 @@ class client {
      * @param string $requestid Original generation request ID.
      * @return object Response object.
      */
-    public function save_approved_course_to_knowledge_base($coursestructure, $coursetitle, $courseid,
-                                                           $approvedby, $requestid = null) {
+    public function save_approved_course_to_knowledge_base(
+        $coursestructure,
+        $coursetitle,
+        $courseid,
+        $approvedby,
+        $requestid = null
+    ) {
         global $COURSE;
 
         $data = [

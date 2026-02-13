@@ -62,20 +62,40 @@ if (in_array($action, ['save_restriction', 'delete_restriction', 'toggle_restric
         // Validation.
         if ($data->restriction_type === 'manual') {
             if ($data->timeend > 0 && $data->timestart > 0 && $data->timeend <= $data->timestart) {
-                redirect($redirecturl, get_string('error_invalid_time_range', 'local_savian_ai'), null, 'error');
+                redirect(
+                    $redirecturl,
+                    get_string('error_invalid_time_range', 'local_savian_ai'),
+                    null,
+                    'error'
+                );
             }
         }
 
         $restrictionmanager->save_restriction($data, $courseid, $USER->id);
-        redirect($redirecturl, get_string('restriction_saved', 'local_savian_ai'), null, 'success');
+        redirect(
+            $redirecturl,
+            get_string('restriction_saved', 'local_savian_ai'),
+            null,
+            'success'
+        );
     }
 
     if ($action === 'delete_restriction') {
         $restrictionid = required_param('restriction_id', PARAM_INT);
         if ($restrictionmanager->delete_restriction($restrictionid, $courseid)) {
-            redirect($redirecturl, get_string('restriction_deleted', 'local_savian_ai'), null, 'success');
+            redirect(
+                $redirecturl,
+                get_string('restriction_deleted', 'local_savian_ai'),
+                null,
+                'success'
+            );
         } else {
-            redirect($redirecturl, get_string('error_restriction_not_found', 'local_savian_ai'), null, 'error');
+            redirect(
+                $redirecturl,
+                get_string('error_restriction_not_found', 'local_savian_ai'),
+                null,
+                'error'
+            );
         }
     }
 
@@ -83,9 +103,19 @@ if (in_array($action, ['save_restriction', 'delete_restriction', 'toggle_restric
         $restrictionid = required_param('restriction_id', PARAM_INT);
         $result = $restrictionmanager->toggle_restriction($restrictionid, $courseid, $USER->id);
         if ($result !== false) {
-            redirect($redirecturl, get_string('restriction_toggled', 'local_savian_ai'), null, 'success');
+            redirect(
+                $redirecturl,
+                get_string('restriction_toggled', 'local_savian_ai'),
+                null,
+                'success'
+            );
         } else {
-            redirect($redirecturl, get_string('error_restriction_not_found', 'local_savian_ai'), null, 'error');
+            redirect(
+                $redirecturl,
+                get_string('error_restriction_not_found', 'local_savian_ai'),
+                null,
+                'error'
+            );
         }
     }
 }
@@ -119,8 +149,12 @@ if ($action === 'save' && confirm_sesskey()) {
         $DB->insert_record('local_savian_chat_course_config', $config);
     }
 
-    redirect(new moodle_url('/local/savian_ai/chat_course_settings.php', ['courseid' => $courseid]),
-             get_string('settings_saved', 'local_savian_ai'), null, 'success');
+    redirect(
+        new moodle_url('/local/savian_ai/chat_course_settings.php', ['courseid' => $courseid]),
+        get_string('settings_saved', 'local_savian_ai'),
+        null,
+        'success'
+    );
 }
 
 echo $OUTPUT->header();
@@ -170,7 +204,11 @@ echo html_writer::tag('label', get_string('enable_chat_for_course', 'local_savia
     'class' => 'form-check-label font-weight-bold',
 ]);
 echo html_writer::end_div();
-echo html_writer::tag('small', get_string('enable_chat_for_course_desc', 'local_savian_ai'), ['class' => 'form-text text-muted']);
+echo html_writer::tag(
+    'small',
+    get_string('enable_chat_for_course_desc', 'local_savian_ai'),
+    ['class' => 'form-text text-muted']
+);
 echo html_writer::end_div();
 
 // Students can chat checkbox.
@@ -189,7 +227,11 @@ echo html_writer::tag('label', get_string('students_can_chat', 'local_savian_ai'
     'class' => 'form-check-label font-weight-bold',
 ]);
 echo html_writer::end_div();
-echo html_writer::tag('small', get_string('students_can_chat_desc', 'local_savian_ai'), ['class' => 'form-text text-muted']);
+echo html_writer::tag(
+    'small',
+    get_string('students_can_chat_desc', 'local_savian_ai'),
+    ['class' => 'form-text text-muted']
+);
 echo html_writer::end_div();
 
 // Auto-include documents checkbox.
@@ -208,7 +250,11 @@ echo html_writer::tag('label', get_string('auto_include_docs', 'local_savian_ai'
     'class' => 'form-check-label font-weight-bold',
 ]);
 echo html_writer::end_div();
-echo html_writer::tag('small', get_string('auto_include_docs_desc', 'local_savian_ai'), ['class' => 'form-text text-muted']);
+echo html_writer::tag(
+    'small',
+    get_string('auto_include_docs_desc', 'local_savian_ai'),
+    ['class' => 'form-text text-muted']
+);
 echo html_writer::end_div();
 
 // Welcome message textarea.
@@ -224,7 +270,11 @@ echo html_writer::tag('textarea', s($config->welcome_message ?? ''), [
     'rows' => 3,
     'placeholder' => get_string('course_welcome_message_placeholder', 'local_savian_ai'),
 ]);
-echo html_writer::tag('small', get_string('course_welcome_message_desc', 'local_savian_ai'), ['class' => 'form-text text-muted']);
+echo html_writer::tag(
+    'small',
+    get_string('course_welcome_message_desc', 'local_savian_ai'),
+    ['class' => 'form-text text-muted']
+);
 echo html_writer::end_div();
 
 echo html_writer::end_div();
@@ -284,18 +334,26 @@ if (empty($restrictions)) {
         // Name and type.
         if ($restriction->restriction_type === 'quiz') {
             $name = html_writer::tag('i', '', ['class' => 'fa fa-question-circle mr-1']);
-            $name .= html_writer::tag('span', s($restriction->quiz_name ?: get_string('quiz_deleted', 'local_savian_ai')), ['class' => 'font-weight-bold']);
-            $name .= html_writer::tag('span', ' (' . get_string('restriction_type_quiz', 'local_savian_ai') . ')', ['class' => 'text-muted small']);
+            $quizname = s($restriction->quiz_name ?: get_string('quiz_deleted', 'local_savian_ai'));
+            $name .= html_writer::tag('span', $quizname, ['class' => 'font-weight-bold']);
+            $typestr = ' (' . get_string('restriction_type_quiz', 'local_savian_ai') . ')';
+            $name .= html_writer::tag('span', $typestr, ['class' => 'text-muted small']);
         } else {
             $name = html_writer::tag('i', '', ['class' => 'fa fa-clock-o mr-1']);
-            $name .= html_writer::tag('span', s($restriction->name ?: get_string('unnamed_restriction', 'local_savian_ai')), ['class' => 'font-weight-bold']);
-            $name .= html_writer::tag('span', ' (' . get_string('restriction_type_manual', 'local_savian_ai') . ')', ['class' => 'text-muted small']);
+            $manualname = s($restriction->name ?: get_string('unnamed_restriction', 'local_savian_ai'));
+            $name .= html_writer::tag('span', $manualname, ['class' => 'font-weight-bold']);
+            $typestr = ' (' . get_string('restriction_type_manual', 'local_savian_ai') . ')';
+            $name .= html_writer::tag('span', $typestr, ['class' => 'text-muted small']);
         }
         $row[] = $name;
 
         // Time range.
-        $start = $restriction->effective_timestart ? userdate($restriction->effective_timestart, get_string('strftimedatetime', 'langconfig')) : '-';
-        $end = $restriction->effective_timeend ? userdate($restriction->effective_timeend, get_string('strftimedatetime', 'langconfig')) : get_string('check_back_later', 'local_savian_ai');
+        $datefmt = get_string('strftimedatetime', 'langconfig');
+        $start = $restriction->effective_timestart
+            ? userdate($restriction->effective_timestart, $datefmt) : '-';
+        $end = $restriction->effective_timeend
+            ? userdate($restriction->effective_timeend, $datefmt)
+            : get_string('check_back_later', 'local_savian_ai');
         $row[] = $start . html_writer::tag('br', '') . $end;
 
         // Groups.
@@ -316,15 +374,19 @@ if (empty($restrictions)) {
             case 'active':
                 $statusclass = 'badge-danger';
                 if ($restriction->effective_timeend > 0) {
-                    $statustext .= ' - ' . get_string('ends_in', 'local_savian_ai',
-                        \local_savian_ai\chat\restriction_manager::format_time_remaining($restriction->effective_timeend));
+                    $remaining = \local_savian_ai\chat\restriction_manager::format_time_remaining(
+                        $restriction->effective_timeend
+                    );
+                    $statustext .= ' - ' . get_string('ends_in', 'local_savian_ai', $remaining);
                 }
                 break;
             case 'scheduled':
                 $statusclass = 'badge-warning';
                 if ($restriction->effective_timestart > 0) {
-                    $statustext .= ' - ' . get_string('starts_in', 'local_savian_ai',
-                        \local_savian_ai\chat\restriction_manager::format_time_remaining($restriction->effective_timestart));
+                    $remaining = \local_savian_ai\chat\restriction_manager::format_time_remaining(
+                        $restriction->effective_timestart
+                    );
+                    $statustext .= ' - ' . get_string('starts_in', 'local_savian_ai', $remaining);
                 }
                 break;
             case 'expired':
@@ -346,8 +408,11 @@ if (empty($restrictions)) {
             'restriction_id' => $restriction->id,
             'sesskey' => sesskey(),
         ]);
-        $toggletext = $restriction->is_enabled ? get_string('disable_restriction', 'local_savian_ai') : get_string('enable_restriction', 'local_savian_ai');
-        $toggleclass = $restriction->is_enabled ? 'btn-outline-warning' : 'btn-outline-success';
+        $toggletext = $restriction->is_enabled
+            ? get_string('disable_restriction', 'local_savian_ai')
+            : get_string('enable_restriction', 'local_savian_ai');
+        $toggleclass = $restriction->is_enabled
+            ? 'btn-outline-warning' : 'btn-outline-success';
         $actions[] = html_writer::link($toggleurl, $toggletext, ['class' => "btn btn-sm {$toggleclass}"]);
 
         // Delete.
@@ -357,9 +422,10 @@ if (empty($restrictions)) {
             'restriction_id' => $restriction->id,
             'sesskey' => sesskey(),
         ]);
+        $confirmstr = get_string('confirm_delete_restriction', 'local_savian_ai');
         $actions[] = html_writer::link($deleteurl, get_string('delete'), [
             'class' => 'btn btn-sm btn-outline-danger',
-            'onclick' => 'return confirm("' . get_string('confirm_delete_restriction', 'local_savian_ai') . '");',
+            'onclick' => 'return confirm("' . $confirmstr . '");',
         ]);
 
         $row[] = implode(' ', $actions);
@@ -377,7 +443,10 @@ echo html_writer::end_div();
 $quizzes = $restrictionmanager->get_course_quizzes($courseid);
 $groups = $restrictionmanager->get_course_groups($courseid);
 
-echo html_writer::start_div('modal fade', ['id' => 'addQuizRestrictionModal', 'tabindex' => '-1', 'role' => 'dialog']);
+echo html_writer::start_div(
+    'modal fade',
+    ['id' => 'addQuizRestrictionModal', 'tabindex' => '-1', 'role' => 'dialog']
+);
 echo html_writer::start_div('modal-dialog', ['role' => 'document']);
 echo html_writer::start_div('modal-content');
 echo html_writer::start_tag('form', [
@@ -402,14 +471,24 @@ if (empty($quizzes)) {
 } else {
     // Quiz select.
     echo html_writer::start_div('form-group');
-    echo html_writer::tag('label', get_string('select_quiz', 'local_savian_ai'), ['for' => 'quiz_id', 'class' => 'font-weight-bold']);
-    echo html_writer::start_tag('select', ['name' => 'quiz_id', 'id' => 'quiz_id', 'class' => 'form-control', 'required' => 'required']);
+    echo html_writer::tag(
+        'label',
+        get_string('select_quiz', 'local_savian_ai'),
+        ['for' => 'quiz_id', 'class' => 'font-weight-bold']
+    );
+    echo html_writer::start_tag('select', [
+        'name' => 'quiz_id',
+        'id' => 'quiz_id',
+        'class' => 'form-control',
+        'required' => 'required',
+    ]);
     echo html_writer::tag('option', '-- ' . get_string('select_quiz', 'local_savian_ai') . ' --', ['value' => '']);
     foreach ($quizzes as $quiz) {
         $timing = '';
         if ($quiz->timeopen || $quiz->timeclose) {
-            $open = $quiz->timeopen ? userdate($quiz->timeopen, get_string('strftimedatetime', 'langconfig')) : '-';
-            $close = $quiz->timeclose ? userdate($quiz->timeclose, get_string('strftimedatetime', 'langconfig')) : '-';
+            $dtfmt = get_string('strftimedatetime', 'langconfig');
+            $open = $quiz->timeopen ? userdate($quiz->timeopen, $dtfmt) : '-';
+            $close = $quiz->timeclose ? userdate($quiz->timeclose, $dtfmt) : '-';
             $timing = " ({$open} - {$close})";
         }
         echo html_writer::tag('option', s($quiz->name) . $timing, ['value' => $quiz->id]);
@@ -419,16 +498,32 @@ if (empty($quizzes)) {
 
     // Group select.
     echo html_writer::start_div('form-group');
-    echo html_writer::tag('label', get_string('select_groups', 'local_savian_ai'), ['class' => 'font-weight-bold']);
-    echo html_writer::tag('small', ' (' . get_string('all_students', 'local_savian_ai') . ' if none selected)', ['class' => 'text-muted']);
+    echo html_writer::tag(
+        'label',
+        get_string('select_groups', 'local_savian_ai'),
+        ['class' => 'font-weight-bold']
+    );
+    $allstudents = get_string('all_students', 'local_savian_ai');
+    echo html_writer::tag(
+        'small',
+        ' (' . $allstudents . ' if none selected)',
+        ['class' => 'text-muted']
+    );
     if (!empty($groups)) {
         foreach ($groups as $group) {
             echo html_writer::start_div('form-check');
             echo html_writer::empty_tag('input', [
-                'type' => 'checkbox', 'name' => 'group_ids[]', 'id' => 'quiz_group_' . $group->id,
-                'value' => $group->id, 'class' => 'form-check-input',
+                'type' => 'checkbox',
+                'name' => 'group_ids[]',
+                'id' => 'quiz_group_' . $group->id,
+                'value' => $group->id,
+                'class' => 'form-check-input',
             ]);
-            echo html_writer::tag('label', s($group->name), ['for' => 'quiz_group_' . $group->id, 'class' => 'form-check-label']);
+            echo html_writer::tag(
+                'label',
+                s($group->name),
+                ['for' => 'quiz_group_' . $group->id, 'class' => 'form-check-label']
+            );
             echo html_writer::end_div();
         }
     } else {
@@ -438,9 +533,16 @@ if (empty($quizzes)) {
 
     // Custom message.
     echo html_writer::start_div('form-group');
-    echo html_writer::tag('label', get_string('restriction_message', 'local_savian_ai'), ['for' => 'quiz_restriction_message']);
+    echo html_writer::tag(
+        'label',
+        get_string('restriction_message', 'local_savian_ai'),
+        ['for' => 'quiz_restriction_message']
+    );
     echo html_writer::tag('textarea', '', [
-        'name' => 'restriction_message', 'id' => 'quiz_restriction_message', 'class' => 'form-control', 'rows' => 2,
+        'name' => 'restriction_message',
+        'id' => 'quiz_restriction_message',
+        'class' => 'form-control',
+        'rows' => 2,
         'placeholder' => get_string('chat_restricted_quiz_default', 'local_savian_ai'),
     ]);
     echo html_writer::end_div();
@@ -449,9 +551,17 @@ if (empty($quizzes)) {
 echo html_writer::end_div();
 
 echo html_writer::start_div('modal-footer');
-echo html_writer::tag('button', get_string('cancel'), ['type' => 'button', 'class' => 'btn btn-secondary', 'data-dismiss' => 'modal']);
+echo html_writer::tag('button', get_string('cancel'), [
+    'type' => 'button',
+    'class' => 'btn btn-secondary',
+    'data-dismiss' => 'modal',
+]);
 if (!empty($quizzes)) {
-    echo html_writer::empty_tag('input', ['type' => 'submit', 'value' => get_string('savechanges'), 'class' => 'btn btn-primary']);
+    echo html_writer::empty_tag('input', [
+        'type' => 'submit',
+        'value' => get_string('savechanges'),
+        'class' => 'btn btn-primary',
+    ]);
 }
 echo html_writer::end_div();
 
@@ -461,7 +571,10 @@ echo html_writer::end_div();
 echo html_writer::end_div();
 
 // Add manual restriction modal.
-echo html_writer::start_div('modal fade', ['id' => 'addManualRestrictionModal', 'tabindex' => '-1', 'role' => 'dialog']);
+echo html_writer::start_div(
+    'modal fade',
+    ['id' => 'addManualRestrictionModal', 'tabindex' => '-1', 'role' => 'dialog']
+);
 echo html_writer::start_div('modal-dialog', ['role' => 'document']);
 echo html_writer::start_div('modal-content');
 echo html_writer::start_tag('form', [
@@ -483,43 +596,83 @@ echo html_writer::start_div('modal-body');
 
 // Restriction name.
 echo html_writer::start_div('form-group');
-echo html_writer::tag('label', get_string('restriction_name', 'local_savian_ai'), ['for' => 'restriction_name', 'class' => 'font-weight-bold']);
+echo html_writer::tag(
+    'label',
+    get_string('restriction_name', 'local_savian_ai'),
+    ['for' => 'restriction_name', 'class' => 'font-weight-bold']
+);
 echo html_writer::empty_tag('input', [
-    'type' => 'text', 'name' => 'restriction_name', 'id' => 'restriction_name', 'class' => 'form-control',
-    'placeholder' => get_string('restriction_name_placeholder', 'local_savian_ai'), 'required' => 'required',
+    'type' => 'text',
+    'name' => 'restriction_name',
+    'id' => 'restriction_name',
+    'class' => 'form-control',
+    'placeholder' => get_string('restriction_name_placeholder', 'local_savian_ai'),
+    'required' => 'required',
 ]);
 echo html_writer::end_div();
 
 // Start time.
 echo html_writer::start_div('form-group');
-echo html_writer::tag('label', get_string('restriction_start', 'local_savian_ai'), ['for' => 'timestart_input', 'class' => 'font-weight-bold']);
+echo html_writer::tag(
+    'label',
+    get_string('restriction_start', 'local_savian_ai'),
+    ['for' => 'timestart_input', 'class' => 'font-weight-bold']
+);
 echo html_writer::empty_tag('input', [
-    'type' => 'datetime-local', 'name' => 'timestart_input', 'id' => 'timestart_input', 'class' => 'form-control', 'required' => 'required',
+    'type' => 'datetime-local',
+    'name' => 'timestart_input',
+    'id' => 'timestart_input',
+    'class' => 'form-control',
+    'required' => 'required',
 ]);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'timestart', 'id' => 'timestart']);
 echo html_writer::end_div();
 
 // End time.
 echo html_writer::start_div('form-group');
-echo html_writer::tag('label', get_string('restriction_end', 'local_savian_ai'), ['for' => 'timeend_input', 'class' => 'font-weight-bold']);
+echo html_writer::tag(
+    'label',
+    get_string('restriction_end', 'local_savian_ai'),
+    ['for' => 'timeend_input', 'class' => 'font-weight-bold']
+);
 echo html_writer::empty_tag('input', [
-    'type' => 'datetime-local', 'name' => 'timeend_input', 'id' => 'timeend_input', 'class' => 'form-control', 'required' => 'required',
+    'type' => 'datetime-local',
+    'name' => 'timeend_input',
+    'id' => 'timeend_input',
+    'class' => 'form-control',
+    'required' => 'required',
 ]);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'timeend', 'id' => 'timeend']);
 echo html_writer::end_div();
 
 // Group select.
 echo html_writer::start_div('form-group');
-echo html_writer::tag('label', get_string('select_groups', 'local_savian_ai'), ['class' => 'font-weight-bold']);
-echo html_writer::tag('small', ' (' . get_string('all_students', 'local_savian_ai') . ' if none selected)', ['class' => 'text-muted']);
+echo html_writer::tag(
+    'label',
+    get_string('select_groups', 'local_savian_ai'),
+    ['class' => 'font-weight-bold']
+);
+$allstudentsstr = get_string('all_students', 'local_savian_ai');
+echo html_writer::tag(
+    'small',
+    ' (' . $allstudentsstr . ' if none selected)',
+    ['class' => 'text-muted']
+);
 if (!empty($groups)) {
     foreach ($groups as $group) {
         echo html_writer::start_div('form-check');
         echo html_writer::empty_tag('input', [
-            'type' => 'checkbox', 'name' => 'group_ids[]', 'id' => 'manual_group_' . $group->id,
-            'value' => $group->id, 'class' => 'form-check-input',
+            'type' => 'checkbox',
+            'name' => 'group_ids[]',
+            'id' => 'manual_group_' . $group->id,
+            'value' => $group->id,
+            'class' => 'form-check-input',
         ]);
-        echo html_writer::tag('label', s($group->name), ['for' => 'manual_group_' . $group->id, 'class' => 'form-check-label']);
+        echo html_writer::tag(
+            'label',
+            s($group->name),
+            ['for' => 'manual_group_' . $group->id, 'class' => 'form-check-label']
+        );
         echo html_writer::end_div();
     }
 } else {
@@ -529,9 +682,16 @@ echo html_writer::end_div();
 
 // Custom message.
 echo html_writer::start_div('form-group');
-echo html_writer::tag('label', get_string('restriction_message', 'local_savian_ai'), ['for' => 'manual_restriction_message']);
+echo html_writer::tag(
+    'label',
+    get_string('restriction_message', 'local_savian_ai'),
+    ['for' => 'manual_restriction_message']
+);
 echo html_writer::tag('textarea', '', [
-    'name' => 'restriction_message', 'id' => 'manual_restriction_message', 'class' => 'form-control', 'rows' => 2,
+    'name' => 'restriction_message',
+    'id' => 'manual_restriction_message',
+    'class' => 'form-control',
+    'rows' => 2,
     'placeholder' => get_string('chat_restricted_manual_default', 'local_savian_ai'),
 ]);
 echo html_writer::end_div();
@@ -539,8 +699,16 @@ echo html_writer::end_div();
 echo html_writer::end_div();
 
 echo html_writer::start_div('modal-footer');
-echo html_writer::tag('button', get_string('cancel'), ['type' => 'button', 'class' => 'btn btn-secondary', 'data-dismiss' => 'modal']);
-echo html_writer::empty_tag('input', ['type' => 'submit', 'value' => get_string('savechanges'), 'class' => 'btn btn-primary']);
+echo html_writer::tag('button', get_string('cancel'), [
+    'type' => 'button',
+    'class' => 'btn btn-secondary',
+    'data-dismiss' => 'modal',
+]);
+echo html_writer::empty_tag('input', [
+    'type' => 'submit',
+    'value' => get_string('savechanges'),
+    'class' => 'btn btn-primary',
+]);
 echo html_writer::end_div();
 
 echo html_writer::end_tag('form');
@@ -550,11 +718,11 @@ echo html_writer::end_div();
 
 // JavaScript for datetime conversion.
 $PAGE->requires->js_amd_inline("
-    document.getElementById('timestart_input').addEventListener('change', function() {
+    document.getElementById('timestart_input').addEventListener('change', function () {
         var date = new Date(this.value);
         document.getElementById('timestart').value = Math.floor(date.getTime() / 1000);
     });
-    document.getElementById('timeend_input').addEventListener('change', function() {
+    document.getElementById('timeend_input').addEventListener('change', function () {
         var date = new Date(this.value);
         document.getElementById('timeend').value = Math.floor(date.getTime() / 1000);
     });

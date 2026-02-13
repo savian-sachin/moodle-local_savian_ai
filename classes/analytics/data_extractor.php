@@ -82,10 +82,13 @@ class data_extractor {
                   AND u.suspended = 0
                 ORDER BY u.id";
 
-        return $this->db->get_records_sql($sql, [
-            'courseid' => $courseid,
-            'contextid' => $context->id,
-        ]);
+        return $this->db->get_records_sql(
+            $sql,
+            [
+                'courseid' => $courseid,
+                'contextid' => $context->id,
+            ]
+        );
     }
 
     /**
@@ -211,10 +214,13 @@ class data_extractor {
                   AND qa.userid = :userid
                   AND qa.state = 'finished'";
 
-        return $this->db->get_record_sql($sql, [
-            'courseid' => $courseid,
-            'userid' => $userid,
-        ]);
+        return $this->db->get_record_sql(
+            $sql,
+            [
+                'courseid' => $courseid,
+                'userid' => $userid,
+            ]
+        );
     }
 
     /**
@@ -236,10 +242,13 @@ class data_extractor {
                   AND asub.userid = :userid
                   AND asub.latest = 1";
 
-        return $this->db->get_record_sql($sql, [
-            'courseid' => $courseid,
-            'userid' => $userid,
-        ]);
+        return $this->db->get_record_sql(
+            $sql,
+            [
+                'courseid' => $courseid,
+                'userid' => $userid,
+            ]
+        );
     }
 
     /**
@@ -260,10 +269,13 @@ class data_extractor {
                 WHERE f.course = :courseid
                   AND fp.userid = :userid";
 
-        return $this->db->get_record_sql($sql, [
-            'courseid' => $courseid,
-            'userid' => $userid,
-        ]);
+        return $this->db->get_record_sql(
+            $sql,
+            [
+                'courseid' => $courseid,
+                'userid' => $userid,
+            ]
+        );
     }
 
     /**
@@ -291,10 +303,13 @@ class data_extractor {
                             AND cmc.userid = :userid
                             AND cmc.completionstate > 0";
 
-        $completed = $this->db->get_record_sql($completedsql, [
-            'courseid' => $courseid,
-            'userid' => $userid,
-        ]);
+        $completed = $this->db->get_record_sql(
+            $completedsql,
+            [
+                'courseid' => $courseid,
+                'userid' => $userid,
+            ]
+        );
 
         $completionrate = $total->total_activities > 0 ?
             round(($completed->completed_activities / $total->total_activities) * 100, 2) / 100 : 0;
@@ -319,10 +334,13 @@ class data_extractor {
                 WHERE cc.course = :courseid
                   AND cc.userid = :userid";
 
-        return $this->db->get_record_sql($sql, [
-            'courseid' => $courseid,
-            'userid' => $userid,
-        ]);
+        return $this->db->get_record_sql(
+            $sql,
+            [
+                'courseid' => $courseid,
+                'userid' => $userid,
+            ]
+        );
     }
 
     /**
@@ -354,10 +372,13 @@ class data_extractor {
                              AND ctx.contextlevel = 50
                              AND ctx.instanceid = :courseid2";
 
-        $enrollmentcount = $this->db->get_record_sql($enrollmentsql, [
-            'courseid' => $courseid,
-            'courseid2' => $courseid,
-        ]);
+        $enrollmentcount = $this->db->get_record_sql(
+            $enrollmentsql,
+            [
+                'courseid' => $courseid,
+                'courseid2' => $courseid,
+            ]
+        );
 
         return (object)[
             'course_id' => $course->id,
@@ -390,11 +411,16 @@ class data_extractor {
                   AND timecreated >= :mintime
                 ORDER BY timecreated ASC";
 
-        $logs = $this->db->get_records_sql($sql, [
-            'courseid' => $courseid,
-            'userid' => $userid,
-            'mintime' => $mintime,
-        ], 0, 10000);
+        $logs = $this->db->get_records_sql(
+            $sql,
+            [
+                'courseid' => $courseid,
+                'userid' => $userid,
+                'mintime' => $mintime,
+            ],
+            0,
+            10000
+        );
 
         if (empty($logs)) {
             return 0;
@@ -441,10 +467,13 @@ class data_extractor {
                   AND gg.finalgrade < :usergrade
                   AND gg.finalgrade IS NOT NULL";
 
-        $below = $this->db->get_record_sql($sql, [
-            'courseid' => $courseid,
-            'usergrade' => $usergrade,
-        ]);
+        $below = $this->db->get_record_sql(
+            $sql,
+            [
+                'courseid' => $courseid,
+                'usergrade' => $usergrade,
+            ]
+        );
 
         // Get total students with grades.
         $totalsql = "SELECT COUNT(*) as total

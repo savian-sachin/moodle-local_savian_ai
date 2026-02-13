@@ -24,10 +24,6 @@
 
 namespace local_savian_ai\task;
 
-defined('MOODLE_INTERNAL') || die();
-
-require_once($CFG->dirroot . '/local/savian_ai/classes/analytics/report_builder.php');
-
 /**
  * Weekly scheduled task to send analytics reports.
  *
@@ -39,7 +35,6 @@ require_once($CFG->dirroot . '/local/savian_ai/classes/analytics/report_builder.
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class send_analytics_weekly extends \core\task\scheduled_task {
-
     /**
      * Get task name.
      *
@@ -53,7 +48,9 @@ class send_analytics_weekly extends \core\task\scheduled_task {
      * Execute the task.
      */
     public function execute() {
-        global $DB;
+        global $CFG, $DB;
+
+        require_once($CFG->dirroot . '/local/savian_ai/classes/analytics/report_builder.php');
 
         // Check if analytics is globally enabled.
         $enabled = get_config('local_savian_ai', 'analytics_enabled');
@@ -132,13 +129,14 @@ class send_analytics_weekly extends \core\task\scheduled_task {
                 $dateto = time();
 
                 // Build and send comprehensive report.
+                // System triggered, no specific user.
                 $result = $builder->build_and_send_report(
                     $course->id,
                     'scheduled',
                     'cron',
                     $datefrom,
                     $dateto,
-                    null // System triggered.
+                    null
                 );
 
                 if ($result->success) {
@@ -160,7 +158,6 @@ class send_analytics_weekly extends \core\task\scheduled_task {
                     mtrace("  Report failed: " . ($result->error ?? 'Unknown error'));
                     $errorcount++;
                 }
-
             } catch (\Exception $e) {
                 mtrace("  Error processing course: " . $e->getMessage());
                 $errorcount++;

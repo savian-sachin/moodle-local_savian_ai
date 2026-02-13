@@ -24,8 +24,6 @@
 
 namespace local_savian_ai\task;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Scheduled task to cleanup old analytics data (GDPR data retention).
  *
@@ -37,7 +35,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class cleanup_old_analytics extends \core\task\scheduled_task {
-
     /**
      * Get task name.
      *
@@ -101,11 +98,10 @@ class cleanup_old_analytics extends \core\task\scheduled_task {
         }
 
         // Clean up orphaned events (user or course deleted).
-        $orphanedevents = $DB->execute("
-            DELETE FROM {local_savian_analytics_events}
-            WHERE user_id NOT IN (SELECT id FROM {user})
-               OR course_id NOT IN (SELECT id FROM {course})
-        ");
+        $sql = "DELETE FROM {local_savian_analytics_events}
+                WHERE user_id NOT IN (SELECT id FROM {user})
+                   OR course_id NOT IN (SELECT id FROM {course})";
+        $orphanedevents = $DB->execute($sql);
 
         if ($orphanedevents) {
             mtrace("  Cleaned up orphaned event records.");

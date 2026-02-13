@@ -39,7 +39,10 @@ $orgcode = get_config('local_savian_ai', 'org_code');
 echo $OUTPUT->header();
 
 // Consistent header.
-echo local_savian_ai_render_header('Savian AI Dashboard', 'AI-powered content generation for Moodle');
+echo local_savian_ai_render_header(
+    'Savian AI Dashboard',
+    'AI-powered content generation for Moodle'
+);
 
 if (empty($apikey)) {
     echo $OUTPUT->notification(get_string('error_no_api_key', 'local_savian_ai'), 'error');
@@ -116,7 +119,9 @@ echo html_writer::end_div();
 
 // Total Questions.
 $totalquestions = $DB->get_field_sql(
-    'SELECT COALESCE(SUM(questions_count), 0) FROM {local_savian_generations} WHERE generation_type IN (?, ?)',
+    'SELECT COALESCE(SUM(questions_count), 0)
+       FROM {local_savian_generations}
+      WHERE generation_type IN (?, ?)',
     ['questions', 'questions_from_documents']
 );
 echo html_writer::start_div('col-md-3 col-6 mb-3');
@@ -136,7 +141,9 @@ foreach ($coursecontentgens as $gen) {
     if (!empty($gen->response_data)) {
         $data = json_decode($gen->response_data);
         $totalsections += $data->sections_created ?? 0;
-        $totalactivities += ($data->pages_created ?? 0) + ($data->quizzes_created ?? 0) + ($data->assignments_created ?? 0);
+        $totalactivities += ($data->pages_created ?? 0)
+            + ($data->quizzes_created ?? 0)
+            + ($data->assignments_created ?? 0);
     }
 }
 echo html_writer::start_div('col-md-3 col-6 mb-3');
@@ -163,10 +170,14 @@ echo html_writer::end_div(); // End row.
 // API status and quota.
 if ($apiconnected) {
     echo html_writer::start_div('card mb-4 savian-accent-card');
-    echo html_writer::div('📊 API Usage & Quota', 'card-header');
+    echo html_writer::div('API Usage & Quota', 'card-header');
     echo html_writer::start_div('card-body');
 
-    echo html_writer::div('✓ Connected to ' . ($apiresponse->organization->name ?? $orgcode), 'alert alert-success mb-3');
+    $orgname = $apiresponse->organization->name ?? $orgcode;
+    echo html_writer::div(
+        'Connected to ' . $orgname,
+        'alert alert-success mb-3'
+    );
 
     if (isset($apiresponse->quota)) {
         echo html_writer::start_div('row');
@@ -185,7 +196,8 @@ if ($apiconnected) {
                 ]),
                 'progress mt-2'
             );
-            echo html_writer::tag('small', "{$q->used} / {$q->limit} used ({$q->remaining} remaining)", ['class' => 'text-muted']);
+            $quotatext = "{$q->used} / {$q->limit} used ({$q->remaining} remaining)";
+            echo html_writer::tag('small', $quotatext, ['class' => 'text-muted']);
             echo html_writer::end_div();
         }
 
@@ -203,7 +215,8 @@ if ($apiconnected) {
                 ]),
                 'progress mt-2'
             );
-            echo html_writer::tag('small', "{$d->used} / {$d->limit} used ({$d->remaining} remaining)", ['class' => 'text-muted']);
+            $quotatext = "{$d->used} / {$d->limit} used ({$d->remaining} remaining)";
+            echo html_writer::tag('small', $quotatext, ['class' => 'text-muted']);
             echo html_writer::end_div();
         }
 
@@ -221,7 +234,8 @@ if ($apiconnected) {
                 ]),
                 'progress mt-2'
             );
-            echo html_writer::tag('small', "{$c->used} / {$c->limit} used ({$c->remaining} remaining)", ['class' => 'text-muted']);
+            $quotatext = "{$c->used} / {$c->limit} used ({$c->remaining} remaining)";
+            echo html_writer::tag('small', $quotatext, ['class' => 'text-muted']);
             echo html_writer::end_div();
         }
 
@@ -246,10 +260,14 @@ if (!empty($usercourses)) {
     $table->attributes['class'] = 'table table-striped generaltable';
 
     foreach ($usercourses as $course) {
-        $coursedocs = $DB->count_records('local_savian_documents', ['course_id' => $course->id, 'is_active' => 1]);
+        $coursedocs = $DB->count_records(
+            'local_savian_documents',
+            ['course_id' => $course->id, 'is_active' => 1]
+        );
         $coursequestions = $DB->get_field_sql(
-            'SELECT COALESCE(SUM(questions_count), 0) FROM {local_savian_generations}
-             WHERE course_id = ? AND generation_type IN (?, ?)',
+            'SELECT COALESCE(SUM(questions_count), 0)
+               FROM {local_savian_generations}
+              WHERE course_id = ? AND generation_type IN (?, ?)',
             [$course->id, 'questions', 'questions_from_documents']
         );
 
@@ -263,7 +281,9 @@ if (!empty($usercourses)) {
             if (!empty($gen->response_data)) {
                 $data = json_decode($gen->response_data);
                 $sections += $data->sections_created ?? 0;
-                $activities += ($data->pages_created ?? 0) + ($data->quizzes_created ?? 0) + ($data->assignments_created ?? 0);
+                $activities += ($data->pages_created ?? 0)
+                    + ($data->quizzes_created ?? 0)
+                    + ($data->assignments_created ?? 0);
             }
         }
 
@@ -300,22 +320,23 @@ if (!empty($recent)) {
 
     foreach ($recent as $activity) {
         $coursename = $DB->get_field('course', 'fullname', ['id' => $activity->course_id]);
-        $username = $DB->get_field('user', 'firstname', ['id' => $activity->user_id]) . ' ' .
-                     $DB->get_field('user', 'lastname', ['id' => $activity->user_id]);
+        $firstname = $DB->get_field('user', 'firstname', ['id' => $activity->user_id]);
+        $lastname = $DB->get_field('user', 'lastname', ['id' => $activity->user_id]);
+        $username = $firstname . ' ' . $lastname;
 
-        $icon = '❓';
+        $icon = '?';
         $description = '';
         switch ($activity->generation_type) {
             case 'questions':
-                $icon = '❓';
+                $icon = '?';
                 $description = "{$activity->questions_count} questions generated";
                 break;
             case 'questions_from_documents':
-                $icon = '📄❓';
+                $icon = 'Q';
                 $description = "{$activity->questions_count} questions from documents";
                 break;
             case 'course_content':
-                $icon = '📚';
+                $icon = 'C';
                 $data = json_decode($activity->response_data ?? '{}');
                 $sections = $data->sections_created ?? 0;
                 $description = "{$sections} course sections created";
@@ -323,14 +344,14 @@ if (!empty($recent)) {
         }
 
         echo html_writer::start_div('list-group-item');
-        echo html_writer::tag('div',
+        echo html_writer::tag(
+            'div',
             "{$icon} <strong>{$description}</strong> in {$coursename}",
             ['class' => 'mb-1']
         );
-        echo html_writer::tag('small',
-            "by {$username} • " . userdate($activity->timecreated, '%d %b %Y, %H:%M'),
-            ['class' => 'text-muted']
-        );
+        $timetext = "by {$username} &bull; "
+            . userdate($activity->timecreated, '%d %b %Y, %H:%M');
+        echo html_writer::tag('small', $timetext, ['class' => 'text-muted']);
         echo html_writer::end_div();
     }
 
@@ -343,10 +364,15 @@ if (!empty($recent)) {
 echo html_writer::start_div('text-center mt-5 mb-4');
 echo html_writer::link(
     new moodle_url('/local/savian_ai/tutorials.php'),
-    '<i class="fa fa-question-circle mr-2"></i>' . get_string('tutorials', 'local_savian_ai'),
+    '<i class="fa fa-question-circle mr-2"></i>'
+        . get_string('tutorials', 'local_savian_ai'),
     ['class' => 'btn btn-info btn-lg']
 );
-echo html_writer::tag('p', 'Need help getting started? Check out our tutorials!', ['class' => 'text-muted mt-2']);
+echo html_writer::tag(
+    'p',
+    'Need help getting started? Check out our tutorials!',
+    ['class' => 'text-muted mt-2']
+);
 echo html_writer::end_div();
 
 // Footer.

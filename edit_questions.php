@@ -48,13 +48,25 @@ if ($action === 'save' && confirm_sesskey()) {
 
     // Update questions from form data.
     foreach ($questions as $idx => $q) {
-        $q->questiontext = optional_param("questiontext_{$idx}", $q->question_text ?? $q->questiontext ?? '', PARAM_RAW);
-        $q->generalfeedback = optional_param("generalfeedback_{$idx}", $q->generalfeedback ?? '', PARAM_RAW);
+        $q->questiontext = optional_param(
+            "questiontext_{$idx}",
+            $q->question_text ?? $q->questiontext ?? '',
+            PARAM_RAW
+        );
+        $q->generalfeedback = optional_param(
+            "generalfeedback_{$idx}",
+            $q->generalfeedback ?? '',
+            PARAM_RAW
+        );
 
         if (isset($q->answers)) {
             foreach ($q->answers as $aidx => $answer) {
                 $answer->text = optional_param("answer_{$idx}_{$aidx}", $answer->text, PARAM_RAW);
-                $answer->feedback = optional_param("feedback_{$idx}_{$aidx}", $answer->feedback ?? '', PARAM_RAW);
+                $answer->feedback = optional_param(
+                    "feedback_{$idx}_{$aidx}",
+                    $answer->feedback ?? '',
+                    PARAM_RAW
+                );
             }
         }
     }
@@ -62,16 +74,24 @@ if ($action === 'save' && confirm_sesskey()) {
     // Save back to cache.
     $saviancache->set('questions', json_encode($questions));
 
-    redirect(new moodle_url('/local/savian_ai/generate.php', [
-        'courseid' => $courseid,
-        'action' => 'preview'
-    ]), 'Questions updated', null, 'success');
+    redirect(
+        new moodle_url('/local/savian_ai/generate.php', [
+            'courseid' => $courseid,
+            'action' => 'preview',
+        ]),
+        'Questions updated',
+        null,
+        'success'
+    );
 }
 
 echo $OUTPUT->header();
 
 // Consistent header.
-echo local_savian_ai_render_header('Edit Questions', 'Modify generated questions before adding to Question Bank');
+echo local_savian_ai_render_header(
+    'Edit Questions',
+    'Modify generated questions before adding to Question Bank'
+);
 
 if ($saviancache->get('questions')) {
     $questions = json_decode($saviancache->get('questions'));
@@ -86,7 +106,10 @@ if ($saviancache->get('questions')) {
 
     foreach ($questions as $idx => $q) {
         echo html_writer::start_div('card mb-4');
-        echo html_writer::div('Question ' . ($idx + 1) . ' of ' . count($questions), 'card-header bg-light');
+        echo html_writer::div(
+            'Question ' . ($idx + 1) . ' of ' . count($questions),
+            'card-header bg-light'
+        );
         echo html_writer::start_div('card-body');
 
         // Question text (editable).
@@ -106,7 +129,11 @@ if ($saviancache->get('questions')) {
                 $badge = $iscorrect ? '<span class="badge badge-success">Correct</span>' : '';
 
                 echo html_writer::start_div('input-group mb-2');
-                echo html_writer::tag('div', ($aidx + 1) . '. ' . $badge, ['class' => 'input-group-prepend input-group-text']);
+                echo html_writer::tag(
+                    'div',
+                    ($aidx + 1) . '. ' . $badge,
+                    ['class' => 'input-group-prepend input-group-text']
+                );
                 echo html_writer::tag('input', '', [
                     'type' => 'text',
                     'name' => "answer_{$idx}_{$aidx}",
@@ -138,7 +165,10 @@ if ($saviancache->get('questions')) {
         'class' => 'btn btn-primary btn-lg mr-2',
     ]);
     echo html_writer::link(
-        new moodle_url('/local/savian_ai/generate.php', ['courseid' => $courseid, 'action' => 'preview']),
+        new moodle_url('/local/savian_ai/generate.php', [
+            'courseid' => $courseid,
+            'action' => 'preview',
+        ]),
         'Cancel',
         ['class' => 'btn btn-secondary']
     );

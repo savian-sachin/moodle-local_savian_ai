@@ -95,25 +95,45 @@ if ($mform->is_cancelled()) {
         if (isset($response->request_id) && isset($response->status) && $response->status === 'pending') {
             // Async generation - need to poll.
             $saviancache->set('pending_request', $response->request_id);
-            redirect(new moodle_url('/local/savian_ai/generate.php', [
-                'courseid' => $courseid,
-                'mode' => $mode,
-                'action' => 'poll',
-            ]), get_string('generation_pending', 'local_savian_ai'), null, 'info');
+            redirect(
+                new moodle_url('/local/savian_ai/generate.php', [
+                    'courseid' => $courseid,
+                    'mode' => $mode,
+                    'action' => 'poll',
+                ]),
+                get_string('generation_pending', 'local_savian_ai'),
+                null,
+                'info'
+            );
         } else if (isset($response->questions) && count($response->questions) > 0) {
             // Synchronous generation - questions ready.
             $saviancache->set('questions', json_encode($response->questions));
-            $saviancache->set('metadata', isset($response->metadata) ? json_encode($response->metadata) : null);
-            $saviancache->set('usage', isset($response->usage) ? json_encode($response->usage) : null);
+            $saviancache->set(
+                'metadata',
+                isset($response->metadata) ? json_encode($response->metadata) : null
+            );
+            $saviancache->set(
+                'usage',
+                isset($response->usage) ? json_encode($response->usage) : null
+            );
 
-            redirect(new moodle_url('/local/savian_ai/generate.php', [
-                'courseid' => $courseid,
-                'action' => 'preview',
-            ]), get_string('questions_generated', 'local_savian_ai', count($response->questions)), null, 'success');
+            $questioncount = count($response->questions);
+            redirect(
+                new moodle_url('/local/savian_ai/generate.php', [
+                    'courseid' => $courseid,
+                    'action' => 'preview',
+                ]),
+                get_string('questions_generated', 'local_savian_ai', $questioncount),
+                null,
+                'success'
+            );
         }
     } else {
         $error = $response->error ?? $response->message ?? 'Unknown error';
-        echo $OUTPUT->notification(get_string('generation_failed', 'local_savian_ai', $error), 'error');
+        echo $OUTPUT->notification(
+            get_string('generation_failed', 'local_savian_ai', $error),
+            'error'
+        );
     }
 }
 
@@ -149,8 +169,12 @@ if ($action === 'add' && confirm_sesskey()) {
             $message .= " ({$failedcount} failed)";
         }
 
-        redirect(new moodle_url('/question/edit.php', ['courseid' => $courseid]),
-                 $message, null, 'success');
+        redirect(
+            new moodle_url('/question/edit.php', ['courseid' => $courseid]),
+            $message,
+            null,
+            'success'
+        );
     }
 }
 
@@ -164,21 +188,37 @@ if ($action === 'poll' && !empty($saviancache->get('pending_request'))) {
             // Generation completed!
             if (isset($statusresponse->questions) && count($statusresponse->questions) > 0) {
                 $saviancache->set('questions', json_encode($statusresponse->questions));
-                $saviancache->set('metadata', isset($statusresponse->metadata) ? json_encode($statusresponse->metadata) : null);
-                $saviancache->set('usage', isset($statusresponse->usage) ? json_encode($statusresponse->usage) : null);
+                $saviancache->set(
+                    'metadata',
+                    isset($statusresponse->metadata) ? json_encode($statusresponse->metadata) : null
+                );
+                $saviancache->set(
+                    'usage',
+                    isset($statusresponse->usage) ? json_encode($statusresponse->usage) : null
+                );
                 $saviancache->delete('pending_request');
 
-                redirect(new moodle_url('/local/savian_ai/generate.php', [
-                    'courseid' => $courseid,
-                    'action' => 'preview',
-                ]), get_string('questions_generated', 'local_savian_ai', count($statusresponse->questions)), null, 'success');
+                $questioncount = count($statusresponse->questions);
+                redirect(
+                    new moodle_url('/local/savian_ai/generate.php', [
+                        'courseid' => $courseid,
+                        'action' => 'preview',
+                    ]),
+                    get_string('questions_generated', 'local_savian_ai', $questioncount),
+                    null,
+                    'success'
+                );
             }
         } else if (isset($statusresponse->status) && $statusresponse->status === 'failed') {
             // Generation failed.
             $error = $statusresponse->error ?? 'Generation failed';
             $saviancache->delete('pending_request');
-            redirect(new moodle_url('/local/savian_ai/generate.php', ['courseid' => $courseid]),
-                     get_string('generation_failed', 'local_savian_ai', $error), null, 'error');
+            redirect(
+                new moodle_url('/local/savian_ai/generate.php', ['courseid' => $courseid]),
+                get_string('generation_failed', 'local_savian_ai', $error),
+                null,
+                'error'
+            );
         }
         // Else status is still pending/processing - page will auto-refresh.
     }
@@ -187,19 +227,25 @@ if ($action === 'poll' && !empty($saviancache->get('pending_request'))) {
 echo $OUTPUT->header();
 
 // Consistent header.
-echo local_savian_ai_render_header('Generate Questions from Documents', 'Create quiz questions from your course materials');
+echo local_savian_ai_render_header(
+    'Generate Questions from Documents',
+    'Create quiz questions from your course materials'
+);
 
 // Show preview if questions are in session.
 if ($action === 'preview' && !empty($saviancache->get('questions'))) {
     $questions = json_decode($saviancache->get('questions'));
 
-    echo html_writer::tag('h3', get_string('preview_questions', 'local_savian_ai') . ' (' . count($questions) . ')', ['class' => 'mt-4']);
+    $previewheading = get_string('preview_questions', 'local_savian_ai')
+        . ' (' . count($questions) . ')';
+    echo html_writer::tag('h3', $previewheading, ['class' => 'mt-4']);
 
     // Display usage if available.
     if (!empty($saviancache->get('usage'))) {
         $usage = json_decode($saviancache->get('usage'));
         if (isset($usage->questions)) {
-            $percentage = ($usage->questions->limit > 0) ? ($usage->questions->used / $usage->questions->limit * 100) : 0;
+            $percentage = ($usage->questions->limit > 0)
+                ? ($usage->questions->used / $usage->questions->limit * 100) : 0;
             echo html_writer::start_div('card mb-3');
             echo html_writer::start_div('card-body');
             echo html_writer::tag('strong', 'Quota Usage');
@@ -210,7 +256,9 @@ if ($action === 'preview' && !empty($saviancache->get('questions'))) {
                 ]),
                 'progress mt-2 mb-2'
             );
-            echo html_writer::tag('small', "{$usage->questions->used}/{$usage->questions->limit} questions ({$usage->questions->remaining} remaining)", ['class' => 'text-muted']);
+            $usagetext = "{$usage->questions->used}/{$usage->questions->limit}"
+                . " questions ({$usage->questions->remaining} remaining)";
+            echo html_writer::tag('small', $usagetext, ['class' => 'text-muted']);
             echo html_writer::end_div();
             echo html_writer::end_div();
         }
@@ -222,13 +270,16 @@ if ($action === 'preview' && !empty($saviancache->get('questions'))) {
         echo html_writer::div('Question ' . ($idx + 1), 'card-header bg-light');
         echo html_writer::start_div('card-body');
 
-        echo html_writer::tag('div', format_text($q->question_text ?? $q->questiontext ?? '', FORMAT_HTML), ['class' => 'mb-3']);
-        echo html_writer::tag('div', '<small class="text-muted">Type: ' . ucfirst($q->type ?? 'unknown') . '</small>');
+        $qtext = format_text($q->question_text ?? $q->questiontext ?? '', FORMAT_HTML);
+        echo html_writer::tag('div', $qtext, ['class' => 'mb-3']);
+        $typetext = '<small class="text-muted">Type: '
+            . ucfirst($q->type ?? 'unknown') . '</small>';
+        echo html_writer::tag('div', $typetext);
 
         if (isset($q->answers)) {
             echo html_writer::start_tag('ul', ['class' => 'list-unstyled ml-3']);
             foreach ($q->answers as $answer) {
-                $icon = ($answer->fraction ?? 0) > 0 ? '✓' : '○';
+                $icon = ($answer->fraction ?? 0) > 0 ? '&#10003;' : '&#9675;';
                 $class = ($answer->fraction ?? 0) > 0 ? 'text-success' : '';
                 echo html_writer::tag('li', "{$icon} " . s($answer->text), ['class' => $class]);
             }
@@ -236,8 +287,13 @@ if ($action === 'preview' && !empty($saviancache->get('questions'))) {
         }
 
         if (!empty($q->generalfeedback)) {
+            $feedbackhtml = html_writer::tag(
+                'small',
+                html_writer::tag('strong', 'Feedback: ')
+                    . format_text($q->generalfeedback, FORMAT_HTML)
+            );
             echo html_writer::div(
-                html_writer::tag('small', html_writer::tag('strong', 'Feedback: ') . format_text($q->generalfeedback, FORMAT_HTML)),
+                $feedbackhtml,
                 'text-muted mt-2 p-2 bg-light rounded'
             );
         }
@@ -267,9 +323,17 @@ if ($action === 'preview' && !empty($saviancache->get('questions'))) {
     // Show polling status.
     echo html_writer::start_div('card mt-4');
     echo html_writer::start_div('card-body text-center');
-    echo html_writer::tag('div', '', ['class' => 'spinner-border text-primary mb-3', 'role' => 'status', 'style' => 'width: 3rem; height: 3rem;']);
+    echo html_writer::tag('div', '', [
+        'class' => 'spinner-border text-primary mb-3',
+        'role' => 'status',
+        'style' => 'width: 3rem; height: 3rem;',
+    ]);
     echo html_writer::tag('h4', 'Generating Questions...');
-    echo html_writer::tag('p', 'This page will automatically refresh every 5 seconds.', ['class' => 'text-muted']);
+    echo html_writer::tag(
+        'p',
+        'This page will automatically refresh every 5 seconds.',
+        ['class' => 'text-muted']
+    );
     echo html_writer::end_div();
     echo html_writer::end_div();
 
@@ -288,7 +352,7 @@ if ($action === 'preview' && !empty($saviancache->get('questions'))) {
 echo html_writer::div(
     html_writer::link(
         new moodle_url('/local/savian_ai/course.php', ['courseid' => $courseid]),
-        '← Back to Dashboard',
+        '&#8592; Back to Dashboard',
         ['class' => 'btn btn-secondary']
     ),
     'mt-4'
@@ -296,20 +360,39 @@ echo html_writer::div(
 
 // Coming Soon Features (Collapsible).
 echo html_writer::start_div('mt-5 mb-4');
-echo html_writer::start_tag('details', ['class' => 'border rounded p-3 bg-light']);
-echo html_writer::tag('summary', '🔮 Coming Soon: AI Assessment Evaluation', ['class' => 'font-weight-bold text-success', 'style' => 'cursor: pointer;']);
+echo html_writer::start_tag('details', [
+    'class' => 'border rounded p-3 bg-light',
+]);
+echo html_writer::tag(
+    'summary',
+    'Coming Soon: AI Assessment Evaluation',
+    ['class' => 'font-weight-bold text-success', 'style' => 'cursor: pointer;']
+);
 echo html_writer::start_div('mt-3');
 
-echo html_writer::tag('h6', '🤖 Automatic Grading of Short Text & Essays', ['class' => 'text-success']);
-echo html_writer::tag('p', 'AI will evaluate student responses that currently require manual grading:', ['class' => 'small']);
+echo html_writer::tag(
+    'h6',
+    'Automatic Grading of Short Text & Essays',
+    ['class' => 'text-success']
+);
+echo html_writer::tag(
+    'p',
+    'AI will evaluate student responses that currently require manual grading:',
+    ['class' => 'small']
+);
 echo html_writer::start_tag('ul', ['class' => 'small mb-3']);
-echo html_writer::tag('li', '✨ Automatic grading of short answer questions');
-echo html_writer::tag('li', '📝 Detailed feedback on essay responses');
-echo html_writer::tag('li', '📊 Rubric-based assessment with suggestions');
-echo html_writer::tag('li', '⏱️ Save 70% of grading time');
+echo html_writer::tag('li', 'Automatic grading of short answer questions');
+echo html_writer::tag('li', 'Detailed feedback on essay responses');
+echo html_writer::tag('li', 'Rubric-based assessment with suggestions');
+echo html_writer::tag('li', 'Save 70% of grading time');
 echo html_writer::end_tag('ul');
 
-echo html_writer::tag('p', '<strong>Use case:</strong> Students submit essays → AI provides draft grades + feedback → You review and finalize', ['class' => 'small text-muted']);
+echo html_writer::tag(
+    'p',
+    '<strong>Use case:</strong> Students submit essays '
+        . '&rarr; AI provides draft grades + feedback &rarr; You review and finalize',
+    ['class' => 'small text-muted']
+);
 
 echo html_writer::end_div();
 echo html_writer::end_tag('details');
