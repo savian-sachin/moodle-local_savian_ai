@@ -111,8 +111,16 @@ class client {
         }
 
         $result = json_decode($response);
-        if (!$result) {
+        if ($result === null && json_last_error() !== JSON_ERROR_NONE) {
             return $this->error_response('Invalid JSON response', $httpcode);
+        }
+
+        if (!is_object($result)) {
+            $wrapped = new \stdClass();
+            $wrapped->success = ($httpcode >= 200 && $httpcode < 300);
+            $wrapped->data = $result;
+            $wrapped->http_code = $httpcode;
+            return $wrapped;
         }
 
         $result->http_code = $httpcode;
@@ -319,12 +327,7 @@ class client {
         if ($method === 'POST') {
             $response = $curl->post($url, json_encode($data));
         } else if ($method === 'DELETE') {
-            $curl->setopt(['CURLOPT_CUSTOMREQUEST' => 'DELETE']);
-            if (!empty($data)) {
-                $response = $curl->post($url, json_encode($data));
-            } else {
-                $response = $curl->get($url);
-            }
+            $response = $curl->delete($url);
         } else {
             $response = $curl->get($url);
         }
@@ -345,9 +348,25 @@ class client {
             return $this->error_response($curlerror, 0);
         }
 
+        // Handle empty responses (e.g. DELETE returning 200/204 with no body).
+        if ($response === '' || $response === false) {
+            $result = new \stdClass();
+            $result->success = ($httpcode >= 200 && $httpcode < 300);
+            $result->http_code = $httpcode;
+            return $result;
+        }
+
         $result = json_decode($response);
-        if (!$result) {
+        if ($result === null && json_last_error() !== JSON_ERROR_NONE) {
             return $this->error_response('Invalid JSON response: ' . substr($response, 0, 200), $httpcode);
+        }
+
+        if (!is_object($result)) {
+            $wrapped = new \stdClass();
+            $wrapped->success = ($httpcode >= 200 && $httpcode < 300);
+            $wrapped->data = $result;
+            $wrapped->http_code = $httpcode;
+            return $wrapped;
         }
 
         $result->http_code = $httpcode;

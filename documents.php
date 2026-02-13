@@ -54,13 +54,13 @@ if ($action === 'delete' && $docid && confirm_sesskey()) {
 
     $response = $client->delete_document($docid);
 
-    if ($response->http_code === 200 && isset($response->success) && $response->success) {
+    if ($response->http_code >= 200 && $response->http_code < 300 && (!isset($response->success) || $response->success)) {
         // Update local record.
         $DB->set_field('local_savian_documents', 'is_active', 0, ['savian_doc_id' => $docid]);
         redirect(new moodle_url('/local/savian_ai/documents.php', ['courseid' => $courseid]),
                  get_string('document_deleted', 'local_savian_ai'), null, 'success');
     } else {
-        $error = $response->error ?? $response->message ?? 'Unknown error';
+        $error = $response->error ?? $response->message ?? $response->detail ?? 'Unknown error';
         redirect(new moodle_url('/local/savian_ai/documents.php', ['courseid' => $courseid]),
                  get_string('document_delete_failed', 'local_savian_ai', $error), null, 'error');
     }

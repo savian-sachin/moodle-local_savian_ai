@@ -64,13 +64,13 @@ class qbank_creator {
             try {
                 $questionid = $this->create_question($questiondata, $categoryid, $context);
                 $results['success'][] = [
-                    'name' => $questiondata->name ?? $questiondata->questiontext ?? 'Untitled',
+                    'name' => $questiondata->name ?? $questiondata->question_text ?? $questiondata->questiontext ?? 'Untitled',
                     'question_id' => $questionid,
                     'type' => $questiondata->type ?? 'unknown',
                 ];
             } catch (\Exception $e) {
                 $results['failed'][] = [
-                    'name' => $questiondata->name ?? $questiondata->questiontext ?? 'Untitled',
+                    'name' => $questiondata->name ?? $questiondata->question_text ?? $questiondata->questiontext ?? 'Untitled',
                     'error' => $e->getMessage(),
                 ];
             }
@@ -137,8 +137,8 @@ class qbank_creator {
         // Build question form data.
         $fromform = new \stdClass();
         $fromform->category = $categoryid . ',' . $context->id;
-        $fromform->name = $this->truncate_name($data->name ?? $data->questiontext);
-        $fromform->questiontext = ['text' => $this->extract_string($data->questiontext ?? ''), 'format' => FORMAT_HTML];
+        $fromform->name = $this->truncate_name($data->name ?? $data->question_text ?? $data->questiontext ?? '');
+        $fromform->questiontext = ['text' => $this->extract_string($data->question_text ?? $data->questiontext ?? ''), 'format' => FORMAT_HTML];
         $fromform->generalfeedback = ['text' => $this->extract_string($data->generalfeedback ?? ''), 'format' => FORMAT_HTML];
         $fromform->defaultmark = 1;
         $fromform->penalty = 0.3333333;

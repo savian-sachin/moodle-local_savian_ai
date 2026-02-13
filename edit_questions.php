@@ -48,7 +48,7 @@ if ($action === 'save' && confirm_sesskey()) {
 
     // Update questions from form data.
     foreach ($questions as $idx => $q) {
-        $q->questiontext = optional_param("questiontext_{$idx}", $q->questiontext, PARAM_RAW);
+        $q->questiontext = optional_param("questiontext_{$idx}", $q->question_text ?? $q->questiontext ?? '', PARAM_RAW);
         $q->generalfeedback = optional_param("generalfeedback_{$idx}", $q->generalfeedback ?? '', PARAM_RAW);
 
         if (isset($q->answers)) {
@@ -91,7 +91,7 @@ if ($saviancache->get('questions')) {
 
         // Question text (editable).
         echo html_writer::div('Question Text:', 'font-weight-bold mb-2');
-        echo html_writer::tag('textarea', s($q->questiontext ?? ''), [
+        echo html_writer::tag('textarea', s($q->question_text ?? $q->questiontext ?? ''), [
             'name' => "questiontext_{$idx}",
             'rows' => 3,
             'class' => 'form-control mb-3',

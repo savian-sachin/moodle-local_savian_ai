@@ -222,7 +222,7 @@ if ($action === 'preview' && !empty($saviancache->get('questions'))) {
         echo html_writer::div('Question ' . ($idx + 1), 'card-header bg-light');
         echo html_writer::start_div('card-body');
 
-        echo html_writer::tag('div', format_text($q->questiontext, FORMAT_HTML), ['class' => 'mb-3']);
+        echo html_writer::tag('div', format_text($q->question_text ?? $q->questiontext ?? '', FORMAT_HTML), ['class' => 'mb-3']);
         echo html_writer::tag('div', '<small class="text-muted">Type: ' . ucfirst($q->type ?? 'unknown') . '</small>');
 
         if (isset($q->answers)) {
