@@ -27,7 +27,7 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
         this.render();
         this.attachEvents();
 
-        // Load conversation if specified
+        // Load conversation if specified.
         if (this.conversationId) {
             this.loadConversation(this.conversationId);
         }
@@ -96,7 +96,7 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
             self.startNewConversation();
         });
 
-        // Click on conversation in sidebar
+        // Click on conversation in sidebar.
         $(document).on('click', '.savian-conversation-item', function() {
             var convId = parseInt($(this).data('conversation-id'));
             self.loadConversation(convId);
@@ -112,7 +112,7 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
             methodname: 'local_savian_ai_list_conversations',
             args: {courseid: this.courseId || 0}
         }])[0].done(function(response) {
-            console.log('Conversations response:', response);
+            // Response loaded successfully.
             if (response.success && response.data) {
                 var html = '';
                 if (Array.isArray(response.data) && response.data.length > 0) {
@@ -131,6 +131,7 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
                 }
                 $('#savian-conversation-list').html(html || '<p class="text-muted p-3">No conversations yet. Start chatting below!</p>');
             } else {
+                // eslint-disable-next-line no-console
                 console.error('Invalid response:', response);
                 $('#savian-conversation-list').html('<p class="text-muted p-3">No conversations yet</p>');
             }
@@ -163,8 +164,8 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
 
     return {
         init: function(params) {
-            var interface = new ChatInterface();
-            interface.init(params);
+            var chatInstance = new ChatInterface();
+            chatInstance.init(params);
         }
     };
 });

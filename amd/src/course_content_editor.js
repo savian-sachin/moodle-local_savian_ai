@@ -88,7 +88,7 @@ function($, Modal, ModalSaveCancel, ModalEvents, Ajax, Notification) {
     function showViewModal(sectionIdx, itemIdx) {
         var item = getItem(sectionIdx, itemIdx);
         if (!item) {
-            return;
+            return undefined;
         }
 
         var content = getItemContent(item);
@@ -124,7 +124,7 @@ function($, Modal, ModalSaveCancel, ModalEvents, Ajax, Notification) {
     function showEditModal(sectionIdx, itemIdx) {
         var item = getItem(sectionIdx, itemIdx);
         if (!item) {
-            return;
+            return undefined;
         }
 
         var content = getItemContent(item);
@@ -321,7 +321,7 @@ function($, Modal, ModalSaveCancel, ModalEvents, Ajax, Notification) {
         if (quiz.questions && quiz.questions.length > 0) {
             html += '<h5>Questions (' + quiz.questions.length + '):</h5>';
             html += '<ol>';
-            quiz.questions.forEach(function(q, _idx) {
+            quiz.questions.forEach(function(q) {
                 html += '<li><strong>' + escapeHtml(q.question_text || q.text) + '</strong>';
                 if (q.answers && q.answers.length > 0) {
                     html += '<ul class="mt-2">';

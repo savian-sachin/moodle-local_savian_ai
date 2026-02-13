@@ -65,6 +65,12 @@ class chat extends external_api {
 
     /**
      * Send chat message.
+     *
+     * @param string $message The message text.
+     * @param string $conversationid Conversation ID.
+     * @param int $courseid Course ID.
+     * @param array $documentids Document IDs for context.
+     * @return array Response data.
      */
     public static function send_message($message, $conversationid, $courseid, $documentids) {
         global $USER;
@@ -171,6 +177,9 @@ class chat extends external_api {
 
     /**
      * Get conversation with messages.
+     *
+     * @param int $conversationid Conversation ID.
+     * @return array Response data.
      */
     public static function get_conversation($conversationid) {
         $params = self::validate_parameters(
@@ -235,6 +244,9 @@ class chat extends external_api {
 
     /**
      * List user conversations.
+     *
+     * @param int $courseid Course ID.
+     * @return array Response data.
      */
     public static function list_conversations($courseid) {
         global $USER;
@@ -313,6 +325,11 @@ class chat extends external_api {
 
     /**
      * Submit feedback.
+     *
+     * @param int $messageid Message ID.
+     * @param string $feedback Feedback type (thumbsup/thumbsdown).
+     * @param string $comment Optional feedback comment.
+     * @return array Response data.
      */
     public static function submit_feedback($messageid, $feedback, $comment) {
         $params = self::validate_parameters(
@@ -369,6 +386,10 @@ class chat extends external_api {
 
     /**
      * Save widget state.
+     *
+     * @param string $position Widget position.
+     * @param bool $minimized Whether widget is minimized.
+     * @return array Response data.
      */
     public static function save_widget_state($position, $minimized) {
         $params = self::validate_parameters(
@@ -422,6 +443,9 @@ class chat extends external_api {
 
     /**
      * Get course documents for selection in chat.
+     *
+     * @param int $courseid Course ID.
+     * @return array Response data.
      */
     public static function get_course_documents($courseid) {
         global $DB;
