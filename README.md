@@ -4,7 +4,7 @@
 
 [![Moodle Version](https://img.shields.io/badge/Moodle-4.5%2B-orange)](https://moodle.org/)
 [![License](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](LICENSE.txt)
-[![Version](https://img.shields.io/badge/version-1.1.1-brightgreen)](CHANGES.md)
+[![Version](https://img.shields.io/badge/version-1.2.0-brightgreen)](CHANGES.md)
 [![Stability](https://img.shields.io/badge/stability-stable-green)](https://github.com/savian-sachin/moodle-local_savian_ai/releases)
 
 ---
@@ -330,20 +330,21 @@ See [LICENSE.txt](LICENSE.txt) for the full license text.
 
 ## 🔄 Version
 
-**Current Version**: 1.1.1 (February 2026) - **Stable Release** ✨
+**Current Version**: 1.2.0 (February 2026) - **Stable Release**
 
-### What's New in v1.1.1
-- Connection status indicator on settings page (shows connected/failed/not configured)
-- Document sync on dashboard visit and after organization code change
-- Learning Analytics tutorials for teachers (at-risk detection, chat monitoring)
-- API setup documentation with registration link and free trial info
-- Auto-clear documents when organization code changes (prevents generation errors)
-- Removed test files for production security
+### What's New in v1.2.0
+- Full Moodle plugin directory compliance (codechecker, PHPDoc, ESLint all passing)
+- Complete GPL v3 boilerplate on all files
+- Moodle coding standards: snake_case to camelCase variables, PSR-2 formatting
+- Database tables renamed to correct frankenstyle prefix (local_savian_ai_*)
+- Chat restriction system for course-level control
+- Improved document deletion and API error handling
+- Privacy API with full GDPR export/delete support
+- Hook-based architecture (Moodle 4.5 hooks API)
 
-### What's New in v1.1.0
-- Learning Analytics System with AI-powered at-risk student detection
-- Automated daily/weekly analytics reports
-- CSV export functionality
-- GDPR-compliant data anonymization
+### Previous Releases
+- **v1.1.1**: Connection status, document sync, tutorials
+- **v1.1.0**: Learning Analytics with at-risk detection, CSV export
+- **v1.0.0**: Initial release with course generation, AI chat, question bank
 
 See [CHANGES.md](CHANGES.md) for complete version history.
