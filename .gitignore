@@ -5,8 +5,6 @@ HOW_IT_WORKS.md
 DEVELOPER_GUIDE.md
 MOODLE_SUBMISSION_GUIDE.md
 
-# Build files
-/amd/build/*.min.js.map
 
 # IDE files
 .idea/
