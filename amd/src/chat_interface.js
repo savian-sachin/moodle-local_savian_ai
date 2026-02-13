@@ -12,7 +12,7 @@
  * @copyright  2025 Savian AI
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notification) {
+define(['jquery', 'core/ajax'], function($, Ajax) {
 
     var ChatInterface = function() {
         this.conversationId = null;
@@ -106,8 +106,6 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
     };
 
     ChatInterface.prototype.loadConversationList = function() {
-        var self = this;
-
         Ajax.call([{
             methodname: 'local_savian_ai_list_conversations',
             args: {courseid: this.courseId || 0}
@@ -129,13 +127,15 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
                         `;
                     });
                 }
-                $('#savian-conversation-list').html(html || '<p class="text-muted p-3">No conversations yet. Start chatting below!</p>');
+                var fallback = '<p class="text-muted p-3">No conversations yet. Start chatting below!</p>';
+                $('#savian-conversation-list').html(html || fallback);
             } else {
                 // eslint-disable-next-line no-console
                 console.error('Invalid response:', response);
                 $('#savian-conversation-list').html('<p class="text-muted p-3">No conversations yet</p>');
             }
         }).fail(function(error) {
+            // eslint-disable-next-line no-console
             console.error('Failed to load conversations:', error);
             $('#savian-conversation-list').html('<p class="text-danger p-3">Failed to load. Check console for details.</p>');
         });
@@ -158,7 +158,11 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
 
     ChatInterface.prototype.startNewConversation = function() {
         this.conversationId = null;
-        $('#chat-messages-full').html('<div class="savian-chat-message assistant"><div class="savian-message-content">Hi! I\'m your AI tutor. How can I help you today?</div></div>');
+        var welcome = '<div class="savian-chat-message assistant">' +
+            '<div class="savian-message-content">' +
+            'Hi! I\'m your AI tutor. How can I help you today?' +
+            '</div></div>';
+        $('#chat-messages-full').html(welcome);
         $('.savian-conversation-item').removeClass('active');
     };
 

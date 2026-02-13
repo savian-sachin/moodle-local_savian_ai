@@ -12,7 +12,7 @@
  * @copyright  2025 Savian AI
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'core/ajax', 'core/notification', 'core/templates'], function($, Ajax, Notification, Templates) {
+define(['jquery', 'core/ajax'], function($, Ajax) {
 
     var ChatHistory = function() {
         this.courseId = null;
@@ -99,8 +99,6 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/templates'], function(
     };
 
     ChatHistory.prototype.loadConversations = function() {
-        var self = this;
-
         Ajax.call([{
             methodname: 'local_savian_ai_list_conversations',
             args: {courseid: this.courseId}
@@ -130,6 +128,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/templates'], function(
                 $('#savian-conversations-table tbody').html(tbody);
             }
         }).fail(function(error) {
+            // eslint-disable-next-line no-console
             console.error('Failed to load conversations:', error);
         });
     };
