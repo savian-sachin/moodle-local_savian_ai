@@ -12,6 +12,7 @@
  * @copyright  2025 Savian AI
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+/* globals MathJax */
 define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Ajax, Notification, Str) {
 
     var ChatWidget = function() {
@@ -114,9 +115,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
                             <button class="savian-btn-icon" id="savian-chat-new" title="${this.strings.newconversation}">
                                 <i class="fa fa-plus"></i>
                             </button>
-                            ${this.config.canViewHistory ? `<button class="savian-btn-icon" id="savian-chat-history" title="${this.strings.history}">
-                                <i class="fa fa-history"></i>
-                            </button>` : ''}
+                            ${this.config.canViewHistory ?
+                            '<button class="savian-btn-icon" id="savian-chat-history" title="' +
+                            this.strings.history + '"><i class="fa fa-history"></i></button>' : ''}
                             <button class="savian-btn-icon" id="savian-chat-fullscreen" title="${this.strings.maximize}">
                                 <i class="fa fa-expand"></i>
                             </button>
@@ -168,7 +169,6 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
      * Render the restricted state widget with countdown
      */
     ChatWidget.prototype.renderRestrictedState = function() {
-        var self = this;
         var restriction = this.config.restriction;
         var resumesAt = restriction.resumesAt ? restriction.resumesAt * 1000 : 0; // Convert to milliseconds
         var positionClass = 'savian-widget-' + this.position;
@@ -246,8 +246,6 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
      * Attach events for restricted state widget
      */
     ChatWidget.prototype.attachRestrictedEvents = function() {
-        var self = this;
-
         // Toggle on bubble click
         $(document).on('click', '#savian-chat-widget.restricted .savian-chat-bubble', function() {
             $('#savian-chat-widget').toggleClass('minimized').toggleClass('maximized');
@@ -262,10 +260,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
 
     /**
      * Start countdown timer
+     * @param {number} targetTime - The target timestamp in milliseconds
      */
     ChatWidget.prototype.startCountdown = function(targetTime) {
-        var self = this;
-
         var updateCountdown = function() {
             var now = Date.now();
             var remaining = targetTime - now;
@@ -307,8 +304,6 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
     };
 
     ChatWidget.prototype.loadCourseDocuments = function() {
-        var self = this;
-
         Ajax.call([{
             methodname: 'local_savian_ai_get_course_documents',
             args: {courseid: this.courseId}
@@ -323,6 +318,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
                 $('#savian-doc-select').html('<option value="">No documents available</option>');
             }
         }).fail(function(error) {
+            // eslint-disable-next-line no-console
             console.error('Failed to load documents:', error);
             $('#savian-doc-select').html('<option value="">Failed to load documents</option>');
         });
@@ -596,6 +592,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
         // Render LaTeX with MathJax if available
         if (window.MathJax && window.MathJax.typesetPromise) {
             MathJax.typesetPromise([$messageEl[0]]).catch(function(err) {
+                // eslint-disable-next-line no-console
                 console.error('MathJax rendering error:', err);
             });
         }
@@ -644,6 +641,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
                 });
             }
         }).fail(function(error) {
+            // eslint-disable-next-line no-console
             console.error('Failed to load conversation:', error);
         });
     };
@@ -678,6 +676,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
                 $btn.addClass('active').siblings().removeClass('active');
             }
         }).fail(function(error) {
+            // eslint-disable-next-line no-console
             console.error('Failed to submit feedback:', error);
         });
     };
@@ -698,6 +697,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
                 minimized: this.isMinimized ? 1 : 0
             }
         }])[0].fail(function(error) {
+            // eslint-disable-next-line no-console
             console.error('Failed to save widget state:', error);
         });
     };

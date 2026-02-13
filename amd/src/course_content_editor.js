@@ -34,6 +34,7 @@ function($, Modal, ModalSaveCancel, ModalEvents, Ajax, Notification) {
                 // Use attr() to get raw JSON string, not data() which auto-parses
                 var structureData = $dataEl.attr('data-structure');
                 if (!structureData) {
+                    // eslint-disable-next-line no-console
                     console.error('No course structure data found');
                     return;
                 }
@@ -46,6 +47,7 @@ function($, Modal, ModalSaveCancel, ModalEvents, Ajax, Notification) {
                     courseStructure = structureData;
                 }
             } catch (e) {
+                // eslint-disable-next-line no-console
                 console.error('Failed to parse course structure:', e);
                 return;
             }
@@ -79,10 +81,15 @@ function($, Modal, ModalSaveCancel, ModalEvents, Ajax, Notification) {
 
     /**
      * Show view modal (read-only)
+     *
+     * @param {number} sectionIdx The section index.
+     * @param {number} itemIdx The item index.
      */
     function showViewModal(sectionIdx, itemIdx) {
         var item = getItem(sectionIdx, itemIdx);
-        if (!item) return;
+        if (!item) {
+            return;
+        }
 
         var content = getItemContent(item);
         var icon = getContentIcon(item.type);
@@ -98,25 +105,29 @@ function($, Modal, ModalSaveCancel, ModalEvents, Ajax, Notification) {
         };
         var displayTitle = item.title || defaultTitles[item.type] || 'Content';
 
-        Modal.create({
+        return Modal.create({
             title: icon + ' ' + displayTitle,
             body: '<div class="savian-content-preview p-3">' + content + '</div>',
             large: true
         }).then(function(modal) {
             modal.show();
             return modal;
-        });
+        }).catch(Notification.exception);
     }
 
     /**
      * Show edit modal
+     *
+     * @param {number} sectionIdx The section index.
+     * @param {number} itemIdx The item index.
      */
     function showEditModal(sectionIdx, itemIdx) {
         var item = getItem(sectionIdx, itemIdx);
-        if (!item) return;
+        if (!item) {
+            return;
+        }
 
         var content = getItemContent(item);
-        var icon = getContentIcon(item.type);
 
         // Default title if item doesn't have one
         var defaultTitles = {
@@ -141,7 +152,7 @@ function($, Modal, ModalSaveCancel, ModalEvents, Ajax, Notification) {
             </div>
         `;
 
-        ModalSaveCancel.create({
+        return ModalSaveCancel.create({
             title: '<i class="fa fa-edit"></i> Edit: ' + displayTitle,
             body: bodyHtml,
             large: true
@@ -154,11 +165,15 @@ function($, Modal, ModalSaveCancel, ModalEvents, Ajax, Notification) {
             });
 
             return modal;
-        });
+        }).catch(Notification.exception);
     }
 
     /**
      * Save edited item to session
+     *
+     * @param {number} sectionIdx The section index.
+     * @param {number} itemIdx The item index.
+     * @param {Object} modal The modal instance.
      */
     function saveItemEdits(sectionIdx, itemIdx, modal) {
         var newTitle = $('#edit-title').val();
@@ -207,6 +222,10 @@ function($, Modal, ModalSaveCancel, ModalEvents, Ajax, Notification) {
 
     /**
      * Update preview display after edit
+     *
+     * @param {number} sectionIdx The section index.
+     * @param {number} itemIdx The item index.
+     * @param {string} newTitle The new title to display.
      */
     function updatePreviewItem(sectionIdx, itemIdx, newTitle) {
         var selector = '[data-action="view-item"][data-section="' + sectionIdx + '"][data-item="' + itemIdx + '"]';
@@ -219,6 +238,10 @@ function($, Modal, ModalSaveCancel, ModalEvents, Ajax, Notification) {
 
     /**
      * Get item from structure
+     *
+     * @param {number} sectionIdx The section index.
+     * @param {number} itemIdx The item index.
+     * @returns {Object|null} The item or null.
      */
     function getItem(sectionIdx, itemIdx) {
         if (courseStructure && courseStructure.sections && courseStructure.sections[sectionIdx]) {
@@ -232,6 +255,9 @@ function($, Modal, ModalSaveCancel, ModalEvents, Ajax, Notification) {
 
     /**
      * Get item content based on type
+     *
+     * @param {Object} item The content item.
+     * @returns {string} The formatted content.
      */
     function getItemContent(item) {
         switch (item.type) {
@@ -241,7 +267,7 @@ function($, Modal, ModalSaveCancel, ModalEvents, Ajax, Notification) {
                 return item.instructions || item.content || '';
             case 'discussion':
                 return item.prompt || item.content || '';
-            case 'formative':  // ADDIE v2.0
+            case 'formative': // ADDIE v2.0
                 return formatFormativeContent(item);
             case 'quiz':
                 return formatQuizContent(item);
@@ -254,6 +280,9 @@ function($, Modal, ModalSaveCancel, ModalEvents, Ajax, Notification) {
 
     /**
      * Format formative assessment content (ADDIE v2.0)
+     *
+     * @param {Object} formative The formative assessment item.
+     * @returns {string} The formatted HTML.
      */
     function formatFormativeContent(formative) {
         var html = '<div class="alert alert-info">';
@@ -282,6 +311,9 @@ function($, Modal, ModalSaveCancel, ModalEvents, Ajax, Notification) {
 
     /**
      * Format quiz content for display
+     *
+     * @param {Object} quiz The quiz item.
+     * @returns {string} The formatted HTML.
      */
     function formatQuizContent(quiz) {
         var html = '<p>' + (quiz.description || '') + '</p>';
@@ -289,7 +321,7 @@ function($, Modal, ModalSaveCancel, ModalEvents, Ajax, Notification) {
         if (quiz.questions && quiz.questions.length > 0) {
             html += '<h5>Questions (' + quiz.questions.length + '):</h5>';
             html += '<ol>';
-            quiz.questions.forEach(function(q, idx) {
+            quiz.questions.forEach(function(q, _idx) {
                 html += '<li><strong>' + escapeHtml(q.question_text || q.text) + '</strong>';
                 if (q.answers && q.answers.length > 0) {
                     html += '<ul class="mt-2">';
@@ -309,6 +341,9 @@ function($, Modal, ModalSaveCancel, ModalEvents, Ajax, Notification) {
 
     /**
      * Format assignment content for display
+     *
+     * @param {Object} assignment The assignment item.
+     * @returns {string} The formatted HTML.
      */
     function formatAssignmentContent(assignment) {
         var html = '<div>';
@@ -318,7 +353,8 @@ function($, Modal, ModalSaveCancel, ModalEvents, Ajax, Notification) {
         if (assignment.rubric && assignment.rubric.criteria) {
             html += '<h5 class="mt-3">📋 Grading Rubric:</h5>';
             html += '<table class="table table-bordered table-sm">';
-            html += '<thead class="thead-light"><tr><th>Criterion</th><th width="80">Points</th><th>Performance Levels</th></tr></thead>';
+            html += '<thead class="thead-light"><tr><th>Criterion</th>' +
+                    '<th width="80">Points</th><th>Performance Levels</th></tr></thead>';
             html += '<tbody>';
             assignment.rubric.criteria.forEach(function(criterion) {
                 html += '<tr>';
@@ -355,6 +391,9 @@ function($, Modal, ModalSaveCancel, ModalEvents, Ajax, Notification) {
 
     /**
      * Get content icon
+     *
+     * @param {string} type The content type.
+     * @returns {string} The icon string.
      */
     function getContentIcon(type) {
         var icons = {
@@ -369,9 +408,14 @@ function($, Modal, ModalSaveCancel, ModalEvents, Ajax, Notification) {
 
     /**
      * Escape HTML
+     *
+     * @param {string} text The text to escape.
+     * @returns {string} The escaped HTML string.
      */
     function escapeHtml(text) {
-        if (!text) return '';
+        if (!text) {
+            return '';
+        }
         var div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
