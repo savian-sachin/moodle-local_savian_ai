@@ -5,25 +5,41 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Chat restriction manager.
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 namespace local_savian_ai\chat;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Manager class for chat restrictions
+ * Manager class for chat restrictions.
  *
  * Handles time-based chat restrictions for courses, including quiz-linked
  * and manual time range restrictions with per-group targeting.
  *
  * @package    local_savian_ai
- * @copyright  2025 Savian AI
+ * @copyright  2026 Savian AI
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restriction_manager {
 
     /**
-     * Check if chat is restricted for a user in a course
+     * Check if chat is restricted for a user in a course.
      *
      * @param int $courseid Course ID
      * @param int $userid User ID
@@ -33,17 +49,17 @@ class restriction_manager {
         global $DB;
 
         $now = time();
-        $user_groups = $this->get_user_group_ids($courseid, $userid);
+        $usergroups = $this->get_user_group_ids($courseid, $userid);
 
         // Get all enabled restrictions for this course.
         $restrictions = $DB->get_records('local_savian_chat_restrictions', [
             'course_id' => $courseid,
-            'is_enabled' => 1
+            'is_enabled' => 1,
         ]);
 
         foreach ($restrictions as $restriction) {
             // Check if user is in a targeted group (or all groups if none specified).
-            if (!$this->user_matches_restriction_groups($restriction->id, $user_groups)) {
+            if (!$this->user_matches_restriction_groups($restriction->id, $usergroups)) {
                 continue;
             }
 
@@ -57,7 +73,7 @@ class restriction_manager {
                     'message' => $restriction->restriction_message ?: $this->get_default_message($restriction),
                     'resumes_at' => $times->timeend,
                     'restriction_type' => $restriction->restriction_type,
-                    'restriction_name' => $restriction->name ?: $this->get_restriction_display_name($restriction)
+                    'restriction_name' => $restriction->name ?: $this->get_restriction_display_name($restriction),
                 ];
             }
         }
@@ -66,7 +82,7 @@ class restriction_manager {
     }
 
     /**
-     * Get restriction times, considering quiz overrides for quiz-linked restrictions
+     * Get restriction times, considering quiz overrides for quiz-linked restrictions.
      *
      * @param object $restriction The restriction record
      * @param int $userid User ID
@@ -85,7 +101,7 @@ class restriction_manager {
                 $quiz = quiz_update_effective_access($quiz, $userid);
                 return (object)[
                     'timestart' => $quiz->timeopen ?: 0,
-                    'timeend' => $quiz->timeclose ?: 0
+                    'timeend' => $quiz->timeclose ?: 0,
                 ];
             }
         }
@@ -93,21 +109,21 @@ class restriction_manager {
         // Manual restriction or fallback.
         return (object)[
             'timestart' => $restriction->timestart ?: 0,
-            'timeend' => $restriction->timeend ?: 0
+            'timeend' => $restriction->timeend ?: 0,
         ];
     }
 
     /**
-     * Check if user is in any of the targeted groups
+     * Check if user is in any of the targeted groups.
      *
      * @param int $restrictionid Restriction ID
-     * @param array $user_groups Array of group IDs the user belongs to
+     * @param array $usergroups Array of group IDs the user belongs to
      * @return bool True if user matches restriction groups
      */
-    private function user_matches_restriction_groups(int $restrictionid, array $user_groups): bool {
+    private function user_matches_restriction_groups(int $restrictionid, array $usergroups): bool {
         global $DB;
 
-        $restriction_groups = $DB->get_fieldset_select(
+        $restrictiongroups = $DB->get_fieldset_select(
             'local_savian_chat_restriction_groups',
             'group_id',
             'restriction_id = ?',
@@ -115,16 +131,16 @@ class restriction_manager {
         );
 
         // If no groups specified, applies to all students.
-        if (empty($restriction_groups)) {
+        if (empty($restrictiongroups)) {
             return true;
         }
 
         // Check if user is in any targeted group.
-        return !empty(array_intersect($user_groups, $restriction_groups));
+        return !empty(array_intersect($usergroups, $restrictiongroups));
     }
 
     /**
-     * Get user's group IDs for a course
+     * Get user's group IDs for a course.
      *
      * @param int $courseid Course ID
      * @param int $userid User ID
@@ -136,7 +152,7 @@ class restriction_manager {
     }
 
     /**
-     * Get default restriction message
+     * Get default restriction message.
      *
      * @param object $restriction The restriction record
      * @return string Default message
@@ -149,7 +165,7 @@ class restriction_manager {
     }
 
     /**
-     * Get display name for a restriction
+     * Get display name for a restriction.
      *
      * @param object $restriction The restriction record
      * @return string Display name
@@ -167,7 +183,7 @@ class restriction_manager {
     }
 
     /**
-     * Get all quizzes for a course with timing info
+     * Get all quizzes for a course with timing info.
      *
      * @param int $courseid Course ID
      * @return array Array of quiz objects
@@ -186,7 +202,7 @@ class restriction_manager {
     }
 
     /**
-     * Get all groups for a course
+     * Get all groups for a course.
      *
      * @param int $courseid Course ID
      * @return array Array of group objects
@@ -196,7 +212,7 @@ class restriction_manager {
     }
 
     /**
-     * Get all restrictions for a course
+     * Get all restrictions for a course.
      *
      * @param int $courseid Course ID
      * @return array Array of restriction objects with additional info
@@ -205,24 +221,24 @@ class restriction_manager {
         global $DB;
 
         $restrictions = $DB->get_records('local_savian_chat_restrictions', [
-            'course_id' => $courseid
+            'course_id' => $courseid,
         ], 'timecreated DESC');
 
         $now = time();
 
         foreach ($restrictions as $restriction) {
             // Get assigned groups.
-            $group_ids = $DB->get_fieldset_select(
+            $groupids = $DB->get_fieldset_select(
                 'local_savian_chat_restriction_groups',
                 'group_id',
                 'restriction_id = ?',
                 [$restriction->id]
             );
-            $restriction->group_ids = $group_ids;
+            $restriction->group_ids = $groupids;
 
             // Get group names.
-            if (!empty($group_ids)) {
-                list($insql, $params) = $DB->get_in_or_equal($group_ids);
+            if (!empty($groupids)) {
+                list($insql, $params) = $DB->get_in_or_equal($groupids);
                 $groups = $DB->get_records_select('groups', "id $insql", $params, '', 'id, name');
                 $restriction->group_names = array_column($groups, 'name');
             } else {
@@ -256,7 +272,7 @@ class restriction_manager {
     }
 
     /**
-     * Get restriction status string
+     * Get restriction status string.
      *
      * @param object $restriction The restriction with effective times
      * @param int $now Current timestamp
@@ -290,7 +306,7 @@ class restriction_manager {
     }
 
     /**
-     * Save a restriction
+     * Save a restriction.
      *
      * @param object $data Restriction data
      * @param int $courseid Course ID
@@ -318,42 +334,42 @@ class restriction_manager {
             // Update existing.
             $record->id = $data->id;
             $DB->update_record('local_savian_chat_restrictions', $record);
-            $restriction_id = $record->id;
+            $restrictionid = $record->id;
         } else {
             // Insert new.
             $record->timecreated = $now;
-            $restriction_id = $DB->insert_record('local_savian_chat_restrictions', $record);
+            $restrictionid = $DB->insert_record('local_savian_chat_restrictions', $record);
         }
 
         // Update group assignments.
-        $this->update_restriction_groups($restriction_id, $data->group_ids ?? []);
+        $this->update_restriction_groups($restrictionid, $data->group_ids ?? []);
 
-        return $restriction_id;
+        return $restrictionid;
     }
 
     /**
-     * Update group assignments for a restriction
+     * Update group assignments for a restriction.
      *
      * @param int $restrictionid Restriction ID
-     * @param array $group_ids Array of group IDs
+     * @param array $groupids Array of group IDs
      */
-    private function update_restriction_groups(int $restrictionid, array $group_ids): void {
+    private function update_restriction_groups(int $restrictionid, array $groupids): void {
         global $DB;
 
         // Delete existing assignments.
         $DB->delete_records('local_savian_chat_restriction_groups', ['restriction_id' => $restrictionid]);
 
         // Insert new assignments.
-        foreach ($group_ids as $group_id) {
+        foreach ($groupids as $groupid) {
             $record = new \stdClass();
             $record->restriction_id = $restrictionid;
-            $record->group_id = $group_id;
+            $record->group_id = $groupid;
             $DB->insert_record('local_savian_chat_restriction_groups', $record);
         }
     }
 
     /**
-     * Delete a restriction
+     * Delete a restriction.
      *
      * @param int $restrictionid Restriction ID
      * @param int $courseid Course ID (for validation)
@@ -365,7 +381,7 @@ class restriction_manager {
         // Verify restriction belongs to this course.
         $restriction = $DB->get_record('local_savian_chat_restrictions', [
             'id' => $restrictionid,
-            'course_id' => $courseid
+            'course_id' => $courseid,
         ]);
 
         if (!$restriction) {
@@ -382,7 +398,7 @@ class restriction_manager {
     }
 
     /**
-     * Toggle restriction enabled status
+     * Toggle restriction enabled status.
      *
      * @param int $restrictionid Restriction ID
      * @param int $courseid Course ID (for validation)
@@ -394,27 +410,27 @@ class restriction_manager {
 
         $restriction = $DB->get_record('local_savian_chat_restrictions', [
             'id' => $restrictionid,
-            'course_id' => $courseid
+            'course_id' => $courseid,
         ]);
 
         if (!$restriction) {
             return false;
         }
 
-        $new_status = $restriction->is_enabled ? 0 : 1;
+        $newstatus = $restriction->is_enabled ? 0 : 1;
 
         $DB->update_record('local_savian_chat_restrictions', (object)[
             'id' => $restrictionid,
-            'is_enabled' => $new_status,
+            'is_enabled' => $newstatus,
             'timemodified' => time(),
-            'usermodified' => $userid
+            'usermodified' => $userid,
         ]);
 
-        return $new_status;
+        return $newstatus;
     }
 
     /**
-     * Get a single restriction by ID
+     * Get a single restriction by ID.
      *
      * @param int $restrictionid Restriction ID
      * @param int $courseid Course ID (for validation)
@@ -425,7 +441,7 @@ class restriction_manager {
 
         $restriction = $DB->get_record('local_savian_chat_restrictions', [
             'id' => $restrictionid,
-            'course_id' => $courseid
+            'course_id' => $courseid,
         ]);
 
         if (!$restriction) {
@@ -444,7 +460,7 @@ class restriction_manager {
     }
 
     /**
-     * Format time remaining for display
+     * Format time remaining for display.
      *
      * @param int $timestamp Future timestamp
      * @return string Formatted time string
@@ -463,8 +479,9 @@ class restriction_manager {
         if ($hours > 24) {
             $days = floor($hours / 24);
             return get_string('days_remaining', 'local_savian_ai', $days);
-        } elseif ($hours > 0) {
-            return get_string('hours_minutes_remaining', 'local_savian_ai', (object)['hours' => $hours, 'minutes' => $minutes]);
+        } else if ($hours > 0) {
+            return get_string('hours_minutes_remaining', 'local_savian_ai',
+                (object)['hours' => $hours, 'minutes' => $minutes]);
         } else {
             return get_string('minutes_remaining', 'local_savian_ai', $minutes);
         }

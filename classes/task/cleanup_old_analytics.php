@@ -5,13 +5,29 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Scheduled task to cleanup old analytics.
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 namespace local_savian_ai\task;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Scheduled task to cleanup old analytics data (GDPR data retention)
+ * Scheduled task to cleanup old analytics data (GDPR data retention).
  *
  * Runs daily to delete analytics reports and events older than the
  * configured retention period (default: 365 days).
@@ -23,7 +39,7 @@ defined('MOODLE_INTERNAL') || die();
 class cleanup_old_analytics extends \core\task\scheduled_task {
 
     /**
-     * Get task name
+     * Get task name.
      *
      * @return string
      */
@@ -32,76 +48,76 @@ class cleanup_old_analytics extends \core\task\scheduled_task {
     }
 
     /**
-     * Execute the task
+     * Execute the task.
      */
     public function execute() {
         global $DB;
 
         mtrace('Starting analytics data cleanup task...');
 
-        // Get retention period from config (default: 365 days)
-        $retention_days = get_config('local_savian_ai', 'analytics_retention_days');
-        if (empty($retention_days)) {
-            $retention_days = 365;
+        // Get retention period from config (default: 365 days).
+        $retentiondays = get_config('local_savian_ai', 'analytics_retention_days');
+        if (empty($retentiondays)) {
+            $retentiondays = 365;
         }
 
-        $cutoff_time = time() - ($retention_days * 86400);
+        $cutofftime = time() - ($retentiondays * 86400);
 
-        mtrace("Retention period: {$retention_days} days");
-        mtrace("Deleting data older than: " . userdate($cutoff_time));
+        mtrace("Retention period: {$retentiondays} days");
+        mtrace("Deleting data older than: " . userdate($cutofftime));
 
-        // Delete old analytics reports
-        $deleted_reports = $DB->delete_records_select(
+        // Delete old analytics reports.
+        $deletedreports = $DB->delete_records_select(
             'local_savian_analytics_reports',
             'timecreated < ?',
-            [$cutoff_time]
+            [$cutofftime]
         );
 
-        if ($deleted_reports) {
-            mtrace("  ✓ Deleted {$deleted_reports} old analytics reports");
+        if ($deletedreports) {
+            mtrace("  Deleted {$deletedreports} old analytics reports.");
         }
 
-        // Delete old processed analytics events (keep unprocessed)
-        $deleted_events = $DB->delete_records_select(
+        // Delete old processed analytics events (keep unprocessed).
+        $deletedevents = $DB->delete_records_select(
             'local_savian_analytics_events',
             'processed = 1 AND timecreated < ?',
-            [$cutoff_time]
+            [$cutofftime]
         );
 
-        if ($deleted_events) {
-            mtrace("  ✓ Deleted {$deleted_events} old processed events");
+        if ($deletedevents) {
+            mtrace("  Deleted {$deletedevents} old processed events.");
         }
 
-        // Delete old analytics cache (stale data)
-        $cache_cutoff = time() - (7 * 86400); // 7 days for cache
-        $deleted_cache = $DB->delete_records_select(
+        // Delete old analytics cache (stale data).
+        $cachecutoff = time() - (7 * 86400); // 7 days for cache.
+        $deletedcache = $DB->delete_records_select(
             'local_savian_analytics_cache',
             'timemodified < ?',
-            [$cache_cutoff]
+            [$cachecutoff]
         );
 
-        if ($deleted_cache) {
-            mtrace("  ✓ Deleted {$deleted_cache} stale cache entries");
+        if ($deletedcache) {
+            mtrace("  Deleted {$deletedcache} stale cache entries.");
         }
 
-        // Clean up orphaned events (user or course deleted)
-        $orphaned_events = $DB->execute("
+        // Clean up orphaned events (user or course deleted).
+        $orphanedevents = $DB->execute("
             DELETE FROM {local_savian_analytics_events}
             WHERE user_id NOT IN (SELECT id FROM {user})
                OR course_id NOT IN (SELECT id FROM {course})
         ");
 
-        if ($orphaned_events) {
-            mtrace("  ✓ Cleaned up orphaned event records");
+        if ($orphanedevents) {
+            mtrace("  Cleaned up orphaned event records.");
         }
 
         mtrace('Analytics cleanup task completed.');
 
-        // Return summary
+        // Return summary.
         return [
-            'reports_deleted' => $deleted_reports ?? 0,
-            'events_deleted' => $deleted_events ?? 0,
-            'cache_deleted' => $deleted_cache ?? 0,
+            'reports_deleted' => $deletedreports ?? 0,
+            'events_deleted' => $deletedevents ?? 0,
+            'cache_deleted' => $deletedcache ?? 0,
         ];
     }
 }

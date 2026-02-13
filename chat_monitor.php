@@ -5,6 +5,22 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Chat monitor page.
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 require_once(__DIR__ . '/../../config.php');
 
@@ -20,20 +36,20 @@ $analytics = new \local_savian_ai\chat\analytics();
 
 echo $OUTPUT->header();
 
-// Consistent header
+// Consistent header.
 echo local_savian_ai_render_header(
     get_string('chat_monitoring', 'local_savian_ai'),
     get_string('chat_monitoring_desc', 'local_savian_ai')
 );
 
-// === SYSTEM-WIDE STATISTICS ===
+// System-wide statistics.
 $stats = $analytics->get_system_stats();
 
 echo html_writer::tag('h3', get_string('system_wide_stats', 'local_savian_ai'), ['class' => 'mt-4']);
 
 echo html_writer::start_div('row mb-4');
 
-// Total Conversations
+// Total Conversations.
 echo html_writer::start_div('col-md-3 col-6 mb-3');
 echo html_writer::start_div('card text-center');
 echo html_writer::start_div('card-body');
@@ -43,7 +59,7 @@ echo html_writer::end_div();
 echo html_writer::end_div();
 echo html_writer::end_div();
 
-// Total Messages
+// Total Messages.
 echo html_writer::start_div('col-md-3 col-6 mb-3');
 echo html_writer::start_div('card text-center');
 echo html_writer::start_div('card-body');
@@ -53,7 +69,7 @@ echo html_writer::end_div();
 echo html_writer::end_div();
 echo html_writer::end_div();
 
-// Unique Users
+// Unique Users.
 echo html_writer::start_div('col-md-3 col-6 mb-3');
 echo html_writer::start_div('card text-center');
 echo html_writer::start_div('card-body');
@@ -63,7 +79,7 @@ echo html_writer::end_div();
 echo html_writer::end_div();
 echo html_writer::end_div();
 
-// Average Response Time
+// Average Response Time.
 echo html_writer::start_div('col-md-3 col-6 mb-3');
 echo html_writer::start_div('card text-center');
 echo html_writer::start_div('card-body');
@@ -73,24 +89,24 @@ echo html_writer::end_div();
 echo html_writer::end_div();
 echo html_writer::end_div();
 
-echo html_writer::end_div(); // row
+echo html_writer::end_div(); // End row.
 
-// === TOP COURSES ===
+// Top courses.
 echo html_writer::tag('h3', get_string('top_courses', 'local_savian_ai'), ['class' => 'mt-4']);
 
-$top_courses = $analytics->get_top_courses(10);
+$topcourses = $analytics->get_top_courses(10);
 
-if (!empty($top_courses)) {
+if (!empty($topcourses)) {
     $table = new html_table();
     $table->head = [
         get_string('course'),
         get_string('conversation_count', 'local_savian_ai'),
         get_string('unique_users', 'local_savian_ai'),
-        get_string('message_count', 'local_savian_ai')
+        get_string('message_count', 'local_savian_ai'),
     ];
     $table->attributes['class'] = 'table table-striped generaltable';
 
-    foreach ($top_courses as $course) {
+    foreach ($topcourses as $course) {
         $row = [];
         $row[] = html_writer::link(
             new moodle_url('/course/view.php', ['id' => $course->course_id]),
@@ -111,7 +127,7 @@ if (!empty($top_courses)) {
     );
 }
 
-// === RECENT CONVERSATIONS ===
+// Recent conversations.
 echo html_writer::tag('h3', get_string('recent_conversations', 'local_savian_ai'), ['class' => 'mt-4']);
 
 $recent = $analytics->get_recent_conversations(20);
@@ -122,7 +138,7 @@ if (!empty($recent)) {
         get_string('user'),
         get_string('course'),
         get_string('message_count', 'local_savian_ai'),
-        get_string('last_active', 'local_savian_ai')
+        get_string('last_active', 'local_savian_ai'),
     ];
     $table->attributes['class'] = 'table table-striped generaltable';
 
@@ -144,7 +160,7 @@ if (!empty($recent)) {
     );
 }
 
-// Back button
+// Back button.
 echo html_writer::div(
     html_writer::link(
         new moodle_url('/local/savian_ai/index.php'),
@@ -154,7 +170,7 @@ echo html_writer::div(
     ''
 );
 
-// Footer
+// Footer.
 echo local_savian_ai_render_footer();
 
 echo $OUTPUT->footer();

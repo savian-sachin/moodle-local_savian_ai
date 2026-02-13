@@ -5,22 +5,38 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Chat analytics handler.
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 namespace local_savian_ai\chat;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Chat analytics class - provides statistics for teachers and admins
+ * Chat analytics class - provides statistics for teachers and admins.
  *
  * @package    local_savian_ai
- * @copyright  2025 Savian AI
+ * @copyright  2026 Savian AI
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class analytics {
 
     /**
-     * Get conversation statistics for a course
+     * Get conversation statistics for a course.
      *
      * @param int $courseid Course ID
      * @return object Statistics object
@@ -40,7 +56,7 @@ class analytics {
 
         $stats = $DB->get_record_sql($sql, [$courseid]);
 
-        // Round averages
+        // Round averages.
         if ($stats) {
             $stats->avg_messages_per_conversation = round($stats->avg_messages_per_conversation, 1);
             $stats->avg_response_time = round($stats->avg_response_time);
@@ -50,7 +66,7 @@ class analytics {
     }
 
     /**
-     * Get user engagement metrics
+     * Get user engagement metrics.
      *
      * @param int $courseid Course ID
      * @param int|null $startdate Start date filter (timestamp)
@@ -61,14 +77,14 @@ class analytics {
         global $DB;
 
         $params = ['courseid' => $courseid];
-        $date_filter = '';
+        $datefilter = '';
 
         if ($startdate) {
-            $date_filter .= " AND c.timecreated >= :startdate";
+            $datefilter .= " AND c.timecreated >= :startdate";
             $params['startdate'] = $startdate;
         }
         if ($enddate) {
-            $date_filter .= " AND c.timecreated <= :enddate";
+            $datefilter .= " AND c.timecreated <= :enddate";
             $params['enddate'] = $enddate;
         }
 
@@ -83,7 +99,7 @@ class analytics {
                 FROM {user} u
                 JOIN {local_savian_chat_conversations} c ON c.user_id = u.id
                 LEFT JOIN {local_savian_chat_messages} m ON m.conversation_id = c.id
-                WHERE c.course_id = :courseid $date_filter
+                WHERE c.course_id = :courseid $datefilter
                 GROUP BY u.id, u.firstname, u.lastname, u.email
                 ORDER BY conversation_count DESC";
 
@@ -91,7 +107,7 @@ class analytics {
     }
 
     /**
-     * Get feedback statistics
+     * Get feedback statistics.
      *
      * @param int $courseid Course ID
      * @return object Feedback statistics
@@ -110,7 +126,7 @@ class analytics {
 
         $stats = $DB->get_record_sql($sql, [$courseid]);
 
-        // Calculate feedback rate
+        // Calculate feedback rate.
         if ($stats && $stats->total_assistant_messages > 0) {
             $stats->feedback_rate = round(($stats->total_feedback / $stats->total_assistant_messages) * 100, 1);
         } else {
@@ -121,7 +137,7 @@ class analytics {
     }
 
     /**
-     * Get system-wide statistics (for admins)
+     * Get system-wide statistics (for admins).
      *
      * @return object System-wide statistics
      */
@@ -135,13 +151,13 @@ class analytics {
             'SELECT COUNT(DISTINCT user_id) FROM {local_savian_chat_conversations}'
         );
 
-        // Average response time
-        $avg_response = $DB->get_field_sql(
+        // Average response time.
+        $avgresponse = $DB->get_field_sql(
             'SELECT AVG(response_time_ms) FROM {local_savian_chat_messages} WHERE response_time_ms IS NOT NULL'
         );
-        $stats->avg_response_time = round($avg_response);
+        $stats->avg_response_time = round($avgresponse);
 
-        // Total tokens used
+        // Total tokens used.
         $stats->total_tokens = $DB->get_field_sql(
             'SELECT SUM(token_count) FROM {local_savian_chat_messages}'
         );
@@ -150,7 +166,7 @@ class analytics {
     }
 
     /**
-     * Get top courses by chat activity
+     * Get top courses by chat activity.
      *
      * @param int $limit Number of courses to return
      * @return array Array of course data
@@ -175,7 +191,7 @@ class analytics {
     }
 
     /**
-     * Get recent conversations (for monitoring dashboard)
+     * Get recent conversations (for monitoring dashboard).
      *
      * @param int $limit Number of conversations to return
      * @return array Array of recent conversations
@@ -197,7 +213,7 @@ class analytics {
     }
 
     /**
-     * Get usage over time (for charts)
+     * Get usage over time (for charts).
      *
      * @param int $days Number of days to look back
      * @return array Array of daily usage data

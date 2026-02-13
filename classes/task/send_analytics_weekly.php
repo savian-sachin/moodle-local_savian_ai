@@ -5,6 +5,22 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Scheduled task for weekly analytics.
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 namespace local_savian_ai\task;
 
@@ -13,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/local/savian_ai/classes/analytics/report_builder.php');
 
 /**
- * Weekly scheduled task to send analytics reports
+ * Weekly scheduled task to send analytics reports.
  *
  * Runs weekly on configured day (default: Sunday 3:00 AM) to send
  * comprehensive analytics reports for all courses.
@@ -25,7 +41,7 @@ require_once($CFG->dirroot . '/local/savian_ai/classes/analytics/report_builder.
 class send_analytics_weekly extends \core\task\scheduled_task {
 
     /**
-     * Get task name
+     * Get task name.
      *
      * @return string
      */
@@ -34,19 +50,19 @@ class send_analytics_weekly extends \core\task\scheduled_task {
     }
 
     /**
-     * Execute the task
+     * Execute the task.
      */
     public function execute() {
         global $DB;
 
-        // Check if analytics is globally enabled
+        // Check if analytics is globally enabled.
         $enabled = get_config('local_savian_ai', 'analytics_enabled');
         if (empty($enabled)) {
             mtrace('Analytics is globally disabled. Skipping weekly task.');
             return;
         }
 
-        // Check if weekly frequency is enabled
+        // Check if weekly frequency is enabled.
         $frequency = get_config('local_savian_ai', 'analytics_frequency');
         if ($frequency !== 'weekly' && $frequency !== 'both') {
             mtrace('Weekly analytics not enabled. Current frequency: ' . ($frequency ?: 'manual'));
@@ -55,7 +71,7 @@ class send_analytics_weekly extends \core\task\scheduled_task {
 
         mtrace('Starting weekly analytics task...');
 
-        // Get all active courses with enrolled students
+        // Get all active courses with enrolled students.
         $sql = "SELECT DISTINCT c.id, c.fullname, c.startdate
                 FROM {course} c
                 JOIN {enrol} e ON e.courseid = c.id
@@ -77,16 +93,16 @@ class send_analytics_weekly extends \core\task\scheduled_task {
         mtrace('Found ' . count($courses) . ' courses to process.');
 
         $builder = new \local_savian_ai\analytics\report_builder();
-        $success_count = 0;
-        $error_count = 0;
-        $skipped_count = 0;
+        $successcount = 0;
+        $errorcount = 0;
+        $skippedcount = 0;
 
         foreach ($courses as $course) {
             try {
                 mtrace("Processing course: {$course->fullname} (ID: {$course->id})");
 
-                // Count enrolled students
-                $student_count = $DB->count_records_sql(
+                // Count enrolled students.
+                $studentcount = $DB->count_records_sql(
                     "SELECT COUNT(DISTINCT ue.userid)
                      FROM {user_enrolments} ue
                      JOIN {enrol} e ON e.id = ue.enrolid
@@ -96,14 +112,14 @@ class send_analytics_weekly extends \core\task\scheduled_task {
                     [$course->id]
                 );
 
-                if ($student_count == 0) {
-                    mtrace("  Skipping - no students enrolled");
-                    $skipped_count++;
+                if ($studentcount == 0) {
+                    mtrace("  Skipping - no students enrolled.");
+                    $skippedcount++;
                     continue;
                 }
 
-                // Get last weekly report
-                $last_report = $DB->get_record_sql(
+                // Get last weekly report.
+                $lastreport = $DB->get_record_sql(
                     "SELECT MAX(date_to) as last_date
                      FROM {local_savian_analytics_reports}
                      WHERE course_id = ?
@@ -112,51 +128,51 @@ class send_analytics_weekly extends \core\task\scheduled_task {
                     [$course->id]
                 );
 
-                $date_from = $last_report && $last_report->last_date ? $last_report->last_date : 0;
-                $date_to = time();
+                $datefrom = $lastreport && $lastreport->last_date ? $lastreport->last_date : 0;
+                $dateto = time();
 
-                // Build and send comprehensive report
+                // Build and send comprehensive report.
                 $result = $builder->build_and_send_report(
                     $course->id,
                     'scheduled',
                     'cron',
-                    $date_from,
-                    $date_to,
-                    null // System triggered
+                    $datefrom,
+                    $dateto,
+                    null // System triggered.
                 );
 
                 if ($result->success) {
-                    mtrace("  ✓ Report sent successfully");
+                    mtrace("  Report sent successfully.");
                     mtrace("    Report ID: {$result->report_id}");
-                    mtrace("    Students analyzed: {$student_count}");
+                    mtrace("    Students analyzed: {$studentcount}");
 
-                    // Log insights summary if available
+                    // Log insights summary if available.
                     if (isset($result->insights->at_risk_students)) {
-                        $at_risk_count = is_array($result->insights->at_risk_students) ?
+                        $atriskcount = is_array($result->insights->at_risk_students) ?
                             count($result->insights->at_risk_students) : 0;
-                        if ($at_risk_count > 0) {
-                            mtrace("    ⚠ At-risk students: {$at_risk_count}");
+                        if ($atriskcount > 0) {
+                            mtrace("    At-risk students: {$atriskcount}");
                         }
                     }
 
-                    $success_count++;
+                    $successcount++;
                 } else {
-                    mtrace("  ✗ Report failed: " . ($result->error ?? 'Unknown error'));
-                    $error_count++;
+                    mtrace("  Report failed: " . ($result->error ?? 'Unknown error'));
+                    $errorcount++;
                 }
 
             } catch (\Exception $e) {
-                mtrace("  ✗ Error processing course: " . $e->getMessage());
-                $error_count++;
+                mtrace("  Error processing course: " . $e->getMessage());
+                $errorcount++;
             }
 
-            // Delay between courses to avoid API rate limits
+            // Delay between courses to avoid API rate limits.
             sleep(3);
         }
 
         mtrace('Weekly analytics task completed.');
-        mtrace("  Success: {$success_count}");
-        mtrace("  Errors: {$error_count}");
-        mtrace("  Skipped: {$skipped_count}");
+        mtrace("  Success: {$successcount}");
+        mtrace("  Errors: {$errorcount}");
+        mtrace("  Skipped: {$skippedcount}");
     }
 }

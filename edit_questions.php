@@ -5,12 +5,28 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Question editing page.
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 require_once(__DIR__ . '/../../config.php');
 
 require_login();
 
-$savian_cache = cache::make('local_savian_ai', 'session_data');
+$saviancache = cache::make('local_savian_ai', 'session_data');
 
 $courseid = required_param('courseid', PARAM_INT);
 $action = optional_param('action', '', PARAM_ALPHA);
@@ -26,11 +42,11 @@ $PAGE->set_course($course);
 $PAGE->set_title('Edit Questions');
 $PAGE->set_heading($course->fullname);
 
-// Handle save
+// Handle save.
 if ($action === 'save' && confirm_sesskey()) {
-    $questions = json_decode($savian_cache->get('questions'));
+    $questions = json_decode($saviancache->get('questions'));
 
-    // Update questions from form data
+    // Update questions from form data.
     foreach ($questions as $idx => $q) {
         $q->questiontext = optional_param("questiontext_{$idx}", $q->questiontext, PARAM_RAW);
         $q->generalfeedback = optional_param("generalfeedback_{$idx}", $q->generalfeedback ?? '', PARAM_RAW);
@@ -43,8 +59,8 @@ if ($action === 'save' && confirm_sesskey()) {
         }
     }
 
-    // Save back to cache
-    $savian_cache->set('questions', json_encode($questions));
+    // Save back to cache.
+    $saviancache->set('questions', json_encode($questions));
 
     redirect(new moodle_url('/local/savian_ai/generate.php', [
         'courseid' => $courseid,
@@ -54,15 +70,15 @@ if ($action === 'save' && confirm_sesskey()) {
 
 echo $OUTPUT->header();
 
-// Consistent header
+// Consistent header.
 echo local_savian_ai_render_header('Edit Questions', 'Modify generated questions before adding to Question Bank');
 
-if ($savian_cache->get('questions')) {
-    $questions = json_decode($savian_cache->get('questions'));
+if ($saviancache->get('questions')) {
+    $questions = json_decode($saviancache->get('questions'));
 
     echo html_writer::start_tag('form', [
         'method' => 'post',
-        'action' => new moodle_url('/local/savian_ai/edit_questions.php', ['courseid' => $courseid])
+        'action' => new moodle_url('/local/savian_ai/edit_questions.php', ['courseid' => $courseid]),
     ]);
 
     echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'save']);
@@ -73,21 +89,21 @@ if ($savian_cache->get('questions')) {
         echo html_writer::div('Question ' . ($idx + 1) . ' of ' . count($questions), 'card-header bg-light');
         echo html_writer::start_div('card-body');
 
-        // Question text (editable)
+        // Question text (editable).
         echo html_writer::div('Question Text:', 'font-weight-bold mb-2');
         echo html_writer::tag('textarea', s($q->questiontext ?? ''), [
             'name' => "questiontext_{$idx}",
             'rows' => 3,
             'class' => 'form-control mb-3',
-            'style' => 'width: 100%;'
+            'style' => 'width: 100%;',
         ]);
 
-        // Answers (editable)
+        // Answers (editable).
         if (isset($q->answers) && is_array($q->answers)) {
             echo html_writer::div('Answers:', 'font-weight-bold mb-2');
             foreach ($q->answers as $aidx => $answer) {
-                $is_correct = ($answer->fraction ?? 0) > 0;
-                $badge = $is_correct ? '<span class="badge badge-success">Correct</span>' : '';
+                $iscorrect = ($answer->fraction ?? 0) > 0;
+                $badge = $iscorrect ? '<span class="badge badge-success">Correct</span>' : '';
 
                 echo html_writer::start_div('input-group mb-2');
                 echo html_writer::tag('div', ($aidx + 1) . '. ' . $badge, ['class' => 'input-group-prepend input-group-text']);
@@ -95,31 +111,31 @@ if ($savian_cache->get('questions')) {
                     'type' => 'text',
                     'name' => "answer_{$idx}_{$aidx}",
                     'value' => s($answer->text ?? ''),
-                    'class' => 'form-control'
+                    'class' => 'form-control',
                 ]);
                 echo html_writer::end_div();
             }
         }
 
-        // Feedback (editable)
+        // Feedback (editable).
         echo html_writer::div('General Feedback:', 'font-weight-bold mb-2 mt-3');
         echo html_writer::tag('textarea', s($q->generalfeedback ?? ''), [
             'name' => "generalfeedback_{$idx}",
             'rows' => 2,
             'class' => 'form-control',
-            'style' => 'width: 100%;'
+            'style' => 'width: 100%;',
         ]);
 
         echo html_writer::end_div();
         echo html_writer::end_div();
     }
 
-    // Action buttons
+    // Action buttons.
     echo html_writer::start_div('text-center mt-4');
     echo html_writer::empty_tag('input', [
         'type' => 'submit',
         'value' => 'Save Changes',
-        'class' => 'btn btn-primary btn-lg mr-2'
+        'class' => 'btn btn-primary btn-lg mr-2',
     ]);
     echo html_writer::link(
         new moodle_url('/local/savian_ai/generate.php', ['courseid' => $courseid, 'action' => 'preview']),

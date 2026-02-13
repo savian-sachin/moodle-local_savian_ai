@@ -5,11 +5,17 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Savian AI - Help & Tutorials
- *
- * Comprehensive tutorials for administrators, teachers, and students.
+ * Tutorials page.
  *
  * @package    local_savian_ai
  * @copyright  2026 Savian AI
@@ -41,7 +47,7 @@ echo html_writer::tag('p', get_string('select_your_role', 'local_savian_ai') . '
 echo html_writer::start_div('btn-group btn-group-lg', ['role' => 'group']);
 
 $roles = ['admin', 'teacher', 'student'];
-$role_labels = [
+$rolelabels = [
     'admin' => get_string('for_administrators', 'local_savian_ai'),
     'teacher' => get_string('for_teachers', 'local_savian_ai'),
     'student' => get_string('for_students', 'local_savian_ai'),
@@ -51,7 +57,7 @@ foreach ($roles as $r) {
     $active = ($role === $r) ? ' active' : '';
     echo html_writer::link(
         new moodle_url('/local/savian_ai/tutorials.php', ['role' => $r]),
-        $role_labels[$r],
+        $rolelabels[$r],
         ['class' => 'btn btn-primary' . $active]
     );
 }
@@ -97,7 +103,9 @@ echo local_savian_ai_render_footer();
 echo $OUTPUT->footer();
 
 /**
- * Show overview with all tutorials
+ * Show overview with all tutorials.
+ *
+ * @return void
  */
 function local_savian_ai_show_overview() {
     $s = 'local_savian_ai';
@@ -155,7 +163,9 @@ function local_savian_ai_show_overview() {
 }
 
 /**
- * Administrator tutorials
+ * Administrator tutorials.
+ *
+ * @return void
  */
 function local_savian_ai_show_admin_tutorials() {
     $s = 'local_savian_ai';
@@ -257,7 +267,9 @@ function local_savian_ai_show_admin_tutorials() {
 }
 
 /**
- * Teacher tutorials
+ * Teacher tutorials.
+ *
+ * @return void
  */
 function local_savian_ai_show_teacher_tutorials() {
     $s = 'local_savian_ai';
@@ -480,7 +492,9 @@ function local_savian_ai_show_teacher_tutorials() {
 }
 
 /**
- * Student tutorials
+ * Student tutorials.
+ *
+ * @return void
  */
 function local_savian_ai_show_student_tutorials() {
     $s = 'local_savian_ai';

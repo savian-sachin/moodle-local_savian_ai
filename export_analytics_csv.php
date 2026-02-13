@@ -5,6 +5,22 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Analytics CSV export page.
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 require_once(__DIR__ . '/../../config.php');
 
@@ -19,23 +35,23 @@ $context = context_course::instance($report->course_id);
 
 require_capability('local/savian_ai:generate', $context);
 
-// Prepare CSV filename
+// Prepare CSV filename.
 $filename = 'analytics_' . $course->shortname . '_' . date('Y-m-d', $report->timecreated) . '.csv';
 
-// Set headers for CSV download
+// Set headers for CSV download.
 header('Content-Type: text/csv; charset=utf-8');
 header('Content-Disposition: attachment; filename="' . $filename . '"');
 
-// Create output stream
+// Create output stream.
 $output = fopen('php://output', 'w');
 
-// Add BOM for UTF-8
-fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+// Add BOM for UTF-8.
+fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-// Parse API response
+// Parse API response.
 $response = json_decode($report->api_response);
 
-// Write header information
+// Write header information.
 fputcsv($output, ['Savian AI Learning Analytics Report']);
 fputcsv($output, ['Course', $course->fullname]);
 fputcsv($output, ['Course ID', $report->course_id]);
@@ -45,17 +61,17 @@ fputcsv($output, ['Students Analyzed', $report->student_count]);
 fputcsv($output, ['Status', ucfirst($report->status)]);
 fputcsv($output, []);
 
-// If insights available, export them
+// If insights available, export them.
 if ($response && isset($response->insights)) {
     $insights = $response->insights;
 
-    // At-risk students section
+    // At-risk students section.
     if (isset($insights->at_risk_students) && !empty($insights->at_risk_students)) {
         fputcsv($output, ['AT-RISK STUDENTS']);
         fputcsv($output, ['Student ID (Anonymized)', 'Risk Level', 'Risk Score', 'Risk Factors', 'Recommended Actions']);
 
         foreach ($insights->at_risk_students as $student) {
-            $risk_factors = isset($student->risk_factors) && is_array($student->risk_factors) ?
+            $riskfactors = isset($student->risk_factors) && is_array($student->risk_factors) ?
                 implode('; ', $student->risk_factors) : '';
             $actions = isset($student->recommended_actions) && is_array($student->recommended_actions) ?
                 implode('; ', $student->recommended_actions) : '';
@@ -64,14 +80,14 @@ if ($response && isset($response->insights)) {
                 substr($student->anon_id, 0, 16) . '...',
                 strtoupper($student->risk_level),
                 round($student->risk_score * 100) . '%',
-                $risk_factors,
-                $actions
+                $riskfactors,
+                $actions,
             ]);
         }
         fputcsv($output, []);
     }
 
-    // Course recommendations
+    // Course recommendations.
     if (isset($insights->course_recommendations) && !empty($insights->course_recommendations)) {
         fputcsv($output, ['COURSE RECOMMENDATIONS']);
         fputcsv($output, ['Recommendation']);
@@ -82,7 +98,7 @@ if ($response && isset($response->insights)) {
         fputcsv($output, []);
     }
 
-    // Struggling topics
+    // Struggling topics.
     if (isset($insights->struggling_topics) && !empty($insights->struggling_topics)) {
         fputcsv($output, ['STRUGGLING TOPICS']);
         fputcsv($output, ['Topic/Module', 'Students Struggling', 'Average Grade', 'Recommended Action']);
@@ -92,13 +108,13 @@ if ($response && isset($response->insights)) {
                 $topic->topic ?? $topic->module_name ?? 'Unknown',
                 $topic->students_struggling ?? 0,
                 isset($topic->avg_grade) ? round($topic->avg_grade, 1) . '%' : 'N/A',
-                $topic->recommended_action ?? ''
+                $topic->recommended_action ?? '',
             ]);
         }
         fputcsv($output, []);
     }
 
-    // Engagement insights
+    // Engagement insights.
     if (isset($insights->engagement_insights)) {
         $engagement = $insights->engagement_insights;
 
@@ -118,19 +134,19 @@ if ($response && isset($response->insights)) {
         fputcsv($output, []);
     }
 
-    // Summary statistics
+    // Summary statistics.
     fputcsv($output, ['SUMMARY']);
     fputcsv($output, ['Metric', 'Value']);
     fputcsv($output, ['Students Processed', $insights->processed_students ?? $report->student_count]);
 
     if (isset($insights->at_risk_students)) {
-        $at_risk_count = is_array($insights->at_risk_students) ?
+        $atriskcount = is_array($insights->at_risk_students) ?
             count($insights->at_risk_students) : 0;
-        fputcsv($output, ['At-Risk Students', $at_risk_count]);
+        fputcsv($output, ['At-Risk Students', $atriskcount]);
     }
 
 } else {
-    // No insights available
+    // No insights available.
     fputcsv($output, ['No insights data available for this report.']);
     fputcsv($output, ['Status', $report->status]);
     if (!empty($report->error_message)) {

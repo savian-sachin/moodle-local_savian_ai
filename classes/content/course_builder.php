@@ -5,6 +5,22 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Course builder.
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 namespace local_savian_ai\content;
 
@@ -17,7 +33,7 @@ require_once($CFG->dirroot . '/mod/assign/lib.php');
 require_once($CFG->dirroot . '/mod/glossary/lib.php');
 
 /**
- * Course Builder - Creates Moodle course content from AI-generated structures
+ * Course Builder - Creates Moodle course content from AI-generated structures.
  *
  * Converts external service course structures into native Moodle content including
  * sections, pages, activities, discussions, quizzes, assignments, and formative assessments.
@@ -28,74 +44,77 @@ require_once($CFG->dirroot . '/mod/glossary/lib.php');
  */
 class course_builder {
 
-    /** @var qbank_creator Question bank creator */
-    private $qbank_creator;
+    /** @var qbank_creator Question bank creator. */
+    private $qbankcreator;
 
+    /**
+     * Constructor.
+     */
     public function __construct() {
-        $this->qbank_creator = new qbank_creator();
+        $this->qbankcreator = new qbank_creator();
     }
 
     /**
-     * Add AI-generated content to existing course
+     * Add AI-generated content to existing course.
      *
-     * @param int $course_id Course ID
-     * @param object $course_structure Course structure from API
+     * @param int $courseid Course ID
+     * @param object $coursestructure Course structure from API
      * @return array Results with created items
      */
-    public function add_content_to_course($course_id, $course_structure) {
+    public function add_content_to_course($courseid, $coursestructure) {
         global $DB, $CFG;
 
-        $course = $DB->get_record('course', ['id' => $course_id], '*', MUST_EXIST);
+        $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
         $results = [
             'sections_created' => 0,
             'pages_created' => 0,
             'activities_created' => 0,
             'discussions_created' => 0,
-            'formative_created' => 0,  // ADDIE v2.0
+            'formative_created' => 0,
             'quizzes_created' => 0,
             'assignments_created' => 0,
             'glossary_created' => false,
-            'errors' => []
+            'errors' => [],
         ];
 
-        // Get next section number
-        $next_section_num = $this->get_next_section_number($course_id);
+        // Get next section number.
+        $nextsectionnum = $this->get_next_section_number($courseid);
 
-        // Create sections and content
-        if (isset($course_structure->sections)) {
-            foreach ($course_structure->sections as $section_data) {
+        // Create sections and content.
+        if (isset($coursestructure->sections)) {
+            foreach ($coursestructure->sections as $sectiondata) {
                 try {
-                    $section_num = $this->create_section($course_id, $section_data, $next_section_num);
+                    $sectionnum = $this->create_section($courseid, $sectiondata, $nextsectionnum);
                     $results['sections_created']++;
-                    $next_section_num++;
+                    $nextsectionnum++;
 
-                    // Add content to this section
-                    if (isset($section_data->content)) {
-                        foreach ($section_data->content as $content_item) {
+                    // Add content to this section.
+                    if (isset($sectiondata->content)) {
+                        foreach ($sectiondata->content as $contentitem) {
                             try {
-                                switch ($content_item->type) {
+                                switch ($contentitem->type) {
                                     case 'page':
-                                        $this->create_page($course_id, $section_num, $content_item);
+                                        $this->create_page($courseid, $sectionnum, $contentitem);
                                         $results['pages_created']++;
                                         break;
                                     case 'activity':
-                                        $this->create_activity($course_id, $section_num, $content_item);
+                                        $this->create_activity($courseid, $sectionnum, $contentitem);
                                         $results['activities_created']++;
                                         break;
                                     case 'discussion':
-                                        $this->create_discussion($course_id, $section_num, $content_item);
+                                        $this->create_discussion($courseid, $sectionnum, $contentitem);
                                         $results['discussions_created']++;
                                         break;
-                                    case 'formative':  // ADDIE v2.0
-                                        $this->create_formative_assessment($course_id, $section_num, $content_item);
+                                    case 'formative':
+                                        $this->create_formative_assessment($courseid, $sectionnum, $contentitem);
                                         $results['formative_created']++;
                                         break;
                                     case 'quiz':
-                                        $this->create_quiz($course_id, $section_num, $content_item);
+                                        $this->create_quiz($courseid, $sectionnum, $contentitem);
                                         $results['quizzes_created']++;
                                         break;
                                     case 'assignment':
-                                        $this->create_assignment($course_id, $section_num, $content_item);
+                                        $this->create_assignment($courseid, $sectionnum, $contentitem);
                                         $results['assignments_created']++;
                                         break;
                                 }
@@ -110,10 +129,10 @@ class course_builder {
             }
         }
 
-        // Create glossary if terms provided
-        if (isset($course_structure->glossary_terms) && !empty($course_structure->glossary_terms)) {
+        // Create glossary if terms provided.
+        if (isset($coursestructure->glossary_terms) && !empty($coursestructure->glossary_terms)) {
             try {
-                $this->create_glossary($course_id, $course_structure->glossary_terms);
+                $this->create_glossary($courseid, $coursestructure->glossary_terms);
                 $results['glossary_created'] = true;
             } catch (\Exception $e) {
                 $results['errors'][] = "Glossary error: " . $e->getMessage();
@@ -124,53 +143,66 @@ class course_builder {
     }
 
     /**
-     * Get next available section number in course
+     * Get next available section number in course.
+     *
+     * @param int $courseid Course ID
+     * @return int Next section number
      */
-    protected function get_next_section_number($course_id) {
+    protected function get_next_section_number($courseid) {
         global $DB;
-        $max_section = $DB->get_field_sql(
+        $maxsection = $DB->get_field_sql(
             'SELECT MAX(section) FROM {course_sections} WHERE course = ?',
-            [$course_id]
+            [$courseid]
         );
-        return ($max_section ?? 0) + 1;
+        return ($maxsection ?? 0) + 1;
     }
 
     /**
-     * Create a course section
+     * Create a course section.
+     *
+     * @param int $courseid Course ID
+     * @param object $sectiondata Section data from API
+     * @param int $sectionnum Section number
+     * @return int Section number
      */
-    protected function create_section($course_id, $section_data, $section_num) {
+    protected function create_section($courseid, $sectiondata, $sectionnum) {
         global $DB;
 
         $section = new \stdClass();
-        $section->course = $course_id;
-        $section->section = $section_num;
-        $section->name = $this->extract_string($section_data->title ?? "Section {$section_num}");
-        $section->summary = $this->extract_string($section_data->summary ?? '');
+        $section->course = $courseid;
+        $section->section = $sectionnum;
+        $section->name = $this->extract_string($sectiondata->title ?? "Section {$sectionnum}");
+        $section->summary = $this->extract_string($sectiondata->summary ?? '');
         $section->summaryformat = FORMAT_HTML;
         $section->visible = 1;
 
-        $section_id = $DB->insert_record('course_sections', $section);
+        $sectionid = $DB->insert_record('course_sections', $section);
 
-        // Rebuild course cache
-        rebuild_course_cache($course_id, true);
+        // Rebuild course cache.
+        rebuild_course_cache($courseid, true);
 
-        return $section_num;
+        return $sectionnum;
     }
 
     /**
-     * Create a page resource
+     * Create a page resource.
+     *
+     * @param int $courseid Course ID
+     * @param int $sectionnum Section number
+     * @param object $pagedata Page data from API
+     * @return int Page ID
      */
-    protected function create_page($course_id, $section_num, $page_data) {
+    protected function create_page($courseid, $sectionnum, $pagedata) {
         global $DB, $USER, $CFG;
 
-        $course = $DB->get_record('course', ['id' => $course_id], '*', MUST_EXIST);
+        $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 
         // Create course module first.
         $cm = new \stdClass();
-        $cm->course = $course_id;
+        $cm->course = $courseid;
         $cm->module = $DB->get_field('modules', 'id', ['name' => 'page']);
         $cm->instance = 0;
-        $cm->section = $DB->get_field('course_sections', 'id', ['course' => $course_id, 'section' => $section_num]);
+        $cm->section = $DB->get_field('course_sections', 'id', ['course' => $courseid, 'section' => $sectionnum]);
         $cm->idnumber = '';
         $cm->added = time();
 
@@ -178,12 +210,12 @@ class course_builder {
 
         // Create page instance.
         $page = new \stdClass();
-        $page->course = $course_id;
+        $page->course = $courseid;
         $page->coursemodule = $cm->id;
-        $page->name = $this->extract_string($page_data->title ?? 'Page');
+        $page->name = $this->extract_string($pagedata->title ?? 'Page');
         $page->intro = '';
         $page->introformat = FORMAT_HTML;
-        $page->content = $this->extract_string($page_data->content ?? '');
+        $page->content = $this->extract_string($pagedata->content ?? '');
         $page->contentformat = FORMAT_HTML;
         $page->display = 5;
         $page->displayoptions = '';
@@ -196,45 +228,50 @@ class course_builder {
         $DB->set_field('course_modules', 'instance', $page->id, ['id' => $cm->id]);
 
         // Add to section sequence.
-        $section = $DB->get_record('course_sections', ['course' => $course_id, 'section' => $section_num]);
+        $section = $DB->get_record('course_sections', ['course' => $courseid, 'section' => $sectionnum]);
         $sequence = !empty($section->sequence) ? explode(',', $section->sequence) : [];
         $sequence[] = $cm->id;
         $DB->set_field('course_sections', 'sequence', implode(',', $sequence), ['id' => $section->id]);
 
         // Rebuild course cache.
-        rebuild_course_cache($course_id, true);
+        rebuild_course_cache($courseid, true);
 
         // Trigger course module created event.
-        $this->trigger_cm_created_event($cm->id, $course_id);
+        $this->trigger_cm_created_event($cm->id, $courseid);
 
         return $page->id;
     }
 
     /**
-     * Create a quiz with questions
+     * Create a quiz with questions.
+     *
+     * @param int $courseid Course ID
+     * @param int $sectionnum Section number
+     * @param object $quizdata Quiz data from API
+     * @return int Quiz ID
      */
-    protected function create_quiz($course_id, $section_num, $quiz_data) {
+    protected function create_quiz($courseid, $sectionnum, $quizdata) {
         global $DB, $USER, $CFG;
 
-        $course = $DB->get_record('course', ['id' => $course_id], '*', MUST_EXIST);
+        $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 
-        // Create course module first
+        // Create course module first.
         $cm = new \stdClass();
-        $cm->course = $course_id;
+        $cm->course = $courseid;
         $cm->module = $DB->get_field('modules', 'id', ['name' => 'quiz']);
         $cm->instance = 0;
-        $cm->section = $DB->get_field('course_sections', 'id', ['course' => $course_id, 'section' => $section_num]);
+        $cm->section = $DB->get_field('course_sections', 'id', ['course' => $courseid, 'section' => $sectionnum]);
         $cm->idnumber = '';
         $cm->added = time();
 
         $cm->id = $DB->insert_record('course_modules', $cm);
 
-        // Create quiz instance
+        // Create quiz instance.
         $quiz = new \stdClass();
-        $quiz->course = $course_id;
+        $quiz->course = $courseid;
         $quiz->coursemodule = $cm->id;
-        $quiz->name = $this->extract_string($quiz_data->title ?? 'Quiz');
-        $quiz->intro = $this->extract_string($quiz_data->description ?? '');
+        $quiz->name = $this->extract_string($quizdata->title ?? 'Quiz');
+        $quiz->intro = $this->extract_string($quizdata->description ?? '');
         $quiz->introformat = FORMAT_HTML;
         $quiz->timeopen = 0;
         $quiz->timeclose = 0;
@@ -242,9 +279,9 @@ class course_builder {
         $quiz->overduehandling = 'autosubmit';
         $quiz->graceperiod = 0;
         $quiz->preferredbehaviour = 'deferredfeedback';
-        $quiz->attempts = 0; // Unlimited
+        $quiz->attempts = 0;
         $quiz->attemptonlast = 0;
-        $quiz->grademethod = 1; // Highest grade
+        $quiz->grademethod = 1;
         $quiz->decimalpoints = 2;
         $quiz->questiondecimalpoints = -1;
         $quiz->reviewattempt = 69904;
@@ -274,57 +311,62 @@ class course_builder {
 
         $quiz->id = $DB->insert_record('quiz', $quiz);
 
-        // Update course_module with instance ID
+        // Update course_module with instance ID.
         $DB->set_field('course_modules', 'instance', $quiz->id, ['id' => $cm->id]);
 
-        // Add to section sequence
-        $section = $DB->get_record('course_sections', ['course' => $course_id, 'section' => $section_num]);
+        // Add to section sequence.
+        $section = $DB->get_record('course_sections', ['course' => $courseid, 'section' => $sectionnum]);
         $sequence = !empty($section->sequence) ? explode(',', $section->sequence) : [];
         $sequence[] = $cm->id;
         $DB->set_field('course_sections', 'sequence', implode(',', $sequence), ['id' => $section->id]);
 
-        // Add questions if provided
-        if (isset($quiz_data->questions) && !empty($quiz_data->questions)) {
-            $this->qbank_creator->add_to_question_bank(
-                (array)$quiz_data->questions,
-                $course_id
+        // Add questions if provided.
+        if (isset($quizdata->questions) && !empty($quizdata->questions)) {
+            $this->qbankcreator->add_to_question_bank(
+                (array)$quizdata->questions,
+                $courseid
             );
         }
 
         // Rebuild course cache.
-        rebuild_course_cache($course_id, true);
+        rebuild_course_cache($courseid, true);
 
         // Trigger course module created event.
-        $this->trigger_cm_created_event($cm->id, $course_id);
+        $this->trigger_cm_created_event($cm->id, $courseid);
 
         return $quiz->id;
     }
 
     /**
-     * Create an assignment
+     * Create an assignment.
+     *
+     * @param int $courseid Course ID
+     * @param int $sectionnum Section number
+     * @param object $assignmentdata Assignment data from API
+     * @return int Assignment ID
      */
-    protected function create_assignment($course_id, $section_num, $assignment_data) {
+    protected function create_assignment($courseid, $sectionnum, $assignmentdata) {
         global $DB, $CFG;
 
-        $course = $DB->get_record('course', ['id' => $course_id], '*', MUST_EXIST);
+        $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 
-        // Create course module first
+        // Create course module first.
         $cm = new \stdClass();
-        $cm->course = $course_id;
+        $cm->course = $courseid;
         $cm->module = $DB->get_field('modules', 'id', ['name' => 'assign']);
         $cm->instance = 0;
-        $cm->section = $DB->get_field('course_sections', 'id', ['course' => $course_id, 'section' => $section_num]);
+        $cm->section = $DB->get_field('course_sections', 'id', ['course' => $courseid, 'section' => $sectionnum]);
         $cm->idnumber = '';
         $cm->added = time();
 
         $cm->id = $DB->insert_record('course_modules', $cm);
 
-        // Create assignment instance
+        // Create assignment instance.
         $assignment = new \stdClass();
-        $assignment->course = $course_id;
+        $assignment->course = $courseid;
         $assignment->coursemodule = $cm->id;
-        $assignment->name = $this->extract_string($assignment_data->title ?? 'Assignment');
-        $assignment->intro = $this->extract_string($assignment_data->description ?? '');
+        $assignment->name = $this->extract_string($assignmentdata->title ?? 'Assignment');
+        $assignment->intro = $this->extract_string($assignmentdata->description ?? '');
         $assignment->introformat = FORMAT_HTML;
         $assignment->alwaysshowdescription = 1;
         $assignment->submissiondrafts = 0;
@@ -349,100 +391,110 @@ class course_builder {
 
         $assignment->id = $DB->insert_record('assign', $assignment);
 
-        // Update course_module with instance ID
+        // Update course_module with instance ID.
         $DB->set_field('course_modules', 'instance', $assignment->id, ['id' => $cm->id]);
 
-        // Add to section sequence
-        $section = $DB->get_record('course_sections', ['course' => $course_id, 'section' => $section_num]);
+        // Add to section sequence.
+        $section = $DB->get_record('course_sections', ['course' => $courseid, 'section' => $sectionnum]);
         $sequence = !empty($section->sequence) ? explode(',', $section->sequence) : [];
         $sequence[] = $cm->id;
         $DB->set_field('course_sections', 'sequence', implode(',', $sequence), ['id' => $section->id]);
 
         // Rebuild course cache.
-        rebuild_course_cache($course_id, true);
+        rebuild_course_cache($courseid, true);
 
         // Trigger course module created event.
-        $this->trigger_cm_created_event($cm->id, $course_id);
+        $this->trigger_cm_created_event($cm->id, $courseid);
 
         return $assignment->id;
     }
 
     /**
-     * Create an activity (hands-on exercise using label module)
+     * Create an activity (hands-on exercise using label module).
+     *
+     * @param int $courseid Course ID
+     * @param int $sectionnum Section number
+     * @param object $activitydata Activity data from API
+     * @return int Label ID
      */
-    protected function create_activity($course_id, $section_num, $activity_data) {
+    protected function create_activity($courseid, $sectionnum, $activitydata) {
         global $DB;
 
-        $course = $DB->get_record('course', ['id' => $course_id], '*', MUST_EXIST);
+        $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 
-        // Create course module first (use label module for activities)
+        // Create course module first (use label module for activities).
         $cm = new \stdClass();
-        $cm->course = $course_id;
+        $cm->course = $courseid;
         $cm->module = $DB->get_field('modules', 'id', ['name' => 'label']);
         $cm->instance = 0;
-        $cm->section = $DB->get_field('course_sections', 'id', ['course' => $course_id, 'section' => $section_num]);
+        $cm->section = $DB->get_field('course_sections', 'id', ['course' => $courseid, 'section' => $sectionnum]);
         $cm->idnumber = '';
         $cm->added = time();
 
         $cm->id = $DB->insert_record('course_modules', $cm);
 
-        // Create label instance with activity instructions
+        // Create label instance with activity instructions.
         $label = new \stdClass();
-        $label->course = $course_id;
+        $label->course = $courseid;
         $label->coursemodule = $cm->id;
-        $label->name = $this->extract_string($activity_data->title ?? 'Activity');
+        $label->name = $this->extract_string($activitydata->title ?? 'Activity');
         $label->intro = '<div class="alert alert-info">' .
-                        '<h4>🎯 ' . $this->extract_string($activity_data->title ?? 'Activity') . '</h4>' .
-                        $this->extract_string($activity_data->instructions ?? $activity_data->content ?? '') .
+                        '<h4>🎯 ' . $this->extract_string($activitydata->title ?? 'Activity') . '</h4>' .
+                        $this->extract_string($activitydata->instructions ?? $activitydata->content ?? '') .
                         '</div>';
         $label->introformat = FORMAT_HTML;
         $label->timemodified = time();
 
         $label->id = $DB->insert_record('label', $label);
 
-        // Update course_module with instance ID
+        // Update course_module with instance ID.
         $DB->set_field('course_modules', 'instance', $label->id, ['id' => $cm->id]);
 
-        // Add to section sequence
-        $section = $DB->get_record('course_sections', ['course' => $course_id, 'section' => $section_num]);
+        // Add to section sequence.
+        $section = $DB->get_record('course_sections', ['course' => $courseid, 'section' => $sectionnum]);
         $sequence = !empty($section->sequence) ? explode(',', $section->sequence) : [];
         $sequence[] = $cm->id;
         $DB->set_field('course_sections', 'sequence', implode(',', $sequence), ['id' => $section->id]);
 
         // Rebuild course cache.
-        rebuild_course_cache($course_id, true);
+        rebuild_course_cache($courseid, true);
 
         // Trigger course module created event.
-        $this->trigger_cm_created_event($cm->id, $course_id);
+        $this->trigger_cm_created_event($cm->id, $courseid);
 
         return $label->id;
     }
 
     /**
-     * Create a discussion forum
+     * Create a discussion forum.
+     *
+     * @param int $courseid Course ID
+     * @param int $sectionnum Section number
+     * @param object $discussiondata Discussion data from API
+     * @return int Forum ID
      */
-    protected function create_discussion($course_id, $section_num, $discussion_data) {
+    protected function create_discussion($courseid, $sectionnum, $discussiondata) {
         global $DB;
 
-        $course = $DB->get_record('course', ['id' => $course_id], '*', MUST_EXIST);
+        $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 
-        // Create course module first
+        // Create course module first.
         $cm = new \stdClass();
-        $cm->course = $course_id;
+        $cm->course = $courseid;
         $cm->module = $DB->get_field('modules', 'id', ['name' => 'forum']);
         $cm->instance = 0;
-        $cm->section = $DB->get_field('course_sections', 'id', ['course' => $course_id, 'section' => $section_num]);
+        $cm->section = $DB->get_field('course_sections', 'id', ['course' => $courseid, 'section' => $sectionnum]);
         $cm->idnumber = '';
         $cm->added = time();
 
         $cm->id = $DB->insert_record('course_modules', $cm);
 
-        // Create forum instance
+        // Create forum instance.
         $forum = new \stdClass();
-        $forum->course = $course_id;
+        $forum->course = $courseid;
         $forum->coursemodule = $cm->id;
-        $forum->name = $this->extract_string($discussion_data->title ?? 'Discussion');
-        $forum->intro = $this->extract_string($discussion_data->prompt ?? $discussion_data->content ?? '');
+        $forum->name = $this->extract_string($discussiondata->title ?? 'Discussion');
+        $forum->intro = $this->extract_string($discussiondata->prompt ?? $discussiondata->content ?? '');
         $forum->introformat = FORMAT_HTML;
         $forum->type = 'general';
         $forum->assessed = 0;
@@ -467,50 +519,55 @@ class course_builder {
 
         $forum->id = $DB->insert_record('forum', $forum);
 
-        // Update course_module with instance ID
+        // Update course_module with instance ID.
         $DB->set_field('course_modules', 'instance', $forum->id, ['id' => $cm->id]);
 
-        // Add to section sequence
-        $section = $DB->get_record('course_sections', ['course' => $course_id, 'section' => $section_num]);
+        // Add to section sequence.
+        $section = $DB->get_record('course_sections', ['course' => $courseid, 'section' => $sectionnum]);
         $sequence = !empty($section->sequence) ? explode(',', $section->sequence) : [];
         $sequence[] = $cm->id;
         $DB->set_field('course_sections', 'sequence', implode(',', $sequence), ['id' => $section->id]);
 
         // Rebuild course cache.
-        rebuild_course_cache($course_id, true);
+        rebuild_course_cache($courseid, true);
 
         // Trigger course module created event.
-        $this->trigger_cm_created_event($cm->id, $course_id);
+        $this->trigger_cm_created_event($cm->id, $courseid);
 
         return $forum->id;
     }
 
     /**
-     * Create formative assessment (self-check questions) - ADDIE v2.0
+     * Create formative assessment (self-check questions).
+     *
+     * @param int $courseid Course ID
+     * @param int $sectionnum Section number
+     * @param object $formativedata Formative assessment data from API
+     * @return int Label ID
      */
-    protected function create_formative_assessment($course_id, $section_num, $formative_data) {
+    protected function create_formative_assessment($courseid, $sectionnum, $formativedata) {
         global $DB;
 
-        $course = $DB->get_record('course', ['id' => $course_id], '*', MUST_EXIST);
+        $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 
-        // Create course module (use label)
+        // Create course module (use label).
         $cm = new \stdClass();
-        $cm->course = $course_id;
+        $cm->course = $courseid;
         $cm->module = $DB->get_field('modules', 'id', ['name' => 'label']);
         $cm->instance = 0;
-        $cm->section = $DB->get_field('course_sections', 'id', ['course' => $course_id, 'section' => $section_num]);
+        $cm->section = $DB->get_field('course_sections', 'id', ['course' => $courseid, 'section' => $sectionnum]);
         $cm->idnumber = '';
         $cm->added = time();
 
         $cm->id = $DB->insert_record('course_modules', $cm);
 
-        // Build HTML content with collapsible answers
+        // Build HTML content with collapsible answers.
         $content = '<div class="formative-assessment alert alert-info">';
         $content .= '<h4>✓ Knowledge Check (Ungraded)</h4>';
         $content .= '<p>Test your understanding before moving forward:</p>';
 
-        if (isset($formative_data->questions)) {
-            foreach ($formative_data->questions as $idx => $q) {
+        if (isset($formativedata->questions)) {
+            foreach ($formativedata->questions as $idx => $q) {
                 $content .= '<div class="mb-3 p-2 bg-light rounded">';
                 $content .= '<p><strong>Q' . ($idx + 1) . ':</strong> ' .
                             $this->extract_string($q->question) . '</p>';
@@ -523,9 +580,9 @@ class course_builder {
 
         $content .= '</div>';
 
-        // Create label with formative content
+        // Create label with formative content.
         $label = new \stdClass();
-        $label->course = $course_id;
+        $label->course = $courseid;
         $label->coursemodule = $cm->id;
         $label->name = 'Self-Check Questions';
         $label->intro = $content;
@@ -534,76 +591,80 @@ class course_builder {
 
         $label->id = $DB->insert_record('label', $label);
 
-        // Update course_module with instance ID
+        // Update course_module with instance ID.
         $DB->set_field('course_modules', 'instance', $label->id, ['id' => $cm->id]);
 
-        // Add to section sequence
-        $section = $DB->get_record('course_sections', ['course' => $course_id, 'section' => $section_num]);
+        // Add to section sequence.
+        $section = $DB->get_record('course_sections', ['course' => $courseid, 'section' => $sectionnum]);
         $sequence = !empty($section->sequence) ? explode(',', $section->sequence) : [];
         $sequence[] = $cm->id;
         $DB->set_field('course_sections', 'sequence', implode(',', $sequence), ['id' => $section->id]);
 
         // Rebuild course cache.
-        rebuild_course_cache($course_id, true);
+        rebuild_course_cache($courseid, true);
 
         // Trigger course module created event.
-        $this->trigger_cm_created_event($cm->id, $course_id);
+        $this->trigger_cm_created_event($cm->id, $courseid);
 
         return $label->id;
     }
 
     /**
-     * Create or update glossary with terms
+     * Create or update glossary with terms.
+     *
+     * @param int $courseid Course ID
+     * @param array $terms Array of term data
+     * @return int Glossary ID
      */
-    protected function create_glossary($course_id, $terms) {
+    protected function create_glossary($courseid, $terms) {
         global $DB;
 
-        // Check if glossary already exists
-        $glossary = $DB->get_record('glossary', ['course' => $course_id, 'name' => 'Course Glossary']);
+        // Check if glossary already exists.
+        $glossary = $DB->get_record('glossary', ['course' => $courseid, 'name' => 'Course Glossary']);
 
         if (!$glossary) {
-            // Create new glossary
-            $glossary_data = new \stdClass();
-            $glossary_data->course = $course_id;
-            $glossary_data->name = 'Course Glossary';
-            $glossary_data->intro = 'AI-generated glossary terms';
-            $glossary_data->introformat = FORMAT_HTML;
-            $glossary_data->allowduplicatedentries = 0;
-            $glossary_data->displayformat = 'dictionary';
-            $glossary_data->mainglossary = 0;
-            $glossary_data->showspecial = 1;
-            $glossary_data->showalphabet = 1;
-            $glossary_data->showall = 1;
-            $glossary_data->allowcomments = 0;
-            $glossary_data->allowprintview = 1;
-            $glossary_data->usedynalink = 0;
-            $glossary_data->defaultapproval = 1;
-            $glossary_data->globalglossary = 0;
-            $glossary_data->entbypage = 10;
-            $glossary_data->editalways = 0;
-            $glossary_data->rsstype = 0;
-            $glossary_data->rssarticles = 0;
-            $glossary_data->assessed = 0;
-            $glossary_data->assesstimestart = 0;
-            $glossary_data->assesstimefinish = 0;
-            $glossary_data->scale = 0;
-            $glossary_data->timecreated = time();
-            $glossary_data->timemodified = time();
+            // Create new glossary.
+            $glossarydata = new \stdClass();
+            $glossarydata->course = $courseid;
+            $glossarydata->name = 'Course Glossary';
+            $glossarydata->intro = 'AI-generated glossary terms';
+            $glossarydata->introformat = FORMAT_HTML;
+            $glossarydata->allowduplicatedentries = 0;
+            $glossarydata->displayformat = 'dictionary';
+            $glossarydata->mainglossary = 0;
+            $glossarydata->showspecial = 1;
+            $glossarydata->showalphabet = 1;
+            $glossarydata->showall = 1;
+            $glossarydata->allowcomments = 0;
+            $glossarydata->allowprintview = 1;
+            $glossarydata->usedynalink = 0;
+            $glossarydata->defaultapproval = 1;
+            $glossarydata->globalglossary = 0;
+            $glossarydata->entbypage = 10;
+            $glossarydata->editalways = 0;
+            $glossarydata->rsstype = 0;
+            $glossarydata->rssarticles = 0;
+            $glossarydata->assessed = 0;
+            $glossarydata->assesstimestart = 0;
+            $glossarydata->assesstimefinish = 0;
+            $glossarydata->scale = 0;
+            $glossarydata->timecreated = time();
+            $glossarydata->timemodified = time();
 
-            $glossary_id = glossary_add_instance($glossary_data);
-            $glossary = $DB->get_record('glossary', ['id' => $glossary_id]);
+            $glossaryid = glossary_add_instance($glossarydata);
+            $glossary = $DB->get_record('glossary', ['id' => $glossaryid]);
 
-            // Add to section 0 (general)
-            course_add_cm_to_section($course_id, $glossary_id, 0);
+            // Add to section 0 (general).
+            course_add_cm_to_section($courseid, $glossaryid, 0);
         }
 
-        // Add terms to glossary
-        foreach ($terms as $term_data) {
+        // Add terms to glossary.
+        foreach ($terms as $termdata) {
             $entry = new \stdClass();
             $entry->glossaryid = $glossary->id;
             $entry->userid = $USER->id ?? 2;
-            $entry->concept = $this->extract_string($term_data->term ?? '');
-            $entry->definition = $this->extract_string($term_data->definition ?? '');
+            $entry->concept = $this->extract_string($termdata->term ?? '');
+            $entry->definition = $this->extract_string($termdata->definition ?? '');
             $entry->definitionformat = FORMAT_HTML;
             $entry->definitiontrust = 0;
             $entry->attachment = '';
@@ -641,7 +702,11 @@ class course_builder {
     }
 
     /**
-     * Safely extract string from data (handles nested objects)
+     * Safely extract string from data (handles nested objects).
+     *
+     * @param mixed $value Value to extract string from
+     * @param string $default Default value if extraction fails
+     * @return string Extracted string
      */
     protected function extract_string($value, $default = '') {
         if (is_string($value)) {

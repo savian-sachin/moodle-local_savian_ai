@@ -5,6 +5,22 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Savian AI API client.
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 namespace local_savian_ai\api;
 
@@ -13,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/filelib.php');
 
 /**
- * Savian AI API Client
+ * Savian AI API Client.
  *
  * Handles all communication with the Savian AI external service.
  * Uses Moodle's \curl class (lib/filelib.php) for proxy and SSL compatibility.
@@ -23,55 +39,55 @@ require_once($CFG->libdir . '/filelib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class client {
-    /** @var string Base URL for API */
-    private $base_url;
+    /** @var string Base URL for API. */
+    private $baseurl;
 
-    /** @var string API key for authentication */
-    private $api_key;
+    /** @var string API key for authentication. */
+    private $apikey;
 
-    /** @var string Organization code */
-    private $org_code;
+    /** @var string Organization code. */
+    private $orgcode;
 
     /**
-     * Constructor
+     * Constructor.
      */
     public function __construct() {
-        $this->base_url = get_config('local_savian_ai', 'api_url') ?: 'https://app.savian.ai.vn/api/moodle/v1/';
-        $this->api_key = get_config('local_savian_ai', 'api_key');
-        $this->org_code = get_config('local_savian_ai', 'org_code') ?: 't001';
+        $this->baseurl = get_config('local_savian_ai', 'api_url') ?: 'https://app.savian.ai.vn/api/moodle/v1/';
+        $this->apikey = get_config('local_savian_ai', 'api_key');
+        $this->orgcode = get_config('local_savian_ai', 'org_code') ?: 't001';
 
         // Ensure base URL ends with /.
-        if (substr($this->base_url, -1) !== '/') {
-            $this->base_url .= '/';
+        if (substr($this->baseurl, -1) !== '/') {
+            $this->baseurl .= '/';
         }
     }
 
     /**
-     * Validate API credentials
+     * Validate API credentials.
      *
-     * @return object Response object
+     * @return object Response object.
      */
     public function validate() {
         return $this->request('POST', 'auth/validate/', [
-            'org_code' => $this->org_code,
+            'org_code' => $this->orgcode,
         ]);
     }
 
     /**
-     * Upload document for processing
+     * Upload document for processing.
      *
-     * @param string $filepath Path to file
-     * @param string $title Document title
-     * @param array $metadata Optional metadata (description, subject_area, tags)
-     * @return object Response object
+     * @param string $filepath Path to file.
+     * @param string $title Document title.
+     * @param array $metadata Optional metadata (description, subject_area, tags).
+     * @return object Response object.
      */
     public function upload_document($filepath, $title, $metadata = []) {
-        if (empty($this->api_key)) {
+        if (empty($this->apikey)) {
             return $this->error_response('API key not configured', 0);
         }
 
         $curl = new \curl();
-        $curl->setHeader('X-API-Key: ' . $this->api_key);
+        $curl->setHeader('X-API-Key: ' . $this->apikey);
 
         $params = [
             'document' => new \CURLFile($filepath),
@@ -85,29 +101,29 @@ class client {
 
         $curl->setopt(['CURLOPT_TIMEOUT' => 300]);
 
-        $response = $curl->post($this->base_url . 'documents/upload/', $params);
+        $response = $curl->post($this->baseurl . 'documents/upload/', $params);
         $info = $curl->get_info();
-        $http_code = $info['http_code'] ?? 0;
-        $curl_error = $curl->get_errno() ? $curl->error : '';
+        $httpcode = $info['http_code'] ?? 0;
+        $curlerror = $curl->get_errno() ? $curl->error : '';
 
-        if ($curl_error) {
-            return $this->error_response($curl_error, 0);
+        if ($curlerror) {
+            return $this->error_response($curlerror, 0);
         }
 
         $result = json_decode($response);
         if (!$result) {
-            return $this->error_response('Invalid JSON response', $http_code);
+            return $this->error_response('Invalid JSON response', $httpcode);
         }
 
-        $result->http_code = $http_code;
+        $result->http_code = $httpcode;
         return $result;
     }
 
     /**
-     * Get list of documents
+     * Get list of documents.
      *
-     * @param array $params Query parameters (page, per_page, status, etc.)
-     * @return object Response object
+     * @param array $params Query parameters (page, per_page, status, etc.).
+     * @return object Response object.
      */
     public function get_documents($params = []) {
         $query = http_build_query($params);
@@ -116,41 +132,41 @@ class client {
     }
 
     /**
-     * Get document details
+     * Get document details.
      *
-     * @param int $doc_id Document ID
-     * @return object Response object
+     * @param int $docid Document ID.
+     * @return object Response object.
      */
-    public function get_document($doc_id) {
-        return $this->request('GET', "documents/{$doc_id}/");
+    public function get_document($docid) {
+        return $this->request('GET', "documents/{$docid}/");
     }
 
     /**
-     * Get document processing status
+     * Get document processing status.
      *
-     * @param int $doc_id Document ID
-     * @return object Response object
+     * @param int $docid Document ID.
+     * @return object Response object.
      */
-    public function get_document_status($doc_id) {
-        return $this->request('GET', "documents/{$doc_id}/status/");
+    public function get_document_status($docid) {
+        return $this->request('GET', "documents/{$docid}/status/");
     }
 
     /**
-     * Delete document
+     * Delete document.
      *
-     * @param int $doc_id Document ID
-     * @return object Response object
+     * @param int $docid Document ID.
+     * @return object Response object.
      */
-    public function delete_document($doc_id) {
-        return $this->request('DELETE', "documents/{$doc_id}/delete/");
+    public function delete_document($docid) {
+        return $this->request('DELETE', "documents/{$docid}/delete/");
     }
 
     /**
-     * Generate questions from topic (no documents)
+     * Generate questions from topic (no documents).
      *
-     * @param string $topic Topic name
-     * @param array $options Generation options
-     * @return object Response object
+     * @param string $topic Topic name.
+     * @param array $options Generation options.
+     * @return object Response object.
      */
     public function generate_questions($topic, $options = []) {
         $data = [
@@ -167,16 +183,16 @@ class client {
     }
 
     /**
-     * Generate questions from documents using RAG
+     * Generate questions from documents using RAG.
      *
-     * @param array $document_ids Array of document IDs
-     * @param string $topic Topic name
-     * @param array $options Generation options
-     * @return object Response object
+     * @param array $documentids Array of document IDs.
+     * @param string $topic Topic name.
+     * @param array $options Generation options.
+     * @return object Response object.
      */
-    public function generate_questions_from_docs($document_ids, $topic, $options = []) {
+    public function generate_questions_from_docs($documentids, $topic, $options = []) {
         $data = [
-            'document_ids' => $document_ids,
+            'document_ids' => $documentids,
             'topic' => $topic,
             'learning_objectives' => $options['learning_objectives'] ?? [],
             'question_types' => $options['question_types'] ?? ['multichoice'],
@@ -190,34 +206,34 @@ class client {
     }
 
     /**
-     * Get generation status (for async requests)
+     * Get generation status (for async requests).
      *
-     * @param string $request_id Request ID from generation
-     * @return object Response object
+     * @param string $requestid Request ID from generation.
+     * @return object Response object.
      */
-    public function get_generation_status($request_id) {
-        return $this->request('GET', "generate/status/{$request_id}/");
+    public function get_generation_status($requestid) {
+        return $this->request('GET', "generate/status/{$requestid}/");
     }
 
     /**
-     * Get usage statistics
+     * Get usage statistics.
      *
-     * @return object Response object
+     * @return object Response object.
      */
     public function get_usage() {
         return $this->request('GET', 'usage/');
     }
 
     /**
-     * Generate course content from topic
+     * Generate course content from topic.
      *
-     * @param string $course_title Course title
-     * @param array $options Generation options
-     * @return object Response object
+     * @param string $coursetitle Course title.
+     * @param array $options Generation options.
+     * @return object Response object.
      */
-    public function generate_course_content($course_title, $options = []) {
+    public function generate_course_content($coursetitle, $options = []) {
         $data = [
-            'course_title' => $course_title,
+            'course_title' => $coursetitle,
             'description' => $options['description'] ?? '',
             'target_audience' => $options['target_audience'] ?? '',
             'duration_weeks' => $options['duration_weeks'] ?? 4,
@@ -229,17 +245,17 @@ class client {
     }
 
     /**
-     * Generate course content from documents using RAG
+     * Generate course content from documents using RAG.
      *
-     * @param array $document_ids Array of document IDs
-     * @param string $course_title Course title
-     * @param array $options Generation options
-     * @return object Response object
+     * @param array $documentids Array of document IDs.
+     * @param string $coursetitle Course title.
+     * @param array $options Generation options.
+     * @return object Response object.
      */
-    public function generate_course_from_documents($document_ids, $course_title, $options = []) {
+    public function generate_course_from_documents($documentids, $coursetitle, $options = []) {
         $data = [
-            'document_ids' => $document_ids,
-            'course_title' => $course_title,
+            'document_ids' => $documentids,
+            'course_title' => $coursetitle,
             'course_id' => $options['course_id'] ?? null,
             'description' => $options['description'] ?? '',
             'target_audience' => $options['target_audience'] ?? '',
@@ -261,17 +277,17 @@ class client {
     }
 
     /**
-     * Chat with documents
+     * Chat with documents.
      *
-     * @param string $message User message
-     * @param array $document_ids Document IDs for context
-     * @param array $options Additional options
-     * @return object Response object
+     * @param string $message User message.
+     * @param array $documentids Document IDs for context.
+     * @param array $options Additional options.
+     * @return object Response object.
      */
-    public function chat($message, $document_ids, $options = []) {
+    public function chat($message, $documentids, $options = []) {
         $data = [
             'message' => $message,
-            'document_ids' => $document_ids,
+            'document_ids' => $documentids,
             'language' => $options['language'] ?? 'en',
             'conversation_id' => $options['conversation_id'] ?? null,
         ];
@@ -280,24 +296,24 @@ class client {
     }
 
     /**
-     * Internal request method using Moodle's \curl class
+     * Internal request method using Moodle's \curl class.
      *
-     * @param string $method HTTP method (GET, POST, DELETE)
-     * @param string $endpoint API endpoint
-     * @param array $data Request data
-     * @return object Response object
+     * @param string $method HTTP method (GET, POST, DELETE).
+     * @param string $endpoint API endpoint.
+     * @param array $data Request data.
+     * @return object Response object.
      */
     private function request($method, $endpoint, $data = []) {
-        if (empty($this->api_key)) {
+        if (empty($this->apikey)) {
             return $this->error_response('API key not configured', 0);
         }
 
         $curl = new \curl();
-        $curl->setHeader('X-API-Key: ' . $this->api_key);
+        $curl->setHeader('X-API-Key: ' . $this->apikey);
         $curl->setHeader('Content-Type: application/json');
         $curl->setopt(['CURLOPT_TIMEOUT' => 60]);
 
-        $url = $this->base_url . $endpoint;
+        $url = $this->baseurl . $endpoint;
 
         $response = '';
         if ($method === 'POST') {
@@ -314,44 +330,44 @@ class client {
         }
 
         $info = $curl->get_info();
-        $http_code = $info['http_code'] ?? 0;
-        $curl_error = $curl->get_errno() ? $curl->error : '';
+        $httpcode = $info['http_code'] ?? 0;
+        $curlerror = $curl->get_errno() ? $curl->error : '';
 
         // Detect blocked URL (Moodle HTTP security).
-        if ($http_code == 0 && empty($curl_error) && $response === '') {
+        if ($httpcode == 0 && empty($curlerror) && $response === '') {
             return $this->error_response(
                 get_string('error_url_blocked', 'local_savian_ai', $url),
                 0
             );
         }
 
-        if ($curl_error) {
-            return $this->error_response($curl_error, 0);
+        if ($curlerror) {
+            return $this->error_response($curlerror, 0);
         }
 
         $result = json_decode($response);
         if (!$result) {
-            return $this->error_response('Invalid JSON response: ' . substr($response, 0, 200), $http_code);
+            return $this->error_response('Invalid JSON response: ' . substr($response, 0, 200), $httpcode);
         }
 
-        $result->http_code = $http_code;
+        $result->http_code = $httpcode;
         return $result;
     }
 
     /**
-     * Send chat message
+     * Send chat message.
      *
-     * @param string $message Message content
-     * @param string|null $conversation_uuid Conversation UUID
-     * @param array $options Additional options
-     * @return object Response with message and conversation_id
+     * @param string $message Message content.
+     * @param string|null $conversationuuid Conversation UUID.
+     * @param array $options Additional options.
+     * @return object Response with message and conversation_id.
      */
-    public function chat_send($message, $conversation_uuid = null, $options = []) {
+    public function chat_send($message, $conversationuuid = null, $options = []) {
         global $USER, $COURSE;
 
         $data = [
             'message' => $message,
-            'conversation_id' => $conversation_uuid,
+            'conversation_id' => $conversationuuid,
             'user_id' => (string)($options['user_id'] ?? $USER->id),
             'user_email' => $options['user_email'] ?? $USER->email,
             'user_role' => $options['user_role'] ?? 'teacher',
@@ -365,10 +381,10 @@ class client {
     }
 
     /**
-     * Get conversation list
+     * Get conversation list.
      *
-     * @param array $params Query parameters (user_id, course_id)
-     * @return object Response with conversations array
+     * @param array $params Query parameters (user_id, course_id).
+     * @return object Response with conversations array.
      */
     public function chat_conversations($params = []) {
         $query = http_build_query($params);
@@ -377,26 +393,26 @@ class client {
     }
 
     /**
-     * Get conversation messages
+     * Get conversation messages.
      *
-     * @param string $conversation_uuid Conversation UUID
-     * @return object Response with messages array
+     * @param string $conversationuuid Conversation UUID.
+     * @return object Response with messages array.
      */
-    public function chat_conversation_messages($conversation_uuid) {
-        return $this->request('GET', "chat/conversations/{$conversation_uuid}/messages/");
+    public function chat_conversation_messages($conversationuuid) {
+        return $this->request('GET', "chat/conversations/{$conversationuuid}/messages/");
     }
 
     /**
-     * Submit feedback for a message
+     * Submit feedback for a message.
      *
-     * @param string $message_uuid Message UUID
-     * @param int $feedback Feedback value (1 or -1)
-     * @param string $comment Optional comment
-     * @return object Response
+     * @param string $messageuuid Message UUID.
+     * @param int $feedback Feedback value (1 or -1).
+     * @param string $comment Optional comment.
+     * @return object Response.
      */
-    public function chat_feedback($message_uuid, $feedback, $comment = '') {
+    public function chat_feedback($messageuuid, $feedback, $comment = '') {
         $data = [
-            'message_id' => $message_uuid,
+            'message_id' => $messageuuid,
             'feedback' => $feedback === 1 ? 'helpful' : 'not_helpful',
             'comment' => $comment,
         ];
@@ -405,25 +421,26 @@ class client {
     }
 
     /**
-     * Save approved course content to knowledge base (v2.2 - Knowledge Feedback Loop)
+     * Save approved course content to knowledge base (v2.2 - Knowledge Feedback Loop).
      *
-     * @param object $course_structure Course structure from generation
-     * @param string $course_title Course title
-     * @param int $course_id Moodle course ID
-     * @param string $approved_by Instructor name
-     * @param string $request_id Original generation request ID
-     * @return object Response object
+     * @param object $coursestructure Course structure from generation.
+     * @param string $coursetitle Course title.
+     * @param int $courseid Moodle course ID.
+     * @param string $approvedby Instructor name.
+     * @param string $requestid Original generation request ID.
+     * @return object Response object.
      */
-    public function save_approved_course_to_knowledge_base($course_structure, $course_title, $course_id, $approved_by, $request_id = null) {
+    public function save_approved_course_to_knowledge_base($coursestructure, $coursetitle, $courseid,
+                                                           $approvedby, $requestid = null) {
         global $COURSE;
 
         $data = [
-            'course_title' => $course_title,
-            'course_id' => (string) $course_id,
+            'course_title' => $coursetitle,
+            'course_id' => (string) $courseid,
             'course_name' => $COURSE->fullname ?? '',
-            'course_structure' => $course_structure,
-            'generation_request_id' => $request_id,
-            'approved_by' => $approved_by,
+            'course_structure' => $coursestructure,
+            'generation_request_id' => $requestid,
+            'approved_by' => $approvedby,
             'approval_date' => date('Y-m-d'),
             'instructor_notes' => 'Reviewed and approved for institutional use',
         ];
@@ -432,57 +449,57 @@ class client {
     }
 
     /**
-     * Send analytics data to API for learning insights
+     * Send analytics data to API for learning insights.
      *
-     * @param array $report_data Complete analytics report data
-     * @return object Response object with insights or request_id for async processing
+     * @param array $reportdata Complete analytics report data.
+     * @return object Response object with insights or request_id for async processing.
      */
-    public function send_analytics($report_data) {
-        return $this->request('POST', 'analytics/course-data/', $report_data);
+    public function send_analytics($reportdata) {
+        return $this->request('POST', 'analytics/course-data/', $reportdata);
     }
 
     /**
-     * Get analytics processing status (for async processing)
+     * Get analytics processing status (for async processing).
      *
-     * @param string $report_id Report ID from analytics submission
-     * @return object Status response with insights when completed
+     * @param string $reportid Report ID from analytics submission.
+     * @return object Status response with insights when completed.
      */
-    public function get_analytics_status($report_id) {
-        return $this->request('GET', "analytics/status/{$report_id}/");
+    public function get_analytics_status($reportid) {
+        return $this->request('GET', "analytics/status/{$reportid}/");
     }
 
     /**
-     * Get latest analytics report for a course
+     * Get latest analytics report for a course.
      *
-     * @param int $course_id Course ID
-     * @return object Latest report with insights
+     * @param int $courseid Course ID.
+     * @return object Latest report with insights.
      */
-    public function get_latest_analytics($course_id) {
-        return $this->request('GET', "analytics/course/{$course_id}/latest/");
+    public function get_latest_analytics($courseid) {
+        return $this->request('GET', "analytics/course/{$courseid}/latest/");
     }
 
     /**
-     * Get analytics report history for a course
+     * Get analytics report history for a course.
      *
-     * @param int $course_id Course ID
-     * @return object Report history
+     * @param int $courseid Course ID.
+     * @return object Report history.
      */
-    public function get_analytics_history($course_id) {
-        return $this->request('GET', "analytics/course/{$course_id}/history/");
+    public function get_analytics_history($courseid) {
+        return $this->request('GET', "analytics/course/{$courseid}/history/");
     }
 
     /**
-     * Create error response object
+     * Create error response object.
      *
-     * @param string $message Error message
-     * @param int $http_code HTTP status code
-     * @return object Error response object
+     * @param string $message Error message.
+     * @param int $httpcode HTTP status code.
+     * @return object Error response object.
      */
-    private function error_response($message, $http_code) {
+    private function error_response($message, $httpcode) {
         return (object) [
             'success' => false,
             'error' => $message,
-            'http_code' => $http_code,
+            'http_code' => $httpcode,
         ];
     }
 }

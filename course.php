@@ -5,6 +5,22 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Course content generation page.
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 require_once(__DIR__ . '/../../config.php');
 
@@ -15,7 +31,7 @@ $courseid = required_param('courseid', PARAM_INT);
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 
-// Dashboard is for teachers/managers only (not students)
+// Dashboard is for teachers/managers only (not students).
 require_capability('local/savian_ai:generate', $context);
 
 $PAGE->set_url(new moodle_url('/local/savian_ai/course.php', ['courseid' => $courseid]));
@@ -26,41 +42,41 @@ $PAGE->set_heading($course->fullname);
 
 echo $OUTPUT->header();
 
-// Consistent header
+// Consistent header.
 echo local_savian_ai_render_header('Dashboard', $course->fullname);
 
-// Statistics
-$doc_count = $DB->count_records('local_savian_documents', ['course_id' => $courseid, 'is_active' => 1]);
-$questions_count = $DB->get_field_sql(
+// Statistics.
+$doccount = $DB->count_records('local_savian_documents', ['course_id' => $courseid, 'is_active' => 1]);
+$questionscount = $DB->get_field_sql(
     'SELECT COALESCE(SUM(questions_count), 0) FROM {local_savian_generations} WHERE course_id = ? AND generation_type IN (?, ?)',
     [$courseid, 'questions', 'questions_from_documents']
 );
 
-// Get course content generation stats
-$course_generations = $DB->get_records('local_savian_generations', [
+// Get course content generation stats.
+$coursegenerations = $DB->get_records('local_savian_generations', [
     'course_id' => $courseid,
-    'generation_type' => 'course_content'
+    'generation_type' => 'course_content',
 ]);
 
-$sections_created = 0;
-$pages_created = 0;
-$quizzes_created = 0;
-$assignments_created = 0;
+$sectionscreated = 0;
+$pagescreated = 0;
+$quizzescreated = 0;
+$assignmentscreated = 0;
 
-foreach ($course_generations as $gen) {
+foreach ($coursegenerations as $gen) {
     if (!empty($gen->response_data)) {
         $response = json_decode($gen->response_data);
         if (isset($response->sections_created)) {
-            $sections_created += $response->sections_created;
-            $pages_created += $response->pages_created ?? 0;
-            $quizzes_created += $response->quizzes_created ?? 0;
-            $assignments_created += $response->assignments_created ?? 0;
+            $sectionscreated += $response->sections_created;
+            $pagescreated += $response->pages_created ?? 0;
+            $quizzescreated += $response->quizzes_created ?? 0;
+            $assignmentscreated += $response->assignments_created ?? 0;
         }
     }
 }
 
-// Get last activity
-$last_activity = $DB->get_field_sql(
+// Get last activity.
+$lastactivity = $DB->get_field_sql(
     'SELECT MAX(timecreated) FROM {local_savian_generations} WHERE course_id = ?',
     [$courseid]
 );
@@ -71,36 +87,36 @@ echo html_writer::start_div('card-body');
 
 echo html_writer::start_div('row');
 
-// Documents stat
+// Documents stat.
 echo html_writer::start_div('col-md-3 col-6 mb-2');
-echo html_writer::tag('div', $doc_count, ['class' => 'h3 mb-0 savian-text-primary']);
+echo html_writer::tag('div', $doccount, ['class' => 'h3 mb-0 savian-text-primary']);
 echo html_writer::tag('small', 'Documents', ['class' => 'text-muted']);
 echo html_writer::end_div();
 
-// Questions stat
+// Questions stat.
 echo html_writer::start_div('col-md-3 col-6 mb-2');
-echo html_writer::tag('div', $questions_count, ['class' => 'h3 mb-0 savian-text-primary']);
+echo html_writer::tag('div', $questionscount, ['class' => 'h3 mb-0 savian-text-primary']);
 echo html_writer::tag('small', 'Questions', ['class' => 'text-muted']);
 echo html_writer::end_div();
 
-// Sections stat
+// Sections stat.
 echo html_writer::start_div('col-md-3 col-6 mb-2');
-echo html_writer::tag('div', $sections_created, ['class' => 'h3 mb-0 savian-text-primary']);
+echo html_writer::tag('div', $sectionscreated, ['class' => 'h3 mb-0 savian-text-primary']);
 echo html_writer::tag('small', 'Sections', ['class' => 'text-muted']);
 echo html_writer::end_div();
 
-// Pages stat
+// Pages stat.
 echo html_writer::start_div('col-md-3 col-6 mb-2');
-echo html_writer::tag('div', $pages_created + $quizzes_created + $assignments_created, ['class' => 'h3 mb-0 savian-text-primary']);
+echo html_writer::tag('div', $pagescreated + $quizzescreated + $assignmentscreated, ['class' => 'h3 mb-0 savian-text-primary']);
 echo html_writer::tag('small', 'Activities', ['class' => 'text-muted']);
 echo html_writer::end_div();
 
 echo html_writer::end_div();
 
-// Last activity
-if ($last_activity) {
+// Last activity.
+if ($lastactivity) {
     echo html_writer::div(
-        html_writer::tag('small', 'Last activity: ' . userdate($last_activity, '%d %B %Y, %H:%M'), ['class' => 'text-muted']),
+        html_writer::tag('small', 'Last activity: ' . userdate($lastactivity, '%d %B %Y, %H:%M'), ['class' => 'text-muted']),
         'mt-2 border-top pt-2'
     );
 }
@@ -108,10 +124,10 @@ if ($last_activity) {
 echo html_writer::end_div();
 echo html_writer::end_div();
 
-// Feature cards
+// Feature cards.
 echo html_writer::start_div('row');
 
-// Documents card
+// Documents card.
 echo html_writer::start_div('col-md-4 mb-3');
 echo html_writer::start_div('card h-100');
 echo html_writer::div('📄 Documents', 'card-header');
@@ -126,7 +142,7 @@ echo html_writer::end_div();
 echo html_writer::end_div();
 echo html_writer::end_div();
 
-// Chat card
+// Chat card.
 echo html_writer::start_div('col-md-4 mb-3');
 echo html_writer::start_div('card h-100');
 echo html_writer::div('💬 AI Chat', 'card-header');
@@ -150,7 +166,7 @@ echo html_writer::end_div();
 echo html_writer::end_div();
 echo html_writer::end_div();
 
-// Generate Questions card
+// Generate Questions card.
 if (has_capability('local/savian_ai:generate', $context)) {
     echo html_writer::start_div('col-md-4 mb-3');
     echo html_writer::start_div('card h-100');
@@ -166,7 +182,7 @@ if (has_capability('local/savian_ai:generate', $context)) {
     echo html_writer::end_div();
     echo html_writer::end_div();
 
-    // Course Content Generation card
+    // Course Content Generation card.
     echo html_writer::start_div('col-md-12 mb-3');
     echo html_writer::start_div('card');
     echo html_writer::div('📚 Generate Course Content', 'card-header');
@@ -181,7 +197,7 @@ if (has_capability('local/savian_ai:generate', $context)) {
     echo html_writer::end_div();
     echo html_writer::end_div();
 
-    // Learning Analytics card
+    // Learning Analytics card.
     echo html_writer::start_div('col-md-12 mb-3');
     echo html_writer::start_div('card savian-accent-card');
     echo html_writer::div('📊 Learning Analytics', 'card-header');
@@ -197,9 +213,9 @@ if (has_capability('local/savian_ai:generate', $context)) {
     echo html_writer::end_div();
 }
 
-echo html_writer::end_div(); // row
+echo html_writer::end_div(); // End row.
 
-// Back to course
+// Back to course.
 echo html_writer::div(
     html_writer::link(
         new moodle_url('/course/view.php', ['id' => $courseid]),
@@ -209,7 +225,7 @@ echo html_writer::div(
     'mt-3'
 );
 
-// Help & Tutorials Link
+// Help and tutorials link.
 echo html_writer::start_div('text-center mt-5 mb-4');
 echo html_writer::link(
     new moodle_url('/local/savian_ai/tutorials.php', ['role' => 'teacher']),
@@ -219,7 +235,7 @@ echo html_writer::link(
 echo html_writer::tag('p', 'Need help? Check out our step-by-step tutorials!', ['class' => 'text-muted mt-2']);
 echo html_writer::end_div();
 
-// Coming Soon Features (Collapsible)
+// Coming Soon Features (Collapsible).
 echo html_writer::start_div('mt-5 mb-4');
 echo html_writer::start_tag('details', ['class' => 'border rounded p-3 bg-light']);
 echo html_writer::tag('summary', '🔮 Coming Soon: Advanced Features', ['class' => 'font-weight-bold text-success', 'style' => 'cursor: pointer;']);
@@ -249,7 +265,7 @@ echo html_writer::end_div();
 echo html_writer::end_tag('details');
 echo html_writer::end_div();
 
-// Footer
+// Footer.
 echo local_savian_ai_render_footer();
 
 echo $OUTPUT->footer();

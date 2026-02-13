@@ -5,18 +5,34 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * English language strings for Savian AI.
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 defined('MOODLE_INTERNAL') || die();
 
-// Plugin name
+// Plugin name.
 $string['pluginname'] = 'Savian AI';
 
-// Capabilities
+// Capabilities.
 $string['savian_ai:use'] = 'Use Savian AI features';
 $string['savian_ai:manage'] = 'Manage Savian AI settings';
 $string['savian_ai:generate'] = 'Generate content with Savian AI';
 
-// Settings
+// Settings.
 $string['settings_heading'] = 'Savian AI Configuration';
 $string['api_url'] = 'API Base URL';
 $string['api_url_desc'] = 'Savian AI API endpoint (e.g., https://app.savian.ai.vn/api/moodle/v1/)';
@@ -35,14 +51,14 @@ $string['connection_status_failed'] = 'Connection failed: {$a}';
 $string['connection_status_error'] = 'Error: {$a}';
 $string['connection_status_not_configured'] = 'API credentials not configured. Please enter API URL, Organization Code, and API Key below.';
 
-// Navigation
+// Navigation.
 $string['dashboard'] = 'Dashboard';
 $string['documents'] = 'Documents';
 $string['generate'] = 'Generate Questions';
 $string['usage'] = 'Usage Statistics';
 $string['chat'] = 'Document Q&A';
 
-// Documents page
+// Documents page.
 $string['upload_document'] = 'Upload Document';
 $string['document_title'] = 'Title';
 $string['document_description'] = 'Description';
@@ -59,13 +75,13 @@ $string['document_delete'] = 'Delete';
 $string['document_deleted'] = 'Document deleted successfully';
 $string['document_delete_failed'] = 'Document deletion failed: {$a}';
 $string['document_reprocess'] = 'Reprocess';
-// Simplified status labels for end users
+// Simplified status labels for end users.
 $string['status_ready'] = 'Ready';
 $string['status_uploading'] = 'Uploading...';
 $string['status_processing_simple'] = 'Processing...';
 $string['status_failed'] = 'Failed';
 
-// Technical status labels (kept for backward compatibility)
+// Technical status labels (kept for backward compatibility).
 $string['status_pending'] = 'Pending';
 $string['status_processing'] = 'Processing';
 $string['status_embedding'] = 'Generating Embeddings';
@@ -75,7 +91,7 @@ $string['status_completed'] = 'Completed';
 $string['no_documents'] = 'No documents uploaded yet';
 $string['auto_refresh_notice'] = 'This page will automatically refresh in 30 seconds to update processing status';
 
-// Question generation
+// Question generation.
 $string['generate_from_topic'] = 'Generate from Topic';
 $string['generate_from_documents'] = 'Generate from Documents';
 $string['topic'] = 'Topic';
@@ -105,14 +121,14 @@ $string['add_to_question_bank'] = 'Add to Question Bank';
 $string['questions_added'] = '{$a} questions added to question bank';
 $string['backtocourse'] = 'Back to course';
 
-// Question types
+// Question types.
 $string['qtype_multichoice'] = 'Multiple Choice';
 $string['qtype_truefalse'] = 'True/False';
 $string['qtype_shortanswer'] = 'Short Answer';
 $string['qtype_essay'] = 'Essay';
 $string['qtype_matching'] = 'Matching';
 
-// Usage statistics
+// Usage statistics.
 $string['quota_heading'] = 'Monthly Quota Usage';
 $string['quota_questions'] = 'Questions';
 $string['quota_documents'] = 'Documents';
@@ -123,7 +139,7 @@ $string['quota_remaining'] = 'Remaining';
 $string['billing_period'] = 'Billing Period';
 $string['days_remaining'] = '{$a} days remaining';
 
-// Errors
+// Errors.
 $string['error_no_api_key'] = 'API key not configured. Please configure in site administration.';
 $string['error_api_connection'] = 'Unable to connect to Savian AI API';
 $string['error_invalid_document'] = 'Invalid document ID';
@@ -136,7 +152,7 @@ $string['error_feedback_failed'] = 'Failed to submit feedback';
 $string['error_students_course_only'] = 'Students can only use chat within course context';
 $string['error_url_blocked'] = 'The API URL ({$a}) is blocked by Moodle HTTP security. An administrator must add this host to the allowed list at Site Administration → General → HTTP Security → cURL blocked hosts list.';
 
-// Chat widget
+// Chat widget.
 $string['chat'] = 'AI Chat';
 $string['openchat'] = 'Open chat';
 $string['minimize'] = 'Minimize';
@@ -153,7 +169,7 @@ $string['selectdocuments'] = 'Select documents for context';
 $string['coursechatcontext'] = 'I can answer questions about this course.';
 $string['globalchat'] = 'Global Chat';
 
-// Chat settings
+// Chat settings.
 $string['chat_settings_heading'] = 'Chat Widget Settings';
 $string['chat_settings_desc'] = 'Configure the floating chat widget appearance and behavior';
 $string['enable_chat_widget'] = 'Enable Chat Widget';
@@ -179,7 +195,7 @@ $string['enable_conversation_history_desc'] = 'Allow teachers to view student co
 $string['enable_chat_feedback'] = 'Enable Feedback';
 $string['enable_chat_feedback_desc'] = 'Show thumbs up/down buttons on AI responses';
 
-// Chat history and monitoring
+// Chat history and monitoring.
 $string['chat_history'] = 'Conversation History';
 $string['chat_history_desc'] = 'View and analyze student conversations';
 $string['chat_monitoring'] = 'Chat Monitoring';
@@ -205,7 +221,7 @@ $string['token_usage'] = 'Token Usage';
 $string['no_chat_activity'] = 'No chat activity yet';
 $string['no_conversations'] = 'No conversations found';
 
-// Course-level chat settings
+// Course-level chat settings.
 $string['chat_course_settings'] = 'Chat Settings';
 $string['chat_course_settings_desc'] = 'Configure chat widget for this course';
 $string['chat_settings'] = 'Chat Configuration';
@@ -220,14 +236,14 @@ $string['auto_include_docs'] = 'Auto-include course documents';
 $string['auto_include_docs_desc'] = 'Automatically include all course documents in chat context for students';
 $string['settings_saved'] = 'Settings saved successfully';
 
-// Capabilities
+// Capabilities.
 $string['savian_ai:use'] = 'Use Savian AI features';
 $string['savian_ai:generate'] = 'Generate content with Savian AI';
 $string['savian_ai:manage'] = 'Manage Savian AI settings';
 $string['savian_ai:viewchathistory'] = 'View conversation history';
 $string['savian_ai:managechatdocuments'] = 'Manage documents in chat';
 
-// Enhanced course generation
+// Enhanced course generation.
 $string['target_audience'] = 'Target Audience';
 $string['target_audience_help'] = 'Who is this course designed for? (e.g., Beginning developers, High school students)';
 $string['target_audience_placeholder'] = 'e.g., Beginning developers, High school students';
@@ -240,7 +256,7 @@ $string['content_type_discussions'] = 'Discussion Forums';
 $string['content_type_quizzes'] = 'Section Quizzes';
 $string['content_type_assignments'] = 'Assignments with Rubrics';
 
-// Progress tracking
+// Progress tracking.
 $string['generating_course_content'] = 'Generating Course Content';
 $string['progress_analyzing'] = 'Analyzing documents and creating outline...';
 $string['progress_outline_complete'] = 'Outline complete, generating sections...';
@@ -255,7 +271,7 @@ $string['estimated_time_8weeks'] = 'Estimated time: 5-8 minutes';
 $string['estimated_time_12weeks'] = 'Estimated time: 8-12 minutes';
 $string['cancel_generation'] = 'Cancel Generation';
 
-// Preview
+// Preview.
 $string['preview_course_structure'] = 'Preview Course Structure';
 $string['content_summary'] = 'Generated Content Summary';
 $string['summary_sections'] = 'Sections';
@@ -275,23 +291,23 @@ $string['learning_objectives'] = 'Learning Objectives';
 $string['section_content'] = 'Content';
 $string['will_create'] = 'Will create';
 
-// Content created
+// Content created.
 $string['content_created_success'] = 'Course content created successfully';
 $string['content_created_details'] = 'Created: {$a->sections} sections, {$a->pages} pages, {$a->activities} activities, {$a->discussions} discussions, {$a->quizzes} quizzes, {$a->assignments} assignments';
 $string['content_created_simple'] = 'Course content created: {$a->sections} sections, {$a->pages} pages, {$a->quizzes} quizzes, {$a->assignments} assignments';
 $string['content_created_with_errors'] = 'Course content created with {$a} errors';
 
-// Generation errors
+// Generation errors.
 $string['generation_failed'] = 'Generation failed: {$a}';
 $string['generation_timeout'] = 'Generation timeout after {$a} seconds';
 $string['no_documents_selected'] = 'No documents selected. Please select at least one document.';
 $string['no_title_provided'] = 'No course title provided';
 
-// Based on documents
+// Based on documents.
 $string['based_on_documents'] = 'Based on documents';
 $string['chunks_used'] = '{$a} chunks used';
 
-// ADDIE v2.0 - Age/Industry Adaptation
+// ADDIE v2.0 - Age/Industry Adaptation.
 $string['age_group'] = 'Target Learner Age Group';
 $string['age_group_help'] = 'Adapts vocabulary, reading level, and pedagogy to learner age';
 $string['industry'] = 'Industry Context';
@@ -299,7 +315,7 @@ $string['industry_help'] = 'Customizes terminology, examples, and compliance req
 $string['prior_knowledge'] = 'Prior Knowledge Level';
 $string['prior_knowledge_help'] = 'Adjusts content difficulty based on learner background';
 
-// ADDIE progress stages
+// ADDIE progress stages.
 $string['progress_addie_analysis'] = 'Analyzing learner profile and context...';
 $string['progress_addie_design_outline'] = 'Designing course structure...';
 $string['progress_addie_design_completed'] = 'Course outline ready ✓';
@@ -309,7 +325,7 @@ $string['progress_addie_implementation'] = 'Adding quality markers...';
 $string['progress_addie_evaluation'] = 'Calculating quality scores...';
 $string['progress_addie_completed'] = 'Course ready! ✓';
 
-// Quality Matters
+// Quality Matters.
 $string['qm_alignment'] = 'Quality Matters Alignment';
 $string['qm_score'] = 'QM Score';
 $string['qm_certified_ready'] = 'QM Certification Ready';
@@ -318,12 +334,12 @@ $string['qm_recommendations'] = 'QM Recommendations';
 $string['qm_standards_met'] = '{$a->met} of {$a->total} standards met';
 $string['verify_media_accessibility'] = 'Verify all media has accessibility features';
 
-// Quality markers
+// Quality markers.
 $string['pedagogical_metadata'] = 'Course Specifications';
 $string['source_confidence'] = 'Source Confidence';
 $string['ai_transparency'] = 'AI-Generated Content Notice';
 
-// Pedagogical metadata fields (ADDIE v2.0 updated)
+// Pedagogical metadata fields (ADDIE v2.0 updated).
 $string['designed_for'] = 'Designed For';
 $string['subject_area'] = 'Subject Area';
 $string['content_level'] = 'Content Level';
@@ -332,16 +348,16 @@ $string['thinking_skills'] = 'Thinking Skills';
 $string['generation_method'] = 'Generation Method';
 $string['human_review_required'] = 'Human Review Required';
 
-// Section metadata
+// Section metadata.
 $string['prerequisites'] = 'Prerequisites';
 $string['estimated_hours'] = '{$a} hours';
 $string['qm_notes'] = 'QM Notes';
 $string['source_documents_used'] = 'Source Documents';
 
-// Content types
+// Content types.
 $string['content_type_formative'] = 'Self-Check Questions (Formative)';
 
-// Privacy API
+// Privacy API.
 $string['privacy:metadata:conversations'] = 'Chat conversations with AI tutor';
 $string['privacy:metadata:conversations:user_id'] = 'User who created the conversation';
 $string['privacy:metadata:conversations:course_id'] = 'Course context for conversation';
@@ -374,7 +390,7 @@ $string['privacy:chatdata'] = 'Chat Conversations';
 $string['privacy:chatsettings'] = 'Chat Settings';
 $string['privacy:generationdata'] = 'Generation Requests';
 
-// Knowledge Feedback Loop (v2.2)
+// Knowledge Feedback Loop (v2.2).
 $string['save_to_knowledge_base'] = 'Save to Knowledge Base';
 $string['knowledge_feedback_loop'] = 'Knowledge Feedback Loop';
 $string['build_knowledge_base'] = 'Build your institutional knowledge base!';
@@ -395,7 +411,7 @@ $string['kb_availability'] = 'Will appear in document list as approved course';
 $string['kb_usage'] = 'Future course generations can use this content';
 $string['kb_chat'] = 'Students can ask questions about this course';
 
-// Tutorials
+// Tutorials.
 $string['tutorials'] = 'Help & Tutorials';
 $string['select_your_role'] = 'Select your role to see relevant tutorials';
 $string['for_administrators'] = 'For Administrators';
@@ -411,7 +427,7 @@ $string['tutorial_knowledge_base'] = 'Knowledge Feedback Loop';
 $string['video_tutorials'] = 'Video Tutorials';
 $string['faqs'] = 'Frequently Asked Questions';
 
-// ADDIE v2.1: Quality Control
+// ADDIE v2.1: Quality Control.
 $string['quality_report'] = 'Course Quality Report';
 $string['overall_score'] = 'Overall Score';
 $string['source_coverage'] = 'Source Coverage';
@@ -427,7 +443,7 @@ $string['medium_confidence'] = 'Medium confidence - recommended review';
 $string['low_confidence'] = 'Low confidence - priority review needed';
 $string['supplemented_note'] = 'Includes AI-supplemented content - verify against your context';
 
-// Chat Restrictions (v1.0.2)
+// Chat Restrictions (v1.0.2).
 $string['chat_restrictions'] = 'Chat Restrictions';
 $string['chat_restrictions_desc'] = 'Temporarily disable chat during exams or scheduled periods';
 $string['add_quiz_restriction'] = 'Link to Quiz';
@@ -480,7 +496,7 @@ $string['enable_restriction'] = 'Enable';
 $string['disable_restriction'] = 'Disable';
 $string['chat_restricted'] = 'Chat is currently restricted';
 
-// Learning Analytics (v1.1.0)
+// Learning Analytics (v1.1.0).
 $string['send_analytics'] = 'Send Analytics Report';
 $string['learning_analytics'] = 'Learning Analytics';
 $string['analytics_report'] = 'Analytics Report';
@@ -538,12 +554,12 @@ $string['students_struggling'] = 'Students Struggling';
 $string['avg_grade'] = 'Average Grade';
 $string['suggested_contact_date'] = 'Suggested Contact Date';
 
-// Scheduled Tasks
+// Scheduled Tasks.
 $string['send_analytics_daily'] = 'Send Daily Analytics Reports';
 $string['send_analytics_weekly'] = 'Send Weekly Analytics Reports';
 $string['cleanup_old_analytics'] = 'Cleanup Old Analytics Data';
 
-// Admin Settings - Analytics
+// Admin Settings - Analytics.
 $string['analytics_settings'] = 'Learning Analytics Settings';
 $string['analytics_enabled'] = 'Enable Learning Analytics';
 $string['analytics_enabled_desc'] = 'Enable automatic analytics reporting to Savian AI for student insights';
@@ -562,7 +578,7 @@ $string['analytics_realtime_enabled_desc'] = 'Send analytics updates when signif
 $string['analytics_batch_threshold'] = 'Real-Time Event Threshold';
 $string['analytics_batch_threshold_desc'] = 'Number of events before triggering real-time analytics (default: 10)';
 
-// Privacy API - Analytics
+// Privacy API - Analytics.
 $string['privacy:metadata:analytics_reports'] = 'Analytics reports triggered by teachers';
 $string['privacy:metadata:analytics_reports:course_id'] = 'Course for which analytics was generated';
 $string['privacy:metadata:analytics_reports:user_id'] = 'User who triggered the report (if manual)';

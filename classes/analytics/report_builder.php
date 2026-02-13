@@ -5,6 +5,22 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Analytics report builder.
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 namespace local_savian_ai\analytics;
 
@@ -13,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/local/savian_ai/classes/api/client.php');
 
 /**
- * Report builder class - orchestrates analytics data collection and API submission
+ * Report builder class - orchestrates analytics data collection and API submission.
  *
  * This class:
  * - Extracts data using data_extractor
@@ -31,42 +47,42 @@ require_once($CFG->dirroot . '/local/savian_ai/classes/api/client.php');
 class report_builder {
 
     /**
-     * @var data_extractor Data extractor instance
+     * @var data_extractor Data extractor instance.
      */
     private $extractor;
 
     /**
-     * @var anonymizer Anonymizer instance
+     * @var anonymizer Anonymizer instance.
      */
     private $anonymizer;
 
     /**
-     * @var metrics_calculator Metrics calculator instance
+     * @var metrics_calculator Metrics calculator instance.
      */
     private $calculator;
 
     /**
-     * @var \local_savian_ai\api\client API client instance
+     * @var \local_savian_ai\api\client API client instance.
      */
-    private $api_client;
+    private $apiclient;
 
     /**
-     * @var \moodle_database Database instance
+     * @var \moodle_database Database instance.
      */
     private $db;
 
     /**
-     * @var int Maximum retries for failed API calls
+     * @var int Maximum retries for failed API calls.
      */
     const MAX_RETRIES = 3;
 
     /**
-     * @var int Batch size for large courses
+     * @var int Batch size for large courses.
      */
     const BATCH_SIZE = 50;
 
     /**
-     * Constructor
+     * Constructor.
      */
     public function __construct() {
         global $DB;
@@ -74,346 +90,346 @@ class report_builder {
         $this->extractor = new data_extractor();
         $this->anonymizer = new anonymizer();
         $this->calculator = new metrics_calculator();
-        $this->api_client = new \local_savian_ai\api\client();
+        $this->apiclient = new \local_savian_ai\api\client();
         $this->db = $DB;
     }
 
     /**
-     * Build and send analytics report for a course
+     * Build and send analytics report for a course.
      *
-     * @param int $course_id Course ID
-     * @param string $report_type Type: on_demand, scheduled, real_time, end_of_course
-     * @param string $trigger_type Trigger: manual, cron, event, completion
-     * @param int $date_from Start timestamp (0 = all time)
-     * @param int $date_to End timestamp (0 = now)
-     * @param int|null $user_id User who triggered (if manual)
-     * @return object Result with success status and report_id
+     * @param int $courseid Course ID.
+     * @param string $reporttype Type: on_demand, scheduled, real_time, end_of_course.
+     * @param string $triggertype Trigger: manual, cron, event, completion.
+     * @param int $datefrom Start timestamp (0 = all time).
+     * @param int $dateto End timestamp (0 = now).
+     * @param int|null $userid User who triggered (if manual).
+     * @return object Result with success status and report_id.
      */
-    public function build_and_send_report($course_id, $report_type = 'on_demand', $trigger_type = 'manual',
-                                         $date_from = 0, $date_to = 0, $user_id = null) {
+    public function build_and_send_report($courseid, $reporttype = 'on_demand', $triggertype = 'manual',
+                                         $datefrom = 0, $dateto = 0, $userid = null) {
         global $USER;
 
-        $date_to = $date_to > 0 ? $date_to : time();
+        $dateto = $dateto > 0 ? $dateto : time();
 
-        if ($user_id === null) {
-            $user_id = $USER->id;
+        if ($userid === null) {
+            $userid = $USER->id;
         }
 
-        // Create report record
+        // Create report record.
         $report = new \stdClass();
-        $report->course_id = $course_id;
-        $report->report_type = $report_type;
-        $report->trigger_type = $trigger_type;
-        $report->date_from = $date_from;
-        $report->date_to = $date_to;
+        $report->course_id = $courseid;
+        $report->report_type = $reporttype;
+        $report->trigger_type = $triggertype;
+        $report->date_from = $datefrom;
+        $report->date_to = $dateto;
         $report->status = 'pending';
-        $report->user_id = $user_id;
+        $report->user_id = $userid;
         $report->timecreated = time();
         $report->timemodified = time();
         $report->retry_count = 0;
 
-        $report_id = $this->db->insert_record('local_savian_analytics_reports', $report);
+        $reportid = $this->db->insert_record('local_savian_analytics_reports', $report);
 
         try {
-            // Build report data
-            $report_data = $this->build_report_data($course_id, $report_type, $date_from, $date_to);
+            // Build report data.
+            $reportdata = $this->build_report_data($courseid, $reporttype, $datefrom, $dateto);
 
-            // Update student and activity counts
+            // Update student and activity counts.
             $this->db->set_field('local_savian_analytics_reports', 'student_count',
-                                count($report_data['students']), ['id' => $report_id]);
+                                count($reportdata['students']), ['id' => $reportid]);
             $this->db->set_field('local_savian_analytics_reports', 'activity_count',
-                                $report_data['course_summary']['total_activities'], ['id' => $report_id]);
+                                $reportdata['course_summary']['total_activities'], ['id' => $reportid]);
 
-            // Send to API with retry logic
-            $result = $this->send_with_retry($report_id, $report_data);
+            // Send to API with retry logic.
+            $result = $this->send_with_retry($reportid, $reportdata);
 
             return (object)[
                 'success' => $result->success,
-                'report_id' => $report_id,
+                'report_id' => $reportid,
                 'insights' => $result->insights ?? null,
-                'message' => $result->success ? 'Report sent successfully' : ($result->error ?? 'Unknown error')
+                'message' => $result->success ? 'Report sent successfully' : ($result->error ?? 'Unknown error'),
             ];
 
         } catch (\Exception $e) {
-            // Mark as failed
-            $this->mark_report_failed($report_id, $e->getMessage());
+            // Mark as failed.
+            $this->mark_report_failed($reportid, $e->getMessage());
 
             return (object)[
                 'success' => false,
-                'report_id' => $report_id,
-                'error' => $e->getMessage()
+                'report_id' => $reportid,
+                'error' => $e->getMessage(),
             ];
         }
     }
 
     /**
-     * Build report data structure matching API format
+     * Build report data structure matching API format.
      *
-     * @param int $course_id Course ID
-     * @param string $report_type Report type
-     * @param int $date_from Start timestamp
-     * @param int $date_to End timestamp
-     * @return array Complete report data
+     * @param int $courseid Course ID.
+     * @param string $reporttype Report type.
+     * @param int $datefrom Start timestamp.
+     * @param int $dateto End timestamp.
+     * @return array Complete report data.
      */
-    public function build_report_data($course_id, $report_type, $date_from = 0, $date_to = 0) {
-        // Get course info
-        $course_info = $this->extractor->get_course_info($course_id);
+    public function build_report_data($courseid, $reporttype, $datefrom = 0, $dateto = 0) {
+        // Get course info.
+        $courseinfo = $this->extractor->get_course_info($courseid);
 
-        // Get enrolled students
-        $students = $this->extractor->get_enrolled_students($course_id);
+        // Get enrolled students.
+        $students = $this->extractor->get_enrolled_students($courseid);
 
         if (empty($students)) {
             throw new \moodle_exception('No enrolled students found');
         }
 
-        // Check if we need batch processing
-        $student_count = count($students);
-        $use_batching = $student_count > self::BATCH_SIZE;
+        // Check if we need batch processing.
+        $studentcount = count($students);
+        $usebatching = $studentcount > self::BATCH_SIZE;
 
-        // Process students (with optional batching)
-        $students_data = [];
-        if ($use_batching) {
-            $students_data = $this->process_students_batched($course_id, $students, $date_from, $date_to);
+        // Process students (with optional batching).
+        $studentsdata = [];
+        if ($usebatching) {
+            $studentsdata = $this->process_students_batched($courseid, $students, $datefrom, $dateto);
         } else {
-            $students_data = $this->process_students($course_id, $students, $date_from, $date_to);
+            $studentsdata = $this->process_students($courseid, $students, $datefrom, $dateto);
         }
 
-        // Calculate aggregated insights
-        $aggregated_insights = $this->calculator->calculate_aggregated_insights($course_id, $students_data);
+        // Calculate aggregated insights.
+        $aggregatedinsights = $this->calculator->calculate_aggregated_insights($courseid, $studentsdata);
 
-        // Calculate completion data
-        $completion_data = $this->calculate_course_completion_data($students_data);
+        // Calculate completion data.
+        $completiondata = $this->calculate_course_completion_data($studentsdata);
 
-        // Assemble report
+        // Assemble report.
         return [
-            'course_id' => (string)$course_id,
-            'course_name' => $course_info->course_name,
-            'course_code' => $course_info->course_code,
+            'course_id' => (string)$courseid,
+            'course_name' => $courseinfo->course_name,
+            'course_code' => $courseinfo->course_code,
             'report_metadata' => [
-                'report_type' => $report_type,
-                'trigger_type' => 'manual', // TODO: Pass from parameter
-                'date_from' => $date_from > 0 ? date('Y-m-d\TH:i:s\Z', $date_from) : null,
-                'date_to' => date('Y-m-d\TH:i:s\Z', $date_to),
+                'report_type' => $reporttype,
+                'trigger_type' => 'manual', // TODO: Pass from parameter.
+                'date_from' => $datefrom > 0 ? date('Y-m-d\TH:i:s\Z', $datefrom) : null,
+                'date_to' => date('Y-m-d\TH:i:s\Z', $dateto),
                 'generated_at' => date('Y-m-d\TH:i:s\Z'),
                 'moodle_version' => $this->get_moodle_version(),
-                'plugin_version' => get_config('local_savian_ai', 'version') ?? '1.1.0'
+                'plugin_version' => get_config('local_savian_ai', 'version') ?? '1.1.0',
             ],
             'course_summary' => [
-                'start_date' => $course_info->start_date > 0 ? date('Y-m-d\TH:i:s\Z', $course_info->start_date) : null,
-                'end_date' => $course_info->end_date > 0 ? date('Y-m-d\TH:i:s\Z', $course_info->end_date) : null,
-                'total_students' => $student_count,
-                'total_activities' => $course_info->total_activities,
-                'total_assessments' => 0, // TODO: Count quizzes + assignments
-                'completion_rate' => $completion_data['completion_rate']
+                'start_date' => $courseinfo->start_date > 0 ? date('Y-m-d\TH:i:s\Z', $courseinfo->start_date) : null,
+                'end_date' => $courseinfo->end_date > 0 ? date('Y-m-d\TH:i:s\Z', $courseinfo->end_date) : null,
+                'total_students' => $studentcount,
+                'total_activities' => $courseinfo->total_activities,
+                'total_assessments' => 0, // TODO: Count quizzes + assignments.
+                'completion_rate' => $completiondata['completion_rate'],
             ],
-            'students' => $students_data,
-            'aggregated_insights' => $aggregated_insights,
-            'completion_data' => $completion_data
+            'students' => $studentsdata,
+            'aggregated_insights' => $aggregatedinsights,
+            'completion_data' => $completiondata,
         ];
     }
 
     /**
-     * Process students data (non-batched)
+     * Process students data (non-batched).
      *
-     * @param int $course_id Course ID
-     * @param array $students Array of student records
-     * @param int $date_from Start timestamp
-     * @param int $date_to End timestamp
-     * @return array Array of student data
+     * @param int $courseid Course ID.
+     * @param array $students Array of student records.
+     * @param int $datefrom Start timestamp.
+     * @param int $dateto End timestamp.
+     * @return array Array of student data.
      */
-    private function process_students($course_id, $students, $date_from, $date_to) {
-        $students_data = [];
+    private function process_students($courseid, $students, $datefrom, $dateto) {
+        $studentsdata = [];
 
         foreach ($students as $student) {
-            $student_data = $this->process_single_student($course_id, $student, $date_from, $date_to);
-            if ($student_data) {
-                $students_data[] = $student_data;
+            $studentdata = $this->process_single_student($courseid, $student, $datefrom, $dateto);
+            if ($studentdata) {
+                $studentsdata[] = $studentdata;
             }
         }
 
-        return $students_data;
+        return $studentsdata;
     }
 
     /**
-     * Process students in batches (for large courses)
+     * Process students in batches (for large courses).
      *
-     * @param int $course_id Course ID
-     * @param array $students Array of student records
-     * @param int $date_from Start timestamp
-     * @param int $date_to End timestamp
-     * @return array Array of student data
+     * @param int $courseid Course ID.
+     * @param array $students Array of student records.
+     * @param int $datefrom Start timestamp.
+     * @param int $dateto End timestamp.
+     * @return array Array of student data.
      */
-    private function process_students_batched($course_id, $students, $date_from, $date_to) {
-        $students_data = [];
+    private function process_students_batched($courseid, $students, $datefrom, $dateto) {
+        $studentsdata = [];
         $batches = array_chunk($students, self::BATCH_SIZE, true);
 
         foreach ($batches as $batch) {
             foreach ($batch as $student) {
-                $student_data = $this->process_single_student($course_id, $student, $date_from, $date_to);
-                if ($student_data) {
-                    $students_data[] = $student_data;
+                $studentdata = $this->process_single_student($courseid, $student, $datefrom, $dateto);
+                if ($studentdata) {
+                    $studentsdata[] = $studentdata;
                 }
             }
-            // Small delay between batches to avoid overloading database
-            usleep(100000); // 0.1 seconds
+            // Small delay between batches to avoid overloading database.
+            usleep(100000); // 0.1 seconds.
         }
 
-        return $students_data;
+        return $studentsdata;
     }
 
     /**
-     * Process single student's data
+     * Process single student's data.
      *
-     * @param int $course_id Course ID
-     * @param object $student Student record
-     * @param int $date_from Start timestamp
-     * @param int $date_to End timestamp
-     * @return array|null Student data array or null if error
+     * @param int $courseid Course ID.
+     * @param object $student Student record.
+     * @param int $datefrom Start timestamp.
+     * @param int $dateto End timestamp.
+     * @return array|null Student data array or null if error.
      */
-    private function process_single_student($course_id, $student, $date_from, $date_to) {
+    private function process_single_student($courseid, $student, $datefrom, $dateto) {
         try {
-            // Anonymize user ID
-            $anon_id = $this->anonymizer->anonymize_user_id($student->id);
+            // Anonymize user ID.
+            $anonid = $this->anonymizer->anonymize_user_id($student->id);
 
-            // Calculate engagement metrics
-            $engagement_metrics = $this->calculator->calculate_engagement_metrics(
-                $course_id, $student->id, $date_from, $date_to
+            // Calculate engagement metrics.
+            $engagementmetrics = $this->calculator->calculate_engagement_metrics(
+                $courseid, $student->id, $datefrom, $dateto
             );
 
-            // Calculate grade metrics
-            $grade_metrics = $this->calculator->calculate_grade_metrics($course_id, $student->id);
+            // Calculate grade metrics.
+            $grademetrics = $this->calculator->calculate_grade_metrics($courseid, $student->id);
 
-            // Calculate risk indicators
-            $risk_indicators = $this->calculator->calculate_risk_indicators(
-                $course_id, $student->id, $engagement_metrics, $grade_metrics
+            // Calculate risk indicators.
+            $riskindicators = $this->calculator->calculate_risk_indicators(
+                $courseid, $student->id, $engagementmetrics, $grademetrics
             );
 
-            // Get activity timeline (last 30 days)
-            $activity_timeline = $this->calculator->calculate_activity_timeline($course_id, $student->id, 30);
+            // Get activity timeline (last 30 days).
+            $activitytimeline = $this->calculator->calculate_activity_timeline($courseid, $student->id, 30);
 
             return [
-                'anon_id' => $anon_id,
+                'anon_id' => $anonid,
                 'enrollment_date' => date('Y-m-d\TH:i:s\Z', $student->enrollment_date),
                 'role' => 'student',
-                'engagement_metrics' => $engagement_metrics,
-                'grade_metrics' => $grade_metrics,
-                'risk_indicators' => $risk_indicators,
-                'activity_timeline' => $activity_timeline,
-                'module_performance' => [] // TODO: Implement per-module performance
+                'engagement_metrics' => $engagementmetrics,
+                'grade_metrics' => $grademetrics,
+                'risk_indicators' => $riskindicators,
+                'activity_timeline' => $activitytimeline,
+                'module_performance' => [], // TODO: Implement per-module performance.
             ];
 
         } catch (\Exception $e) {
-            // Log error but continue with other students
+            // Log error but continue with other students.
             debugging('Error processing student ' . $student->id . ': ' . $e->getMessage(), DEBUG_DEVELOPER);
             return null;
         }
     }
 
     /**
-     * Calculate course completion data
+     * Calculate course completion data.
      *
-     * @param array $students_data Array of student data
-     * @return array Completion data
+     * @param array $studentsdata Array of student data.
+     * @return array Completion data.
      */
-    private function calculate_course_completion_data($students_data) {
-        $completed_count = 0;
-        $in_progress_count = 0;
-        $not_started_count = 0;
-        $total_completion_times = [];
+    private function calculate_course_completion_data($studentsdata) {
+        $completedcount = 0;
+        $inprogresscount = 0;
+        $notstartedcount = 0;
+        $totalcompletiontimes = [];
 
-        foreach ($students_data as $student) {
-            $completion_rate = $student['engagement_metrics']['activity_completion_rate'];
+        foreach ($studentsdata as $student) {
+            $completionrate = $student['engagement_metrics']['activity_completion_rate'];
 
-            if ($completion_rate >= 1.0) {
-                $completed_count++;
-                // TODO: Calculate actual completion time
-            } else if ($completion_rate > 0) {
-                $in_progress_count++;
+            if ($completionrate >= 1.0) {
+                $completedcount++;
+                // TODO: Calculate actual completion time.
+            } else if ($completionrate > 0) {
+                $inprogresscount++;
             } else {
-                $not_started_count++;
+                $notstartedcount++;
             }
         }
 
-        $avg_completion_time = !empty($total_completion_times) ?
-            array_sum($total_completion_times) / count($total_completion_times) : 0;
+        $avgcompletiontime = !empty($totalcompletiontimes) ?
+            array_sum($totalcompletiontimes) / count($totalcompletiontimes) : 0;
 
         return [
-            'completed_count' => $completed_count,
-            'in_progress_count' => $in_progress_count,
-            'not_started_count' => $not_started_count,
-            'avg_completion_time_days' => round($avg_completion_time),
-            'completion_rate' => count($students_data) > 0 ?
-                round($completed_count / count($students_data), 2) : 0
+            'completed_count' => $completedcount,
+            'in_progress_count' => $inprogresscount,
+            'not_started_count' => $notstartedcount,
+            'avg_completion_time_days' => round($avgcompletiontime),
+            'completion_rate' => count($studentsdata) > 0 ?
+                round($completedcount / count($studentsdata), 2) : 0,
         ];
     }
 
     /**
-     * Send report to API with retry logic
+     * Send report to API with retry logic.
      *
-     * @param int $report_id Report ID
-     * @param array $report_data Report data
-     * @return object API response
+     * @param int $reportid Report ID.
+     * @param array $reportdata Report data.
+     * @return object API response.
      */
-    private function send_with_retry($report_id, $report_data) {
+    private function send_with_retry($reportid, $reportdata) {
         $attempt = 0;
 
         while ($attempt < self::MAX_RETRIES) {
             try {
-                // Update status to sending
-                $this->db->set_field('local_savian_analytics_reports', 'status', 'sending', ['id' => $report_id]);
-                $this->db->set_field('local_savian_analytics_reports', 'retry_count', $attempt, ['id' => $report_id]);
+                // Update status to sending.
+                $this->db->set_field('local_savian_analytics_reports', 'status', 'sending', ['id' => $reportid]);
+                $this->db->set_field('local_savian_analytics_reports', 'retry_count', $attempt, ['id' => $reportid]);
 
-                // Send to API
-                $response = $this->api_client->send_analytics($report_data);
+                // Send to API.
+                $response = $this->apiclient->send_analytics($reportdata);
 
-                // Accept both 200 (sync) and 202 (async) as success
+                // Accept both 200 (sync) and 202 (async) as success.
                 if (($response->http_code === 200 || $response->http_code === 202) &&
                     isset($response->success) && $response->success) {
-                    // Success - mark as sent (or pending for async)
-                    $this->mark_report_sent($report_id, $response);
+                    // Success - mark as sent (or pending for async).
+                    $this->mark_report_sent($reportid, $response);
                     return $response;
                 }
 
-                // Client error (4xx) - don't retry
+                // Client error (4xx) - don't retry.
                 if ($response->http_code >= 400 && $response->http_code < 500) {
-                    $this->mark_report_failed($report_id, $response->error ?? 'Client error');
+                    $this->mark_report_failed($reportid, $response->error ?? 'Client error');
                     return $response;
                 }
 
-                // Server error (5xx) - retry
+                // Server error (5xx) - retry.
                 $attempt++;
                 if ($attempt >= self::MAX_RETRIES) {
-                    $this->mark_report_failed($report_id, $response->error ?? 'Max retries exceeded');
+                    $this->mark_report_failed($reportid, $response->error ?? 'Max retries exceeded');
                     return $response;
                 }
 
-                // Exponential backoff
+                // Exponential backoff.
                 sleep(pow(2, $attempt));
 
             } catch (\Exception $e) {
                 $attempt++;
                 if ($attempt >= self::MAX_RETRIES) {
-                    $this->mark_report_failed($report_id, $e->getMessage());
+                    $this->mark_report_failed($reportid, $e->getMessage());
                     throw $e;
                 }
                 sleep(pow(2, $attempt));
             }
         }
 
-        // Should not reach here
-        $this->mark_report_failed($report_id, 'Failed after retries');
+        // Should not reach here.
+        $this->mark_report_failed($reportid, 'Failed after retries');
         return (object)['success' => false, 'error' => 'Failed after retries'];
     }
 
     /**
-     * Mark report as sent successfully
+     * Mark report as sent successfully.
      *
-     * @param int $report_id Report ID
-     * @param object $response API response
+     * @param int $reportid Report ID.
+     * @param object $response API response.
      */
-    private function mark_report_sent($report_id, $response) {
+    private function mark_report_sent($reportid, $response) {
         $update = new \stdClass();
-        $update->id = $report_id;
+        $update->id = $reportid;
         $update->status = 'sent';
         $update->api_response = json_encode($response);
         $update->timemodified = time();
@@ -422,25 +438,25 @@ class report_builder {
     }
 
     /**
-     * Mark report as failed
+     * Mark report as failed.
      *
-     * @param int $report_id Report ID
-     * @param string $error_message Error message
+     * @param int $reportid Report ID.
+     * @param string $errormessage Error message.
      */
-    private function mark_report_failed($report_id, $error_message) {
+    private function mark_report_failed($reportid, $errormessage) {
         $update = new \stdClass();
-        $update->id = $report_id;
+        $update->id = $reportid;
         $update->status = 'failed';
-        $update->error_message = $error_message;
+        $update->error_message = $errormessage;
         $update->timemodified = time();
 
         $this->db->update_record('local_savian_analytics_reports', $update);
     }
 
     /**
-     * Get Moodle version
+     * Get Moodle version.
      *
-     * @return string Moodle version
+     * @return string Moodle version.
      */
     private function get_moodle_version() {
         global $CFG;

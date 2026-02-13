@@ -5,23 +5,39 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Content generation page.
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 require_once(__DIR__ . '/../../config.php');
 
 require_login();
 
 $courseid = required_param('courseid', PARAM_INT);
-$requested_mode = optional_param('mode', 'documents', PARAM_ALPHA);
+$requestedmode = optional_param('mode', 'documents', PARAM_ALPHA);
 
-// Redirect if someone tries topic mode (not supported)
-if ($requested_mode === 'topic') {
+// Redirect if someone tries topic mode (not supported).
+if ($requestedmode === 'topic') {
     redirect(new moodle_url('/local/savian_ai/generate.php', [
         'courseid' => $courseid,
-        'mode' => 'documents'
+        'mode' => 'documents',
     ]));
 }
 
-$mode = 'documents';  // Always documents mode
+$mode = 'documents'; // Always documents mode.
 $action = optional_param('action', '', PARAM_ALPHA);
 
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
@@ -36,25 +52,25 @@ $PAGE->set_title(get_string('generate', 'local_savian_ai'));
 $PAGE->set_heading($course->fullname);
 
 $client = new \local_savian_ai\api\client();
-$qbank_creator = new \local_savian_ai\content\qbank_creator();
-$savian_cache = cache::make('local_savian_ai', 'session_data');
+$qbankcreator = new \local_savian_ai\content\qbank_creator();
+$saviancache = cache::make('local_savian_ai', 'session_data');
 
-// Initialize form with URL to preserve parameters
-$form_url = new moodle_url('/local/savian_ai/generate.php', [
+// Initialize form with URL to preserve parameters.
+$formurl = new moodle_url('/local/savian_ai/generate.php', [
     'courseid' => $courseid,
-    'mode' => $mode
+    'mode' => $mode,
 ]);
 $customdata = ['courseid' => $courseid, 'mode' => $mode];
-$mform = new \local_savian_ai\form\generate_questions_form($form_url, $customdata);
+$mform = new \local_savian_ai\form\generate_questions_form($formurl, $customdata);
 
-// Handle form submission
+// Handle form submission.
 if ($mform->is_cancelled()) {
     redirect(new moodle_url('/local/savian_ai/generate.php', ['courseid' => $courseid]));
 } else if ($data = $mform->get_data()) {
-    // Get document_ids from POST (static HTML checkboxes not in $data)
-    $document_ids = optional_param_array('document_ids', [], PARAM_INT);
+    // Get document_ids from POST (static HTML checkboxes not in $data).
+    $documentids = optional_param_array('document_ids', [], PARAM_INT);
 
-    // Prepare generation options
+    // Prepare generation options.
     $options = [
         'learning_objectives' => !empty($data->learning_objectives) ?
             array_filter(array_map('trim', explode("\n", $data->learning_objectives))) : [],
@@ -65,30 +81,30 @@ if ($mform->is_cancelled()) {
         'language' => $data->language,
     ];
 
-    // Generate questions
-    if ($mode === 'documents' && !empty($document_ids)) {
-        // RAG-based generation
-        $response = $client->generate_questions_from_docs($document_ids, $data->topic, $options);
+    // Generate questions.
+    if ($mode === 'documents' && !empty($documentids)) {
+        // RAG-based generation.
+        $response = $client->generate_questions_from_docs($documentids, $data->topic, $options);
     } else {
-        // Topic-based generation
+        // Topic-based generation.
         $response = $client->generate_questions($data->topic, $options);
     }
 
     if ($response->http_code === 200 && isset($response->success) && $response->success) {
-        // Check if async (has request_id)
+        // Check if async (has request_id).
         if (isset($response->request_id) && isset($response->status) && $response->status === 'pending') {
-            // Async generation - need to poll
-            $savian_cache->set('pending_request', $response->request_id);
+            // Async generation - need to poll.
+            $saviancache->set('pending_request', $response->request_id);
             redirect(new moodle_url('/local/savian_ai/generate.php', [
                 'courseid' => $courseid,
                 'mode' => $mode,
                 'action' => 'poll',
             ]), get_string('generation_pending', 'local_savian_ai'), null, 'info');
         } else if (isset($response->questions) && count($response->questions) > 0) {
-            // Synchronous generation - questions ready
-            $savian_cache->set('questions', json_encode($response->questions));
-            $savian_cache->set('metadata', isset($response->metadata) ? json_encode($response->metadata) : null);
-            $savian_cache->set('usage', isset($response->usage) ? json_encode($response->usage) : null);
+            // Synchronous generation - questions ready.
+            $saviancache->set('questions', json_encode($response->questions));
+            $saviancache->set('metadata', isset($response->metadata) ? json_encode($response->metadata) : null);
+            $saviancache->set('usage', isset($response->usage) ? json_encode($response->usage) : null);
 
             redirect(new moodle_url('/local/savian_ai/generate.php', [
                 'courseid' => $courseid,
@@ -101,14 +117,14 @@ if ($mform->is_cancelled()) {
     }
 }
 
-// Handle adding questions to question bank
+// Handle adding questions to question bank.
 if ($action === 'add' && confirm_sesskey()) {
-    if (!empty($savian_cache->get('questions'))) {
-        $questions = json_decode($savian_cache->get('questions'));
+    if (!empty($saviancache->get('questions'))) {
+        $questions = json_decode($saviancache->get('questions'));
 
-        $results = $qbank_creator->add_to_question_bank($questions, $courseid);
+        $results = $qbankcreator->add_to_question_bank($questions, $courseid);
 
-        // Log generation
+        // Log generation.
         $log = new stdClass();
         $log->request_id = 'local_' . time();
         $log->generation_type = $mode === 'documents' ? 'questions_from_documents' : 'questions';
@@ -121,16 +137,16 @@ if ($action === 'add' && confirm_sesskey()) {
         $DB->insert_record('local_savian_generations', $log);
 
         // Clear cache.
-        $savian_cache->delete('questions');
-        $savian_cache->delete('metadata');
-        $savian_cache->delete('usage');
+        $saviancache->delete('questions');
+        $saviancache->delete('metadata');
+        $saviancache->delete('usage');
 
-        $success_count = count($results['success']);
-        $failed_count = count($results['failed']);
+        $successcount = count($results['success']);
+        $failedcount = count($results['failed']);
 
-        $message = get_string('questions_added', 'local_savian_ai', $success_count);
-        if ($failed_count > 0) {
-            $message .= " ({$failed_count} failed)";
+        $message = get_string('questions_added', 'local_savian_ai', $successcount);
+        if ($failedcount > 0) {
+            $message .= " ({$failedcount} failed)";
         }
 
         redirect(new moodle_url('/question/edit.php', ['courseid' => $courseid]),
@@ -138,50 +154,50 @@ if ($action === 'add' && confirm_sesskey()) {
     }
 }
 
-// Handle polling for async generation
-if ($action === 'poll' && !empty($savian_cache->get('pending_request'))) {
-    $request_id = $savian_cache->get('pending_request');
-    $status_response = $client->get_generation_status($request_id);
+// Handle polling for async generation.
+if ($action === 'poll' && !empty($saviancache->get('pending_request'))) {
+    $requestid = $saviancache->get('pending_request');
+    $statusresponse = $client->get_generation_status($requestid);
 
-    if ($status_response->http_code === 200) {
-        if (isset($status_response->status) && $status_response->status === 'completed') {
+    if ($statusresponse->http_code === 200) {
+        if (isset($statusresponse->status) && $statusresponse->status === 'completed') {
             // Generation completed!
-            if (isset($status_response->questions) && count($status_response->questions) > 0) {
-                $savian_cache->set('questions', json_encode($status_response->questions));
-                $savian_cache->set('metadata', isset($status_response->metadata) ? json_encode($status_response->metadata) : null);
-                $savian_cache->set('usage', isset($status_response->usage) ? json_encode($status_response->usage) : null);
-                $savian_cache->delete('pending_request');
+            if (isset($statusresponse->questions) && count($statusresponse->questions) > 0) {
+                $saviancache->set('questions', json_encode($statusresponse->questions));
+                $saviancache->set('metadata', isset($statusresponse->metadata) ? json_encode($statusresponse->metadata) : null);
+                $saviancache->set('usage', isset($statusresponse->usage) ? json_encode($statusresponse->usage) : null);
+                $saviancache->delete('pending_request');
 
                 redirect(new moodle_url('/local/savian_ai/generate.php', [
                     'courseid' => $courseid,
                     'action' => 'preview',
-                ]), get_string('questions_generated', 'local_savian_ai', count($status_response->questions)), null, 'success');
+                ]), get_string('questions_generated', 'local_savian_ai', count($statusresponse->questions)), null, 'success');
             }
-        } else if (isset($status_response->status) && $status_response->status === 'failed') {
-            // Generation failed
-            $error = $status_response->error ?? 'Generation failed';
-            $savian_cache->delete('pending_request');
+        } else if (isset($statusresponse->status) && $statusresponse->status === 'failed') {
+            // Generation failed.
+            $error = $statusresponse->error ?? 'Generation failed';
+            $saviancache->delete('pending_request');
             redirect(new moodle_url('/local/savian_ai/generate.php', ['courseid' => $courseid]),
                      get_string('generation_failed', 'local_savian_ai', $error), null, 'error');
         }
-        // else status is still pending/processing - page will auto-refresh
+        // Else status is still pending/processing - page will auto-refresh.
     }
 }
 
 echo $OUTPUT->header();
 
-// Consistent header
+// Consistent header.
 echo local_savian_ai_render_header('Generate Questions from Documents', 'Create quiz questions from your course materials');
 
-// Show preview if questions are in session
-if ($action === 'preview' && !empty($savian_cache->get('questions'))) {
-    $questions = json_decode($savian_cache->get('questions'));
+// Show preview if questions are in session.
+if ($action === 'preview' && !empty($saviancache->get('questions'))) {
+    $questions = json_decode($saviancache->get('questions'));
 
     echo html_writer::tag('h3', get_string('preview_questions', 'local_savian_ai') . ' (' . count($questions) . ')', ['class' => 'mt-4']);
 
-    // Display usage if available
-    if (!empty($savian_cache->get('usage'))) {
-        $usage = json_decode($savian_cache->get('usage'));
+    // Display usage if available.
+    if (!empty($saviancache->get('usage'))) {
+        $usage = json_decode($saviancache->get('usage'));
         if (isset($usage->questions)) {
             $percentage = ($usage->questions->limit > 0) ? ($usage->questions->used / $usage->questions->limit * 100) : 0;
             echo html_writer::start_div('card mb-3');
@@ -190,7 +206,7 @@ if ($action === 'preview' && !empty($savian_cache->get('questions'))) {
             echo html_writer::div(
                 html_writer::div('', 'progress-bar', [
                     'style' => "width: {$percentage}%; background-color: #6C3BAA",
-                    'role' => 'progressbar'
+                    'role' => 'progressbar',
                 ]),
                 'progress mt-2 mb-2'
             );
@@ -200,7 +216,7 @@ if ($action === 'preview' && !empty($savian_cache->get('questions'))) {
         }
     }
 
-    // Display questions
+    // Display questions.
     foreach ($questions as $idx => $q) {
         echo html_writer::start_div('card mb-3');
         echo html_writer::div('Question ' . ($idx + 1), 'card-header bg-light');
@@ -230,7 +246,7 @@ if ($action === 'preview' && !empty($savian_cache->get('questions'))) {
         echo html_writer::end_div();
     }
 
-    // Action buttons
+    // Action buttons.
     echo html_writer::start_div('text-center mt-4');
     echo html_writer::link(
         new moodle_url('/local/savian_ai/edit_questions.php', ['courseid' => $courseid]),
@@ -247,8 +263,8 @@ if ($action === 'preview' && !empty($savian_cache->get('questions'))) {
         ['class' => 'btn btn-savian btn-lg']
     );
     echo html_writer::end_div();
-} else if ($action === 'poll' && !empty($savian_cache->get('pending_request'))) {
-    // Show polling status
+} else if ($action === 'poll' && !empty($saviancache->get('pending_request'))) {
+    // Show polling status.
     echo html_writer::start_div('card mt-4');
     echo html_writer::start_div('card-body text-center');
     echo html_writer::tag('div', '', ['class' => 'spinner-border text-primary mb-3', 'role' => 'status', 'style' => 'width: 3rem; height: 3rem;']);
@@ -257,18 +273,18 @@ if ($action === 'preview' && !empty($savian_cache->get('questions'))) {
     echo html_writer::end_div();
     echo html_writer::end_div();
 
-    // Auto-refresh every 5 seconds
+    // Auto-refresh every 5 seconds.
     $PAGE->requires->js_amd_inline("
         setTimeout(function() {
             window.location.reload();
         }, 5000);
     ");
 } else {
-    // Show generation form
+    // Show generation form.
     $mform->display();
 }
 
-// Back link
+// Back link.
 echo html_writer::div(
     html_writer::link(
         new moodle_url('/local/savian_ai/course.php', ['courseid' => $courseid]),
@@ -278,7 +294,7 @@ echo html_writer::div(
     'mt-4'
 );
 
-// Coming Soon Features (Collapsible)
+// Coming Soon Features (Collapsible).
 echo html_writer::start_div('mt-5 mb-4');
 echo html_writer::start_tag('details', ['class' => 'border rounded p-3 bg-light']);
 echo html_writer::tag('summary', '🔮 Coming Soon: AI Assessment Evaluation', ['class' => 'font-weight-bold text-success', 'style' => 'cursor: pointer;']);
@@ -299,7 +315,7 @@ echo html_writer::end_div();
 echo html_writer::end_tag('details');
 echo html_writer::end_div();
 
-// Footer
+// Footer.
 echo local_savian_ai_render_footer();
 
 echo $OUTPUT->footer();

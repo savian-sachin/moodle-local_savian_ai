@@ -5,6 +5,22 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Scheduled task for daily analytics.
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 namespace local_savian_ai\task;
 
@@ -13,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/local/savian_ai/classes/analytics/report_builder.php');
 
 /**
- * Daily scheduled task to send analytics reports
+ * Daily scheduled task to send analytics reports.
  *
  * Runs daily at configured time (default: 2:00 AM) to send analytics
  * reports for all courses with analytics enabled.
@@ -25,7 +41,7 @@ require_once($CFG->dirroot . '/local/savian_ai/classes/analytics/report_builder.
 class send_analytics_daily extends \core\task\scheduled_task {
 
     /**
-     * Get task name
+     * Get task name.
      *
      * @return string
      */
@@ -34,19 +50,19 @@ class send_analytics_daily extends \core\task\scheduled_task {
     }
 
     /**
-     * Execute the task
+     * Execute the task.
      */
     public function execute() {
         global $DB;
 
-        // Check if analytics is globally enabled
+        // Check if analytics is globally enabled.
         $enabled = get_config('local_savian_ai', 'analytics_enabled');
         if (empty($enabled)) {
             mtrace('Analytics is globally disabled. Skipping daily task.');
             return;
         }
 
-        // Check if daily frequency is enabled
+        // Check if daily frequency is enabled.
         $frequency = get_config('local_savian_ai', 'analytics_frequency');
         if ($frequency !== 'daily' && $frequency !== 'both') {
             mtrace('Daily analytics not enabled. Current frequency: ' . ($frequency ?: 'manual'));
@@ -55,7 +71,7 @@ class send_analytics_daily extends \core\task\scheduled_task {
 
         mtrace('Starting daily analytics task...');
 
-        // Get all courses with enrolled students
+        // Get all courses with enrolled students.
         $sql = "SELECT DISTINCT c.id, c.fullname
                 FROM {course} c
                 JOIN {enrol} e ON e.courseid = c.id
@@ -77,59 +93,59 @@ class send_analytics_daily extends \core\task\scheduled_task {
         mtrace('Found ' . count($courses) . ' courses to process.');
 
         $builder = new \local_savian_ai\analytics\report_builder();
-        $success_count = 0;
-        $error_count = 0;
+        $successcount = 0;
+        $errorcount = 0;
 
         foreach ($courses as $course) {
             try {
                 mtrace("Processing course: {$course->fullname} (ID: {$course->id})");
 
-                // Get last report to determine date_from
-                $last_report = $DB->get_record_sql(
+                // Get last report to determine date_from.
+                $lastreport = $DB->get_record_sql(
                     "SELECT MAX(date_to) as last_date
                      FROM {local_savian_analytics_reports}
                      WHERE course_id = ? AND status = 'sent'",
                     [$course->id]
                 );
 
-                $date_from = $last_report && $last_report->last_date ? $last_report->last_date : 0;
-                $date_to = time();
+                $datefrom = $lastreport && $lastreport->last_date ? $lastreport->last_date : 0;
+                $dateto = time();
 
-                // Only send if there's new data (at least 1 day since last report)
-                if ($date_to - $date_from < 86400) {
-                    mtrace("  Skipping - report sent within last 24 hours");
+                // Only send if there is new data (at least 1 day since last report).
+                if ($dateto - $datefrom < 86400) {
+                    mtrace("  Skipping - report sent within last 24 hours.");
                     continue;
                 }
 
-                // Build and send report
+                // Build and send report.
                 $result = $builder->build_and_send_report(
                     $course->id,
                     'scheduled',
                     'cron',
-                    $date_from,
-                    $date_to,
-                    null // System triggered
+                    $datefrom,
+                    $dateto,
+                    null // System triggered.
                 );
 
                 if ($result->success) {
-                    mtrace("  ✓ Report sent successfully (Report ID: {$result->report_id})");
-                    $success_count++;
+                    mtrace("  Report sent successfully (Report ID: {$result->report_id}).");
+                    $successcount++;
                 } else {
-                    mtrace("  ✗ Report failed: " . ($result->error ?? 'Unknown error'));
-                    $error_count++;
+                    mtrace("  Report failed: " . ($result->error ?? 'Unknown error'));
+                    $errorcount++;
                 }
 
             } catch (\Exception $e) {
-                mtrace("  ✗ Error processing course: " . $e->getMessage());
-                $error_count++;
+                mtrace("  Error processing course: " . $e->getMessage());
+                $errorcount++;
             }
 
-            // Small delay between courses to avoid overwhelming the API
+            // Small delay between courses to avoid overwhelming the API.
             sleep(2);
         }
 
         mtrace('Daily analytics task completed.');
-        mtrace("  Success: {$success_count}");
-        mtrace("  Errors: {$error_count}");
+        mtrace("  Success: {$successcount}");
+        mtrace("  Errors: {$errorcount}");
     }
 }

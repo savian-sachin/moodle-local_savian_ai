@@ -5,6 +5,22 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Save to knowledge base endpoint.
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 require_once(__DIR__ . '/../../config.php');
 
@@ -25,43 +41,43 @@ $PAGE->set_title('Save to Knowledge Base');
 $PAGE->set_heading($course->fullname);
 
 // Get stored generation data from cache.
-$savian_cache = cache::make('local_savian_ai', 'session_data');
-$save_data = $savian_cache->get('kb_save_data');
+$saviancache = cache::make('local_savian_ai', 'session_data');
+$savedata = $saviancache->get('kb_save_data');
 
-if (!$save_data) {
+if (!$savedata) {
     redirect(new moodle_url('/local/savian_ai/course.php', ['courseid' => $courseid]),
              get_string('no_course_data', 'local_savian_ai'), null, 'error');
 }
 
-$course_structure_json = $save_data['course_structure'];
-$course_structure = json_decode($course_structure_json);
-$course_title = $save_data['course_title'];
-$request_id = $save_data['request_id'];
-$results = $save_data['results'];
+$coursestructurejson = $savedata['course_structure'];
+$coursestructure = json_decode($coursestructurejson);
+$coursetitle = $savedata['course_title'];
+$requestid = $savedata['request_id'];
+$results = $savedata['results'];
 
 echo $OUTPUT->header();
 
-// Consistent header
+// Consistent header.
 echo local_savian_ai_render_header('Save to Knowledge Base', 'Contribute approved content to institutional knowledge');
 
-// Initialize API client
+// Initialize API client.
 $client = new \local_savian_ai\api\client();
 
-// Get instructor name
-$instructor_name = fullname($USER);
+// Get instructor name.
+$instructorname = fullname($USER);
 
-// Call Savian API
+// Call Savian API.
 try {
     $response = $client->save_approved_course_to_knowledge_base(
-        $course_structure,
-        $course_title,
+        $coursestructure,
+        $coursetitle,
         $courseid,
-        $instructor_name,
-        $request_id
+        $instructorname,
+        $requestid
     );
 
     if ($response->http_code === 200 && isset($response->success) && $response->success) {
-        // Success notification
+        // Success notification.
         echo html_writer::start_div('alert alert-success', ['style' => 'border-left: 4px solid #28a745;']);
         echo html_writer::tag('h4', '✅ Course Saved to Knowledge Base!');
         echo html_writer::tag('p', 'Your approved course content has been saved and is being processed.');
@@ -73,7 +89,7 @@ try {
 
         echo html_writer::start_tag('ul');
         echo html_writer::tag('li', '<strong>Processing:</strong> 2-3 minutes (chunking and embedding)');
-        echo html_writer::tag('li', '<strong>Document Name:</strong> "' . s($course_title) . ' (Instructor Approved)"');
+        echo html_writer::tag('li', '<strong>Document Name:</strong> "' . s($coursetitle) . ' (Instructor Approved)"');
         echo html_writer::tag('li', '<strong>Availability:</strong> Will appear in document list');
         echo html_writer::tag('li', '<strong>Usage:</strong> Future course generations can use this content');
         echo html_writer::tag('li', '<strong>Chat:</strong> Students can ask questions about this course');
@@ -88,9 +104,9 @@ try {
         echo html_writer::end_div();
 
         // Clear cache.
-        $savian_cache->delete('kb_save_data');
+        $saviancache->delete('kb_save_data');
 
-        // Go to course button
+        // Go to course button.
         echo html_writer::div(
             html_writer::link(
                 new moodle_url('/course/view.php', ['id' => $courseid]),
@@ -101,7 +117,7 @@ try {
         );
 
     } else {
-        // Error notification
+        // Error notification.
         $error = $response->error ?? $response->message ?? 'Unknown error';
         echo html_writer::start_div('alert alert-danger');
         echo html_writer::tag('h4', '❌ Save Failed');
@@ -118,7 +134,7 @@ try {
     echo html_writer::end_div();
 }
 
-// Footer
+// Footer.
 echo local_savian_ai_render_footer();
 
 echo $OUTPUT->footer();

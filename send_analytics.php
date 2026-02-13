@@ -5,12 +5,17 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * DEPRECATED: Redirects to analytics_reports.php
- *
- * This page has been merged into analytics_reports.php.
- * Keeping this redirect for backward compatibility.
+ * Send analytics endpoint.
  *
  * @package    local_savian_ai
  * @copyright  2026 Savian AI
@@ -22,10 +27,10 @@ require_once(__DIR__ . '/../../config.php');
 $courseid = required_param('courseid', PARAM_INT);
 $action = optional_param('action', '', PARAM_ALPHA);
 
-// Redirect to combined analytics dashboard
-$url_params = ['courseid' => $courseid];
+// Redirect to combined analytics dashboard.
+$urlparams = ['courseid' => $courseid];
 if (!empty($action)) {
-    $url_params['action'] = $action;
+    $urlparams['action'] = $action;
 }
 
-redirect(new moodle_url('/local/savian_ai/analytics_reports.php', $url_params));
+redirect(new moodle_url('/local/savian_ai/analytics_reports.php', $urlparams));

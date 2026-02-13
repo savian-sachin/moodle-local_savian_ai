@@ -5,6 +5,22 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Chat external service functions.
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 namespace local_savian_ai\external;
 
@@ -19,20 +35,20 @@ use external_single_structure;
 use external_multiple_structure;
 
 /**
- * External chat API - web services for AJAX communication
+ * External chat API - web services for AJAX communication.
  *
  * @package    local_savian_ai
- * @copyright  2025 Savian AI
+ * @copyright  2026 Savian AI
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class chat extends external_api {
 
     // ========================================
-    // SEND MESSAGE
+    // SEND MESSAGE.
     // ========================================
 
     /**
-     * Parameters for send_message
+     * Parameters for send_message.
      */
     public static function send_message_parameters() {
         return new external_function_parameters([
@@ -43,13 +59,13 @@ class chat extends external_api {
                 new external_value(PARAM_INT, 'Document ID'),
                 'Document IDs for context',
                 VALUE_DEFAULT,
-                []
-            )
+                [],
+            ),
         ]);
     }
 
     /**
-     * Send chat message
+     * Send chat message.
      */
     public static function send_message($message, $conversationid, $courseid, $documentids) {
         global $USER;
@@ -58,20 +74,20 @@ class chat extends external_api {
             'message' => $message,
             'conversationid' => $conversationid,
             'courseid' => $courseid,
-            'documentids' => $documentids
+            'documentids' => $documentids,
         ]);
 
-        // Verify capability
+        // Verify capability.
         $context = $params['courseid'] ? \context_course::instance($params['courseid']) : \context_system::instance();
         self::validate_context($context);
         require_capability('local/savian_ai:use', $context);
 
-        // Check for chat restrictions (students only, teachers bypass)
+        // Check for chat restrictions (students only, teachers bypass).
         if ($params['courseid'] > 0) {
-            $is_student = !has_capability('local/savian_ai:generate', $context);
-            if ($is_student) {
-                $restriction_manager = new \local_savian_ai\chat\restriction_manager();
-                $restriction = $restriction_manager->get_active_restriction($params['courseid'], $USER->id);
+            $isstudent = !has_capability('local/savian_ai:generate', $context);
+            if ($isstudent) {
+                $restrictionmanager = new \local_savian_ai\chat\restriction_manager();
+                $restriction = $restrictionmanager->get_active_restriction($params['courseid'], $USER->id);
                 if ($restriction) {
                     throw new \moodle_exception('chat_restricted', 'local_savian_ai', '', $restriction->message);
                 }
@@ -88,12 +104,12 @@ class chat extends external_api {
 
         return [
             'success' => true,
-            'data' => $result
+            'data' => $result,
         ];
     }
 
     /**
-     * Return structure for send_message
+     * Return structure for send_message.
      */
     public static function send_message_returns() {
         return new external_single_structure([
@@ -108,7 +124,7 @@ class chat extends external_api {
                     'sources' => new external_value(PARAM_RAW, 'Sources JSON', VALUE_OPTIONAL),
                     'feedback' => new external_value(PARAM_INT, 'Feedback', VALUE_OPTIONAL),
                     'timestamp' => new external_value(PARAM_INT, 'Timestamp'),
-                    'formatted_time' => new external_value(PARAM_TEXT, 'Formatted time')
+                    'formatted_time' => new external_value(PARAM_TEXT, 'Formatted time'),
                 ]),
                 'assistant_message' => new external_single_structure([
                     'id' => new external_value(PARAM_INT, 'Message ID'),
@@ -118,31 +134,31 @@ class chat extends external_api {
                     'sources' => new external_value(PARAM_RAW, 'Sources JSON', VALUE_OPTIONAL),
                     'feedback' => new external_value(PARAM_INT, 'Feedback', VALUE_OPTIONAL),
                     'timestamp' => new external_value(PARAM_INT, 'Timestamp'),
-                    'formatted_time' => new external_value(PARAM_TEXT, 'Formatted time')
-                ])
-            ])
+                    'formatted_time' => new external_value(PARAM_TEXT, 'Formatted time'),
+                ]),
+            ]),
         ]);
     }
 
     // ========================================
-    // GET CONVERSATION
+    // GET CONVERSATION.
     // ========================================
 
     /**
-     * Parameters for get_conversation
+     * Parameters for get_conversation.
      */
     public static function get_conversation_parameters() {
         return new external_function_parameters([
-            'conversationid' => new external_value(PARAM_INT, 'Conversation ID')
+            'conversationid' => new external_value(PARAM_INT, 'Conversation ID'),
         ]);
     }
 
     /**
-     * Get conversation with messages
+     * Get conversation with messages.
      */
     public static function get_conversation($conversationid) {
         $params = self::validate_parameters(self::get_conversation_parameters(), [
-            'conversationid' => $conversationid
+            'conversationid' => $conversationid,
         ]);
 
         $manager = new \local_savian_ai\chat\manager();
@@ -150,12 +166,12 @@ class chat extends external_api {
 
         return [
             'success' => true,
-            'data' => $result
+            'data' => $result,
         ];
     }
 
     /**
-     * Return structure for get_conversation
+     * Return structure for get_conversation.
      */
     public static function get_conversation_returns() {
         return new external_single_structure([
@@ -171,38 +187,38 @@ class chat extends external_api {
                         'sources' => new external_value(PARAM_RAW, 'Sources', VALUE_OPTIONAL),
                         'feedback' => new external_value(PARAM_INT, 'Feedback', VALUE_OPTIONAL),
                         'timestamp' => new external_value(PARAM_INT, 'Timestamp'),
-                        'formatted_time' => new external_value(PARAM_TEXT, 'Formatted time')
+                        'formatted_time' => new external_value(PARAM_TEXT, 'Formatted time'),
                     ]),
-                    'Messages'
-                )
-            ])
+                    'Messages',
+                ),
+            ]),
         ]);
     }
 
     // ========================================
-    // LIST CONVERSATIONS
+    // LIST CONVERSATIONS.
     // ========================================
 
     /**
-     * Parameters for list_conversations
+     * Parameters for list_conversations.
      */
     public static function list_conversations_parameters() {
         return new external_function_parameters([
-            'courseid' => new external_value(PARAM_INT, 'Course ID', VALUE_DEFAULT, 0)
+            'courseid' => new external_value(PARAM_INT, 'Course ID', VALUE_DEFAULT, 0),
         ]);
     }
 
     /**
-     * List user conversations
+     * List user conversations.
      */
     public static function list_conversations($courseid) {
         global $USER;
 
         $params = self::validate_parameters(self::list_conversations_parameters(), [
-            'courseid' => $courseid
+            'courseid' => $courseid,
         ]);
 
-        // Verify capability
+        // Verify capability.
         if ($params['courseid']) {
             $context = \context_course::instance($params['courseid']);
             self::validate_context($context);
@@ -215,15 +231,15 @@ class chat extends external_api {
         $manager = new \local_savian_ai\chat\manager();
         $conversations = $manager->list_user_conversations($params['courseid']);
 
-        // Ensure we return an array, even if empty
+        // Ensure we return an array, even if empty.
         return [
             'success' => true,
-            'data' => is_array($conversations) ? $conversations : []
+            'data' => is_array($conversations) ? $conversations : [],
         ];
     }
 
     /**
-     * Return structure for list_conversations
+     * Return structure for list_conversations.
      */
     public static function list_conversations_returns() {
         return new external_single_structure([
@@ -241,36 +257,36 @@ class chat extends external_api {
                     'last_message_at' => new external_value(PARAM_INT, 'Last message timestamp'),
                     'is_archived' => new external_value(PARAM_INT, 'Is archived'),
                     'timecreated' => new external_value(PARAM_INT, 'Created timestamp'),
-                    'timemodified' => new external_value(PARAM_INT, 'Modified timestamp')
+                    'timemodified' => new external_value(PARAM_INT, 'Modified timestamp'),
                 ]),
-                'List of conversations'
-            )
+                'List of conversations',
+            ),
         ]);
     }
 
     // ========================================
-    // SUBMIT FEEDBACK
+    // SUBMIT FEEDBACK.
     // ========================================
 
     /**
-     * Parameters for submit_feedback
+     * Parameters for submit_feedback.
      */
     public static function submit_feedback_parameters() {
         return new external_function_parameters([
             'messageid' => new external_value(PARAM_INT, 'Message ID'),
             'feedback' => new external_value(PARAM_INT, 'Feedback (1 or -1)'),
-            'comment' => new external_value(PARAM_TEXT, 'Comment', VALUE_DEFAULT, '')
+            'comment' => new external_value(PARAM_TEXT, 'Comment', VALUE_DEFAULT, ''),
         ]);
     }
 
     /**
-     * Submit feedback
+     * Submit feedback.
      */
     public static function submit_feedback($messageid, $feedback, $comment) {
         $params = self::validate_parameters(self::submit_feedback_parameters(), [
             'messageid' => $messageid,
             'feedback' => $feedback,
-            'comment' => $comment
+            'comment' => $comment,
         ]);
 
         $manager = new \local_savian_ai\chat\manager();
@@ -282,43 +298,43 @@ class chat extends external_api {
 
         return [
             'success' => true,
-            'data' => $result
+            'data' => $result,
         ];
     }
 
     /**
-     * Return structure for submit_feedback
+     * Return structure for submit_feedback.
      */
     public static function submit_feedback_returns() {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Success status'),
             'data' => new external_single_structure([
-                'success' => new external_value(PARAM_BOOL, 'Operation success')
-            ])
+                'success' => new external_value(PARAM_BOOL, 'Operation success'),
+            ]),
         ]);
     }
 
     // ========================================
-    // SAVE WIDGET STATE
+    // SAVE WIDGET STATE.
     // ========================================
 
     /**
-     * Parameters for save_widget_state
+     * Parameters for save_widget_state.
      */
     public static function save_widget_state_parameters() {
         return new external_function_parameters([
             'position' => new external_value(PARAM_TEXT, 'Widget position (bottom-right, bottom-left)'),
-            'minimized' => new external_value(PARAM_INT, 'Minimized state (0 or 1)')
+            'minimized' => new external_value(PARAM_INT, 'Minimized state (0 or 1)'),
         ]);
     }
 
     /**
-     * Save widget state
+     * Save widget state.
      */
     public static function save_widget_state($position, $minimized) {
         $params = self::validate_parameters(self::save_widget_state_parameters(), [
             'position' => $position,
-            'minimized' => $minimized
+            'minimized' => $minimized,
         ]);
 
         $manager = new \local_savian_ai\chat\manager();
@@ -329,75 +345,75 @@ class chat extends external_api {
 
         return [
             'success' => true,
-            'data' => $result
+            'data' => $result,
         ];
     }
 
     /**
-     * Return structure for save_widget_state
+     * Return structure for save_widget_state.
      */
     public static function save_widget_state_returns() {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Success status'),
             'data' => new external_single_structure([
-                'success' => new external_value(PARAM_BOOL, 'Operation success')
-            ])
+                'success' => new external_value(PARAM_BOOL, 'Operation success'),
+            ]),
         ]);
     }
 
     // ========================================
-    // GET COURSE DOCUMENTS
+    // GET COURSE DOCUMENTS.
     // ========================================
 
     /**
-     * Parameters for get_course_documents
+     * Parameters for get_course_documents.
      */
     public static function get_course_documents_parameters() {
         return new external_function_parameters([
-            'courseid' => new external_value(PARAM_INT, 'Course ID')
+            'courseid' => new external_value(PARAM_INT, 'Course ID'),
         ]);
     }
 
     /**
-     * Get course documents for selection in chat
+     * Get course documents for selection in chat.
      */
     public static function get_course_documents($courseid) {
         global $DB;
 
         $params = self::validate_parameters(self::get_course_documents_parameters(), [
-            'courseid' => $courseid
+            'courseid' => $courseid,
         ]);
 
-        // Verify capability
+        // Verify capability.
         $context = \context_course::instance($params['courseid']);
         self::validate_context($context);
         require_capability('local/savian_ai:generate', $context);
 
-        // Get completed documents for this course
+        // Get completed documents for this course.
         $documents = $DB->get_records('local_savian_documents', [
             'course_id' => $params['courseid'],
             'is_active' => 1,
-            'status' => 'completed'
+            'status' => 'completed',
         ], 'title ASC', 'savian_doc_id, title, subject_area, chunk_count');
 
-        $docs_array = [];
+        $docsarray = [];
         foreach ($documents as $doc) {
-            $docs_array[] = [
+            $docsarray[] = [
                 'id' => $doc->savian_doc_id,
                 'title' => $doc->title,
                 'subject_area' => $doc->subject_area ?? '',
-                'chunk_count' => $doc->chunk_count
+                'chunk_count' => $doc->chunk_count,
             ];
         }
 
         return [
             'success' => true,
-            'documents' => $docs_array
+            'documents' => $docsarray,
         ];
     }
 
     /**
-     * Return structure for get_course_documents
+     * Return structure for get_course_documents.
      */
     public static function get_course_documents_returns() {
         return new external_single_structure([
@@ -407,10 +423,10 @@ class chat extends external_api {
                     'id' => new external_value(PARAM_INT, 'Document ID'),
                     'title' => new external_value(PARAM_TEXT, 'Title'),
                     'subject_area' => new external_value(PARAM_TEXT, 'Subject area'),
-                    'chunk_count' => new external_value(PARAM_INT, 'Chunk count')
+                    'chunk_count' => new external_value(PARAM_INT, 'Chunk count'),
                 ]),
-                'List of documents'
-            )
+                'List of documents',
+            ),
         ]);
     }
 }

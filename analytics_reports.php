@@ -5,13 +5,29 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Analytics reports page.
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 require_once(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot . '/local/savian_ai/classes/analytics/report_builder.php');
 
 require_login();
 
-$savian_cache = cache::make('local_savian_ai', 'session_data');
+$saviancache = cache::make('local_savian_ai', 'session_data');
 
 $courseid = required_param('courseid', PARAM_INT);
 $action = optional_param('action', '', PARAM_ALPHA);
@@ -27,91 +43,91 @@ $PAGE->set_course($course);
 $PAGE->set_title(get_string('learning_analytics', 'local_savian_ai'));
 $PAGE->set_heading($course->fullname);
 
-// Handle form submission (from send form)
-$report_result = null;
+// Handle form submission (from send form).
+$reportresult = null;
 if ($action === 'send' && confirm_sesskey()) {
-    $date_from = optional_param('date_from', 0, PARAM_INT);
-    $date_to = optional_param('date_to', time(), PARAM_INT);
+    $datefrom = optional_param('date_from', 0, PARAM_INT);
+    $dateto = optional_param('date_to', time(), PARAM_INT);
 
     try {
         $builder = new \local_savian_ai\analytics\report_builder();
-        $report_result = $builder->build_and_send_report(
+        $reportresult = $builder->build_and_send_report(
             $courseid,
             'on_demand',
             'manual',
-            $date_from,
-            $date_to,
+            $datefrom,
+            $dateto,
             $USER->id
         );
 
-        // Check if async processing (Django processing started)
-        if ($report_result->success && !isset($report_result->insights)) {
-            // Async processing - use /latest/ endpoint to poll
-            $savian_cache->set('analytics_polling_course', $courseid);
-            $savian_cache->set('analytics_polling_started', time());
+        // Check if async processing (Django processing started).
+        if ($reportresult->success && !isset($reportresult->insights)) {
+            // Async processing - use /latest/ endpoint to poll.
+            $saviancache->set('analytics_polling_course', $courseid);
+            $saviancache->set('analytics_polling_started', time());
 
             redirect(new moodle_url('/local/savian_ai/analytics_reports.php', [
                 'courseid' => $courseid,
-                'action' => 'poll'
+                'action' => 'poll',
             ]), 'Generating analytics...', null, 'info');
         }
     } catch (Exception $e) {
-        $report_result = (object)[
+        $reportresult = (object)[
             'success' => false,
-            'error' => $e->getMessage()
+            'error' => $e->getMessage(),
         ];
     }
 }
 
-// Handle polling for async processing
-if ($action === 'poll' && $savian_cache->get('analytics_polling_course')) {
-    $polling_start_time = $savian_cache->get('analytics_polling_started') ?: time();
+// Handle polling for async processing.
+if ($action === 'poll' && $saviancache->get('analytics_polling_course')) {
+    $pollingstarttime = $saviancache->get('analytics_polling_started') ?: time();
 
-    // Use /latest/ endpoint
+    // Use /latest/ endpoint.
     $client = new \local_savian_ai\api\client();
-    $latest_response = $client->get_latest_analytics($courseid);
+    $latestresponse = $client->get_latest_analytics($courseid);
 
-    if ($latest_response->http_code === 200) {
-        // Check if report is completed and has insights
-        if (isset($latest_response->status) && $latest_response->status === 'completed' && isset($latest_response->insights)) {
-            // Report is ready!
-            $moodle_report = $DB->get_record_sql(
+    if ($latestresponse->http_code === 200) {
+        // Check if report is completed and has insights.
+        if (isset($latestresponse->status) && $latestresponse->status === 'completed' && isset($latestresponse->insights)) {
+            // Report is ready.
+            $moodlereport = $DB->get_record_sql(
                 "SELECT * FROM {local_savian_analytics_reports}
                  WHERE course_id = ? AND status IN ('pending', 'sending', 'sent')
                  ORDER BY timecreated DESC LIMIT 1",
                 [$courseid]
             );
 
-            // Update Moodle report with Django results
-            if ($moodle_report) {
+            // Update Moodle report with Django results.
+            if ($moodlereport) {
                 $update = new stdClass();
-                $update->id = $moodle_report->id;
+                $update->id = $moodlereport->id;
                 $update->status = 'sent';
-                $update->api_response = json_encode($latest_response);
-                $update->student_count = $latest_response->student_count ?? $moodle_report->student_count;
+                $update->api_response = json_encode($latestresponse);
+                $update->student_count = $latestresponse->student_count ?? $moodlereport->student_count;
                 $update->timemodified = time();
                 $DB->update_record('local_savian_analytics_reports', $update);
             }
 
-            $savian_cache->delete('analytics_polling_course');
-            $savian_cache->delete('analytics_polling_started');
+            $saviancache->delete('analytics_polling_course');
+            $saviancache->delete('analytics_polling_started');
 
             redirect(new moodle_url('/local/savian_ai/analytics_reports.php', [
                 'courseid' => $courseid
             ]), 'Analytics insights generated! Scroll down to view.', null, 'success');
         }
-    } else if ($latest_response->http_code >= 400) {
-        $savian_cache->delete('analytics_polling_course');
-        $savian_cache->delete('analytics_polling_started');
+    } else if ($latestresponse->http_code >= 400) {
+        $saviancache->delete('analytics_polling_course');
+        $saviancache->delete('analytics_polling_started');
 
         redirect(new moodle_url('/local/savian_ai/analytics_reports.php', ['courseid' => $courseid]),
-                 'Error retrieving analytics: ' . ($latest_response->error ?? 'Unknown error'), null, 'error');
+                 'Error retrieving analytics: ' . ($latestresponse->error ?? 'Unknown error'), null, 'error');
     }
 
-    // Check timeout (5 minutes max)
-    if (time() - $polling_start_time > 300) {
-        $savian_cache->delete('analytics_polling_course');
-        $savian_cache->delete('analytics_polling_started');
+    // Check timeout (5 minutes max).
+    if (time() - $pollingstarttime > 300) {
+        $saviancache->delete('analytics_polling_course');
+        $saviancache->delete('analytics_polling_started');
 
         redirect(new moodle_url('/local/savian_ai/analytics_reports.php', ['courseid' => $courseid]),
                  'Analytics generation timeout. Please try again or contact support.', null, 'warning');
@@ -120,7 +136,7 @@ if ($action === 'poll' && $savian_cache->get('analytics_polling_course')) {
 
 echo $OUTPUT->header();
 
-// Define JavaScript function at the top (before any onclick events)
+// Define JavaScript function at the top (before any onclick events).
 $PAGE->requires->js_amd_inline("
 require(['jquery'], function($) {
     window.toggleInsights = function(id) {
@@ -136,16 +152,16 @@ require(['jquery'], function($) {
 });
 ");
 
-// Consistent header
+// Consistent header.
 echo local_savian_ai_render_header('Learning Analytics Dashboard', 'Generate new reports and view insights');
 
-// Show polling status with progress (if action=poll)
-if ($action === 'poll' && $savian_cache->get('analytics_polling_course')) {
-    $polling_start_time = $savian_cache->get('analytics_polling_started') ?: time();
-    $elapsed_seconds = time() - $polling_start_time;
+// Show polling status with progress (if action=poll).
+if ($action === 'poll' && $saviancache->get('analytics_polling_course')) {
+    $pollingstarttime = $saviancache->get('analytics_polling_started') ?: time();
+    $elapsedseconds = time() - $pollingstarttime;
 
-    // Get student count
-    $student_count = $DB->count_records_sql(
+    // Get student count.
+    $studentcount = $DB->count_records_sql(
         "SELECT COUNT(DISTINCT ue.userid)
          FROM {user_enrolments} ue
          JOIN {enrol} e ON e.id = ue.enrolid
@@ -155,34 +171,34 @@ if ($action === 'poll' && $savian_cache->get('analytics_polling_course')) {
         [$courseid]
     );
 
-    // Try to get progress from Django /latest/ endpoint
+    // Try to get progress from Django /latest/ endpoint.
     $client = new \local_savian_ai\api\client();
-    $latest_response = $client->get_latest_analytics($courseid);
+    $latestresponse = $client->get_latest_analytics($courseid);
 
-    $progress_percent = 0;
-    $status_message = 'Initializing AI analysis...';
-    $students_processed = 0;
+    $progresspercent = 0;
+    $statusmessage = 'Initializing AI analysis...';
+    $studentsprocessed = 0;
 
-    if ($latest_response->http_code === 200 && isset($latest_response->status)) {
-        // Calculate progress based on status
-        switch ($latest_response->status) {
+    if ($latestresponse->http_code === 200 && isset($latestresponse->status)) {
+        // Calculate progress based on status.
+        switch ($latestresponse->status) {
             case 'pending':
-                $progress_percent = 5;
-                $status_message = 'Queued for processing...';
+                $progresspercent = 5;
+                $statusmessage = 'Queued for processing...';
                 break;
             case 'processing':
-                // Estimate based on elapsed time (3-4 min for 50 students = ~4-5 sec/student)
-                $estimated_total_time = $student_count * 4.5; // seconds per student
-                $progress_percent = min(95, round(($elapsed_seconds / $estimated_total_time) * 100));
+                // Estimate based on elapsed time (3-4 min for 50 students = ~4-5 sec/student).
+                $estimatedtotaltime = $studentcount * 4.5; // Seconds per student.
+                $progresspercent = min(95, round(($elapsedseconds / $estimatedtotaltime) * 100));
 
-                // Estimate students processed
-                $students_processed = min($student_count, floor($elapsed_seconds / 4.5));
+                // Estimate students processed.
+                $studentsprocessed = min($studentcount, floor($elapsedseconds / 4.5));
 
-                $status_message = "Analyzing student {$students_processed}/{$student_count}...";
+                $statusmessage = "Analyzing student {$studentsprocessed}/{$studentcount}...";
                 break;
             case 'completed':
-                $progress_percent = 100;
-                $status_message = 'Analysis complete!';
+                $progresspercent = 100;
+                $statusmessage = 'Analysis complete!';
                 break;
         }
     }
@@ -190,58 +206,58 @@ if ($action === 'poll' && $savian_cache->get('analytics_polling_course')) {
     echo html_writer::start_div('card mt-4 mb-4');
     echo html_writer::start_div('card-body text-center p-4');
 
-    // Spinner
+    // Spinner.
     echo html_writer::tag('div', '', [
         'class' => 'spinner-border text-primary mb-3',
         'role' => 'status',
-        'style' => 'width: 4rem; height: 4rem;'
+        'style' => 'width: 4rem; height: 4rem;',
     ]);
 
-    // Main heading
+    // Main heading.
     echo html_writer::tag('h4', 'AI-Powered Analytics Processing');
 
-    // Progress bar
+    // Progress bar.
     echo html_writer::start_div('progress mb-3', ['style' => 'height: 25px;']);
     echo html_writer::div(
-        $progress_percent . '%',
+        $progresspercent . '%',
         'progress-bar bg-primary progress-bar-striped progress-bar-animated',
         [
             'role' => 'progressbar',
-            'style' => "width: {$progress_percent}%",
-            'aria-valuenow' => $progress_percent,
+            'style' => "width: {$progresspercent}%",
+            'aria-valuenow' => $progresspercent,
             'aria-valuemin' => '0',
-            'aria-valuemax' => '100'
+            'aria-valuemax' => '100',
         ]
     );
     echo html_writer::end_div();
 
-    // Status message
-    echo html_writer::tag('p', $status_message, ['class' => 'text-primary font-weight-bold mb-2']);
+    // Status message.
+    echo html_writer::tag('p', $statusmessage, ['class' => 'text-primary font-weight-bold mb-2']);
 
-    // Student progress
-    if ($students_processed > 0) {
+    // Student progress.
+    if ($studentsprocessed > 0) {
         echo html_writer::tag('p',
-            "Students Analyzed: {$students_processed} / {$student_count}",
+            "Students Analyzed: {$studentsprocessed} / {$studentcount}",
             ['class' => 'text-muted']
         );
     }
 
-    // Time elapsed
-    $minutes = floor($elapsed_seconds / 60);
-    $seconds = $elapsed_seconds % 60;
+    // Time elapsed.
+    $minutes = floor($elapsedseconds / 60);
+    $seconds = $elapsedseconds % 60;
     echo html_writer::tag('p',
         sprintf('Time Elapsed: %dm %ds', $minutes, $seconds),
         ['class' => 'text-muted small']
     );
 
-    // Estimated total time
-    $estimated_total_minutes = ceil(($student_count * 4.5) / 60);
+    // Estimated total time.
+    $estimatedtotalminutes = ceil(($studentcount * 4.5) / 60);
     echo html_writer::tag('p',
-        "⏱️ Estimated Total Time: {$estimated_total_minutes} minutes ({$student_count} students × ~4-5 sec each)",
+        "⏱️ Estimated Total Time: {$estimatedtotalminutes} minutes ({$studentcount} students × ~4-5 sec each)",
         ['class' => 'badge badge-info']
     );
 
-    // What's happening
+    // What is happening.
     echo html_writer::start_div('mt-4 p-3 bg-light rounded');
     echo html_writer::tag('small', '<strong>What\'s happening:</strong>', ['class' => 'text-muted']);
     echo html_writer::start_tag('ul', ['class' => 'text-left text-muted small mt-2 mb-0']);
@@ -253,7 +269,7 @@ if ($action === 'poll' && $savian_cache->get('analytics_polling_course')) {
     echo html_writer::end_tag('ul');
     echo html_writer::end_div();
 
-    // Auto-refresh message
+    // Auto-refresh message.
     echo html_writer::tag('p',
         'This page will automatically refresh every 5 seconds.',
         ['class' => 'text-muted small mt-3']
@@ -262,7 +278,7 @@ if ($action === 'poll' && $savian_cache->get('analytics_polling_course')) {
     echo html_writer::end_div();
     echo html_writer::end_div();
 
-    // Auto-refresh every 5 seconds
+    // Auto-refresh every 5 seconds.
     $PAGE->requires->js_amd_inline("
         setTimeout(function() {
             window.location.reload();
@@ -270,7 +286,7 @@ if ($action === 'poll' && $savian_cache->get('analytics_polling_course')) {
     ");
 }
 
-// Show generate form (if not polling)
+// Show generate form (if not polling).
 if ($action !== 'poll') {
     echo html_writer::start_div('card mb-4');
     echo html_writer::div('📊 Generate New Analytics Report', 'card-header bg-primary text-white');
@@ -281,8 +297,8 @@ if ($action !== 'poll') {
         'performance, and identify at-risk students who need intervention.'
     );
 
-    // Check for enrolled students
-    $student_count = $DB->count_records_sql(
+    // Check for enrolled students.
+    $studentcount = $DB->count_records_sql(
         "SELECT COUNT(DISTINCT ue.userid)
          FROM {user_enrolments} ue
          JOIN {enrol} e ON e.id = ue.enrolid
@@ -292,7 +308,7 @@ if ($action !== 'poll') {
         [$courseid]
     );
 
-    if ($student_count == 0) {
+    if ($studentcount == 0) {
         echo html_writer::start_div('alert alert-warning mt-3');
         echo html_writer::tag('strong', 'No Students Enrolled');
         echo html_writer::tag('p', 'There are no students enrolled in this course. Please enroll students before generating analytics.');
@@ -300,34 +316,34 @@ if ($action !== 'poll') {
     } else {
         echo html_writer::start_div('alert alert-info mt-3');
         echo html_writer::tag('p',
-            '<strong>' . $student_count . ' students</strong> enrolled in this course will be analyzed.'
+            '<strong>' . $studentcount . ' students</strong> enrolled in this course will be analyzed.'
         );
         echo html_writer::end_div();
 
-        // Form
+        // Form.
         echo html_writer::start_tag('form', [
             'method' => 'post',
             'action' => new moodle_url('/local/savian_ai/analytics_reports.php', ['courseid' => $courseid]),
-            'class' => 'mt-3'
+            'class' => 'mt-3',
         ]);
 
         echo html_writer::empty_tag('input', [
             'type' => 'hidden',
             'name' => 'courseid',
-            'value' => $courseid
+            'value' => $courseid,
         ]);
         echo html_writer::empty_tag('input', [
             'type' => 'hidden',
             'name' => 'action',
-            'value' => 'send'
+            'value' => 'send',
         ]);
         echo html_writer::empty_tag('input', [
             'type' => 'hidden',
             'name' => 'sesskey',
-            'value' => sesskey()
+            'value' => sesskey(),
         ]);
 
-        // Date range selector
+        // Date range selector.
         echo html_writer::start_div('form-group');
         echo html_writer::tag('label', 'Report Period');
         echo html_writer::start_tag('select', ['name' => 'date_from', 'class' => 'form-control']);
@@ -342,7 +358,7 @@ if ($action !== 'poll') {
         );
         echo html_writer::end_div();
 
-        // Submit button
+        // Submit button.
         echo html_writer::start_div('text-center mt-4');
         echo html_writer::tag('button',
             '📊 Generate Analytics Report',
@@ -357,20 +373,20 @@ if ($action !== 'poll') {
     echo html_writer::end_div();
 }
 
-// Divider between generate and history
+// Divider between generate and history.
 if ($action !== 'poll') {
     echo html_writer::tag('hr', '', ['class' => 'my-4']);
     echo html_writer::tag('h3', 'Report History', ['class' => 'mt-4 mb-3']);
 }
 
-// Fetch latest report from Django API and sync
+// Fetch latest report from Django API and sync.
 $client = new \local_savian_ai\api\client();
-$latest_response = $client->get_latest_analytics($courseid);
+$latestresponse = $client->get_latest_analytics($courseid);
 
-// Sync latest Django report with Moodle database
-if ($latest_response->http_code === 200 && isset($latest_response->insights) && $latest_response->status === 'completed') {
-    // Get most recent Moodle report without insights
-    $moodle_report = $DB->get_record_sql(
+// Sync latest Django report with Moodle database.
+if ($latestresponse->http_code === 200 && isset($latestresponse->insights) && $latestresponse->status === 'completed') {
+    // Get most recent Moodle report without insights.
+    $moodlereport = $DB->get_record_sql(
         "SELECT * FROM {local_savian_analytics_reports}
          WHERE course_id = ?
          ORDER BY timecreated DESC
@@ -378,25 +394,25 @@ if ($latest_response->http_code === 200 && isset($latest_response->insights) && 
         [$courseid]
     );
 
-    if ($moodle_report) {
-        // Check if this report already has insights
-        $existing_response = !empty($moodle_report->api_response) ? json_decode($moodle_report->api_response) : null;
-        $has_insights = $existing_response && isset($existing_response->insights);
+    if ($moodlereport) {
+        // Check if this report already has insights.
+        $existingresponse = !empty($moodlereport->api_response) ? json_decode($moodlereport->api_response) : null;
+        $hasinsights = $existingresponse && isset($existingresponse->insights);
 
-        if (!$has_insights) {
-            // Update with Django results
+        if (!$hasinsights) {
+            // Update with Django results.
             $update = new stdClass();
-            $update->id = $moodle_report->id;
+            $update->id = $moodlereport->id;
             $update->status = 'sent';
-            $update->api_response = json_encode($latest_response);
-            $update->student_count = $latest_response->student_count ?? $moodle_report->student_count;
+            $update->api_response = json_encode($latestresponse);
+            $update->student_count = $latestresponse->student_count ?? $moodlereport->student_count;
             $update->timemodified = time();
             $DB->update_record('local_savian_analytics_reports', $update);
         }
     }
 }
 
-// Get reports from Moodle database (now synced)
+// Get reports from Moodle database (now synced).
 $reports = $DB->get_records('local_savian_analytics_reports',
     ['course_id' => $courseid],
     'timecreated DESC'
@@ -425,7 +441,7 @@ if (empty($reports)) {
     );
     echo html_writer::start_div('card-body p-0');
 
-    // Reports table
+    // Reports table.
     echo html_writer::start_tag('table', ['class' => 'table table-hover mb-0']);
     echo html_writer::start_tag('thead', ['class' => 'thead-light']);
     echo html_writer::start_tag('tr');
@@ -441,108 +457,108 @@ if (empty($reports)) {
     foreach ($reports as $report) {
         echo html_writer::start_tag('tr');
 
-        // Date
+        // Date.
         echo html_writer::start_tag('td');
         echo html_writer::tag('div', userdate($report->timecreated, '%d %b %Y'));
         echo html_writer::tag('small', userdate($report->timecreated, '%H:%M'), ['class' => 'text-muted d-block']);
         echo html_writer::end_tag('td');
 
-        // Type
+        // Type.
         echo html_writer::start_tag('td');
-        $type_badge = '';
+        $typebadge = '';
         switch ($report->report_type) {
             case 'on_demand':
-                $type_badge = 'primary';
+                $typebadge = 'primary';
                 break;
             case 'scheduled':
-                $type_badge = 'info';
+                $typebadge = 'info';
                 break;
             case 'real_time':
-                $type_badge = 'warning';
+                $typebadge = 'warning';
                 break;
             case 'end_of_course':
-                $type_badge = 'success';
+                $typebadge = 'success';
                 break;
         }
         echo html_writer::tag('span',
             ucfirst(str_replace('_', ' ', $report->report_type)),
-            ['class' => "badge badge-{$type_badge}"]
+            ['class' => "badge badge-{$typebadge}"]
         );
         echo html_writer::end_tag('td');
 
-        // Students
+        // Students.
         echo html_writer::tag('td', $report->student_count . ' students');
 
-        // Status - check if we have insights or still processing
+        // Status - check if we have insights or still processing.
         echo html_writer::start_tag('td');
-        $status_class = '';
-        $status_icon = '';
-        $status_text = '';
-        $is_processing = false;
+        $statusclass = '';
+        $statusicon = '';
+        $statustext = '';
+        $isprocessing = false;
 
         if ($report->status == 'sent') {
-            // Check if we actually have insights
+            // Check if we actually have insights.
             $response = !empty($report->api_response) ? json_decode($report->api_response) : null;
 
             if ($response && isset($response->insights)) {
-                // Completed with insights
-                $status_class = 'success';
-                $status_icon = '✓';
-                $status_text = 'Completed';
+                // Completed with insights.
+                $statusclass = 'success';
+                $statusicon = '✓';
+                $statustext = 'Completed';
             } else {
-                // Sent but still processing (async)
-                $status_class = 'info';
-                $status_icon = '⟳';
-                $status_text = 'Processing';
-                $is_processing = true;
+                // Sent but still processing (async).
+                $statusclass = 'info';
+                $statusicon = '⟳';
+                $statustext = 'Processing';
+                $isprocessing = true;
             }
         } else {
             switch ($report->status) {
                 case 'sending':
-                    $status_class = 'info';
-                    $status_icon = '⟳';
-                    $status_text = 'Sending';
-                    $is_processing = true;
+                    $statusclass = 'info';
+                    $statusicon = '⟳';
+                    $statustext = 'Sending';
+                    $isprocessing = true;
                     break;
                 case 'pending':
-                    $status_class = 'warning';
-                    $status_icon = '⏱';
-                    $status_text = 'Pending';
-                    $is_processing = true;
+                    $statusclass = 'warning';
+                    $statusicon = '⏱';
+                    $statustext = 'Pending';
+                    $isprocessing = true;
                     break;
                 case 'failed':
-                    $status_class = 'danger';
-                    $status_icon = '✗';
-                    $status_text = 'Failed';
+                    $statusclass = 'danger';
+                    $statusicon = '✗';
+                    $statustext = 'Failed';
                     break;
                 default:
-                    $status_class = 'secondary';
-                    $status_icon = '?';
-                    $status_text = ucfirst($report->status);
+                    $statusclass = 'secondary';
+                    $statusicon = '?';
+                    $statustext = ucfirst($report->status);
             }
         }
 
         echo html_writer::tag('span',
-            $status_icon . ' ' . $status_text,
-            ['class' => "badge badge-{$status_class}", 'id' => "status-badge-{$report->id}"]
+            $statusicon . ' ' . $statustext,
+            ['class' => "badge badge-{$statusclass}", 'id' => "status-badge-{$report->id}"]
         );
         echo html_writer::end_tag('td');
 
-        // Actions
+        // Actions.
         echo html_writer::start_tag('td');
 
         if ($report->status == 'sent' && !empty($report->api_response)) {
             $response = json_decode($report->api_response);
             if ($response && isset($response->insights)) {
-                // View insights button
+                // View insights button.
                 echo html_writer::start_tag('button', [
                     'class' => 'btn btn-sm btn-outline-primary mr-1',
-                    'onclick' => "toggleInsights('insights-{$report->id}')"
+                    'onclick' => "toggleInsights('insights-{$report->id}')",
                 ]);
                 echo 'View';
                 echo html_writer::end_tag('button');
 
-                // CSV export button
+                // CSV export button.
                 echo html_writer::link(
                     new moodle_url('/local/savian_ai/export_analytics_csv.php', ['reportid' => $report->id]),
                     '📥',
@@ -550,28 +566,28 @@ if (empty($reports)) {
                 );
             }
         } else if ($report->status == 'failed') {
-            // Show error
+            // Show error.
             echo html_writer::tag('small', substr($report->error_message, 0, 50) . '...', ['class' => 'text-danger']);
         }
 
         echo html_writer::end_tag('td');
         echo html_writer::end_tag('tr');
 
-        // Insights row (hidden by default)
+        // Insights row (hidden by default).
         if ($report->status == 'sent' && !empty($report->api_response)) {
             $response = json_decode($report->api_response);
             if ($response && isset($response->insights)) {
                 echo html_writer::start_tag('tr', [
                     'id' => "insights-{$report->id}",
-                    'style' => 'display: none;'
+                    'style' => 'display: none;',
                 ]);
                 echo html_writer::start_tag('td', ['colspan' => '5']);
                 echo html_writer::start_div('p-4 bg-white border');
 
                 $insights = $response->insights;
 
-                // Get enrolled students for reverse lookup
-                $enrolled_students = $DB->get_records_sql(
+                // Get enrolled students for reverse lookup.
+                $enrolledstudents = $DB->get_records_sql(
                     "SELECT DISTINCT u.id, u.firstname, u.lastname, u.email,
                             u.firstnamephonetic, u.lastnamephonetic, u.middlename, u.alternatename
                      FROM {user} u
@@ -583,12 +599,12 @@ if (empty($reports)) {
                     [$courseid]
                 );
 
-                $student_ids = array_keys($enrolled_students);
+                $studentids = array_keys($enrolledstudents);
 
-                // Create anonymizer for reverse lookup
+                // Create anonymizer for reverse lookup.
                 $anonymizer = new \local_savian_ai\analytics\anonymizer();
 
-                // Report metadata header
+                // Report metadata header.
                 echo html_writer::start_div('mb-4 pb-3 border-bottom');
                 echo html_writer::tag('h4', '📊 Detailed Analytics Report');
                 echo html_writer::tag('p',
@@ -599,49 +615,49 @@ if (empty($reports)) {
                 );
                 echo html_writer::end_div();
 
-                // At-Risk Students Section
+                // At-Risk Students Section.
                 if (isset($insights->at_risk_students) && !empty($insights->at_risk_students)) {
                     echo html_writer::tag('h5', '🚨 At-Risk Students (' . count($insights->at_risk_students) . ')', ['class' => 'text-danger mb-3']);
 
-                    // Show first 5 at-risk students, or all if ≤ 5
-                    $students_to_show = array_slice($insights->at_risk_students, 0, 5);
-                    $remaining_count = count($insights->at_risk_students) - count($students_to_show);
+                    // Show first 5 at-risk students, or all if 5 or fewer.
+                    $studentstoshow = array_slice($insights->at_risk_students, 0, 5);
+                    $remainingcount = count($insights->at_risk_students) - count($studentstoshow);
 
-                    foreach ($students_to_show as $student) {
-                        // Reverse lookup to find actual student
-                        $user_id = $anonymizer->reverse_lookup($student->anon_id, $student_ids);
-                        $user = $user_id ? $enrolled_students[$user_id] : null;
+                    foreach ($studentstoshow as $student) {
+                        // Reverse lookup to find actual student.
+                        $userid = $anonymizer->reverse_lookup($student->anon_id, $studentids);
+                        $user = $userid ? $enrolledstudents[$userid] : null;
 
                         echo html_writer::start_div('card mb-2 border-danger');
                         echo html_writer::start_div('card-body p-2');
 
-                        // Risk badge
-                        $badge_class = $student->risk_level == 'high' ? 'danger' : ($student->risk_level == 'medium' ? 'warning' : 'info');
+                        // Risk badge.
+                        $badgeclass = $student->risk_level == 'high' ? 'danger' : ($student->risk_level == 'medium' ? 'warning' : 'info');
                         echo html_writer::tag('span',
                             strtoupper($student->risk_level) . ' RISK',
-                            ['class' => "badge badge-{$badge_class} float-right"]
+                            ['class' => "badge badge-{$badgeclass} float-right"]
                         );
 
-                        // Show actual student name if found
+                        // Show actual student name if found.
                         if ($user) {
-                            $student_name = fullname($user);
-                            $profile_url = new moodle_url('/user/view.php', ['id' => $user->id, 'course' => $courseid]);
+                            $studentname = fullname($user);
+                            $profileurl = new moodle_url('/user/view.php', ['id' => $user->id, 'course' => $courseid]);
 
-                            echo html_writer::link($profile_url, $student_name, ['class' => 'font-weight-bold small', 'target' => '_blank']);
+                            echo html_writer::link($profileurl, $studentname, ['class' => 'font-weight-bold small', 'target' => '_blank']);
                             echo html_writer::empty_tag('br');
                             echo html_writer::tag('small', $user->email, ['class' => 'text-muted']);
                             echo html_writer::tag('span', ' | Risk Score: ' . round($student->risk_score * 100) . '%', ['class' => 'text-muted small']);
                         } else {
-                            // Fallback if reverse lookup fails
+                            // Fallback if reverse lookup fails.
                             echo html_writer::tag('strong', 'Student ' . substr($student->anon_id, 0, 12) . '...', ['class' => 'small']);
                             echo html_writer::tag('span', ' Risk Score: ' . round($student->risk_score * 100) . '%', ['class' => 'text-muted small']);
                         }
 
-                        // Risk factors (show first 3)
+                        // Risk factors (show first 3).
                         if (!empty($student->risk_factors)) {
                             echo html_writer::start_tag('ul', ['class' => 'small mb-1 mt-1']);
-                            $factors_to_show = array_slice($student->risk_factors, 0, 3);
-                            foreach ($factors_to_show as $factor) {
+                            $factorstoshow = array_slice($student->risk_factors, 0, 3);
+                            foreach ($factorstoshow as $factor) {
                                 echo html_writer::tag('li', $factor, ['class' => 'text-danger']);
                             }
                             if (count($student->risk_factors) > 3) {
@@ -654,9 +670,9 @@ if (empty($reports)) {
                         echo html_writer::end_div();
                     }
 
-                    if ($remaining_count > 0) {
+                    if ($remainingcount > 0) {
                         echo html_writer::div(
-                            "+ {$remaining_count} more at-risk students - Export CSV for full list",
+                            "+ {$remainingcount} more at-risk students - Export CSV for full list",
                             'alert alert-info small mb-3'
                         );
                     }
@@ -664,12 +680,12 @@ if (empty($reports)) {
                     echo html_writer::tag('p', '✓ No at-risk students identified', ['class' => 'text-success']);
                 }
 
-                // Course Recommendations
+                // Course Recommendations.
                 if (isset($insights->course_recommendations) && !empty($insights->course_recommendations)) {
                     echo html_writer::tag('h5', '💡 Course Recommendations (' . count($insights->course_recommendations) . ')', ['class' => 'text-info mt-4 mb-3']);
                     echo html_writer::start_tag('ol', ['class' => 'small']);
-                    $recs_to_show = array_slice($insights->course_recommendations, 0, 6);
-                    foreach ($recs_to_show as $rec) {
+                    $recstoshow = array_slice($insights->course_recommendations, 0, 6);
+                    foreach ($recstoshow as $rec) {
                         echo html_writer::tag('li', $rec, ['class' => 'mb-2']);
                     }
                     if (count($insights->course_recommendations) > 6) {
@@ -678,7 +694,7 @@ if (empty($reports)) {
                     echo html_writer::end_tag('ol');
                 }
 
-                // Engagement Insights
+                // Engagement Insights.
                 if (isset($insights->engagement_insights)) {
                     $engagement = $insights->engagement_insights;
                     echo html_writer::tag('h5', '📈 Engagement Insights', ['class' => 'text-primary mt-4 mb-3']);
@@ -705,7 +721,7 @@ if (empty($reports)) {
                     echo html_writer::end_div();
                 }
 
-                // Action buttons
+                // Action buttons.
                 echo html_writer::start_div('text-center mt-3 pt-3 border-top');
                 echo html_writer::link(
                     new moodle_url('/local/savian_ai/export_analytics_csv.php', ['reportid' => $report->id]),
@@ -728,21 +744,21 @@ if (empty($reports)) {
     echo html_writer::end_div();
 }
 
-// Auto-refresh for processing reports
-$has_processing = false;
+// Auto-refresh for processing reports.
+$hasprocessing = false;
 foreach ($reports as $report) {
     $response = !empty($report->api_response) ? json_decode($report->api_response) : null;
     if ($report->status == 'sent' && (!$response || !isset($response->insights))) {
-        $has_processing = true;
+        $hasprocessing = true;
         break;
     }
     if (in_array($report->status, ['sending', 'pending'])) {
-        $has_processing = true;
+        $hasprocessing = true;
         break;
     }
 }
 
-if ($has_processing) {
+if ($hasprocessing) {
     $PAGE->requires->js_amd_inline("
         // Auto-refresh every 5 seconds if reports are processing
         setTimeout(function() {
@@ -752,7 +768,7 @@ if ($has_processing) {
     ");
 }
 
-// Scroll to top button (to access generate form)
+// Scroll to top button (to access generate form).
 if ($action !== 'poll') {
     echo html_writer::start_div('text-center mt-4');
     echo html_writer::tag('button',
@@ -765,7 +781,7 @@ if ($action !== 'poll') {
     echo html_writer::end_div();
 }
 
-// Back link
+// Back link.
 echo html_writer::div(
     html_writer::link(
         new moodle_url('/local/savian_ai/course.php', ['courseid' => $courseid]),
@@ -775,7 +791,7 @@ echo html_writer::div(
     'mt-4'
 );
 
-// Footer
+// Footer.
 echo local_savian_ai_render_footer();
 
 echo $OUTPUT->footer();

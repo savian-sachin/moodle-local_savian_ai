@@ -5,18 +5,34 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Vietnamese language strings for Savian AI.
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 defined('MOODLE_INTERNAL') || die();
 
-// Plugin name
+// Plugin name.
 $string['pluginname'] = 'Savian AI';
 
-// Capabilities
+// Capabilities.
 $string['savian_ai:use'] = 'Sử dụng tính năng Savian AI';
 $string['savian_ai:manage'] = 'Quản lý cài đặt Savian AI';
 $string['savian_ai:generate'] = 'Tạo nội dung với Savian AI';
 
-// Settings
+// Settings.
 $string['settings_heading'] = 'Cấu hình Savian AI';
 $string['api_url'] = 'URL API';
 $string['api_url_desc'] = 'Địa chỉ API của Savian AI (ví dụ: https://app.savian.ai.vn/api/moodle/v1/)';
@@ -35,14 +51,14 @@ $string['connection_status_failed'] = 'Kết nối thất bại: {$a}';
 $string['connection_status_error'] = 'Lỗi: {$a}';
 $string['connection_status_not_configured'] = 'Chưa cấu hình thông tin API. Vui lòng nhập API URL, Mã Tổ chức và API Key bên dưới.';
 
-// Navigation
+// Navigation.
 $string['dashboard'] = 'Bảng điều khiển';
 $string['documents'] = 'Tài liệu';
 $string['generate'] = 'Tạo Câu hỏi';
 $string['usage'] = 'Thống kê Sử dụng';
 $string['chat'] = 'Hỏi đáp Tài liệu';
 
-// Documents page
+// Documents page.
 $string['upload_document'] = 'Tải lên Tài liệu';
 $string['document_title'] = 'Tiêu đề';
 $string['document_description'] = 'Mô tả';
@@ -66,7 +82,7 @@ $string['status_failed'] = 'Thất bại';
 $string['no_documents'] = 'Chưa có tài liệu nào';
 $string['auto_refresh_notice'] = 'Trang sẽ tự động làm mới sau 30 giây';
 
-// Generate page
+// Generate page.
 $string['generate_questions'] = 'Tạo Câu hỏi';
 $string['generate_from_topic'] = 'Từ Chủ đề';
 $string['generate_from_documents'] = 'Từ Tài liệu (RAG)';
@@ -81,7 +97,7 @@ $string['difficulty_easy'] = 'Dễ';
 $string['difficulty_medium'] = 'Trung bình';
 $string['difficulty_hard'] = 'Khó';
 
-// Bloom's taxonomy
+// Bloom's taxonomy.
 $string['bloom_remember'] = 'Nhớ';
 $string['bloom_understand'] = 'Hiểu';
 $string['bloom_apply'] = 'Áp dụng';
@@ -89,28 +105,28 @@ $string['bloom_analyze'] = 'Phân tích';
 $string['bloom_evaluate'] = 'Đánh giá';
 $string['bloom_create'] = 'Sáng tạo';
 
-// Question types
+// Question types.
 $string['qtype_multichoice'] = 'Trắc nghiệm';
 $string['qtype_truefalse'] = 'Đúng/Sai';
 $string['qtype_shortanswer'] = 'Câu trả lời ngắn';
 $string['qtype_essay'] = 'Tự luận';
 $string['qtype_matching'] = 'Nối';
 
-// Generation results
+// Generation results.
 $string['generation_complete'] = 'Tạo hoàn tất!';
 $string['questions_generated'] = 'Đã tạo {$a} câu hỏi';
 $string['add_to_question_bank'] = 'Thêm vào Ngân hàng Câu hỏi';
 $string['questions_added'] = 'Đã thêm {$a} câu hỏi vào ngân hàng câu hỏi';
 $string['questions_failed'] = '{$a} câu hỏi thất bại';
 
-// Usage statistics
+// Usage statistics.
 $string['usage_stats'] = 'Thống kê Sử dụng';
 $string['questions_generated_total'] = 'Tổng số Câu hỏi Tạo ra';
 $string['documents_processed'] = 'Tài liệu Đã xử lý';
 $string['api_calls'] = 'Số lần Gọi API';
 $string['quota_remaining'] = 'Hạn mức Còn lại';
 
-// Course generation
+// Course generation.
 $string['generate_course_content'] = 'Tạo Nội dung Khóa học';
 $string['course_title'] = 'Tiêu đề Khóa học';
 $string['target_course'] = 'Khóa học Đích';
@@ -120,7 +136,7 @@ $string['section_content'] = 'Nội dung';
 $string['add_to_this_course'] = 'Thêm vào Khóa học NÀY';
 $string['regenerate'] = 'Tạo lại';
 
-// Enhanced course generation
+// Enhanced course generation.
 $string['target_audience'] = 'Đối tượng Học viên';
 $string['target_audience_help'] = 'Khóa học này được thiết kế cho ai? (ví dụ: Sinh viên năm nhất, Lập trình viên mới)';
 $string['target_audience_placeholder'] = 'Ví dụ: Sinh viên y khoa năm nhất, Lập trình viên mới';
@@ -134,7 +150,7 @@ $string['content_type_quizzes'] = 'Bài Kiểm tra';
 $string['content_type_assignments'] = 'Bài Tập với Rubric';
 $string['content_type_formative'] = 'Câu hỏi Tự kiểm tra';
 
-// Progress tracking
+// Progress tracking.
 $string['generating_course_content'] = 'Đang Tạo Nội dung Khóa học';
 $string['progress_analyzing'] = 'Đang phân tích tài liệu và tạo đề cương...';
 $string['progress_outline_complete'] = 'Đề cương hoàn tất, đang tạo các chương...';
@@ -149,7 +165,7 @@ $string['estimated_time_8weeks'] = 'Thời gian ước tính: 5-8 phút';
 $string['estimated_time_12weeks'] = 'Thời gian ước tính: 8-12 phút';
 $string['cancel_generation'] = 'Hủy Tạo';
 
-// Preview
+// Preview.
 $string['content_summary'] = 'Tóm tắt Nội dung';
 $string['summary_sections'] = 'Chương';
 $string['summary_pages'] = 'Trang';
@@ -164,23 +180,23 @@ $string['collapse_all'] = 'Thu gọn Tất cả';
 $string['add_selected'] = 'Thêm Đã chọn vào Khóa học';
 $string['will_create'] = 'Sẽ tạo';
 
-// Content created
+// Content created.
 $string['content_created_success'] = 'Nội dung khóa học đã được tạo thành công';
 $string['content_created_details'] = 'Đã tạo: {$a->sections} chương, {$a->pages} trang, {$a->activities} hoạt động, {$a->discussions} thảo luận, {$a->quizzes} bài kiểm tra, {$a->assignments} bài tập';
 $string['content_created_simple'] = 'Nội dung khóa học đã tạo: {$a->sections} chương, {$a->pages} trang, {$a->quizzes} bài kiểm tra, {$a->assignments} bài tập';
 $string['content_created_with_errors'] = 'Nội dung khóa học đã tạo với {$a} lỗi';
 
-// Generation errors
+// Generation errors.
 $string['generation_failed'] = 'Tạo thất bại: {$a}';
 $string['generation_timeout'] = 'Hết thời gian chờ sau {$a} giây';
 $string['no_documents_selected'] = 'Chưa chọn tài liệu. Vui lòng chọn ít nhất một tài liệu.';
 $string['no_title_provided'] = 'Chưa cung cấp tiêu đề khóa học';
 
-// Based on documents
+// Based on documents.
 $string['based_on_documents'] = 'Dựa trên tài liệu';
 $string['chunks_used'] = '{$a} đoạn đã sử dụng';
 
-// ADDIE v2.0 - Age/Industry Adaptation
+// ADDIE v2.0 - Age/Industry Adaptation.
 $string['age_group'] = 'Nhóm Tuổi Học viên';
 $string['age_group_help'] = 'Điều chỉnh từ vựng, mức độ đọc và phương pháp giảng dạy theo độ tuổi';
 $string['industry'] = 'Ngữ cảnh Ngành nghề';
@@ -188,7 +204,7 @@ $string['industry_help'] = 'Tùy chỉnh thuật ngữ, ví dụ và yêu cầu 
 $string['prior_knowledge'] = 'Mức độ Kiến thức Nền';
 $string['prior_knowledge_help'] = 'Điều chỉnh độ khó nội dung dựa trên kiến thức của học viên';
 
-// ADDIE progress stages
+// ADDIE progress stages.
 $string['progress_addie_analysis'] = 'Đang phân tích hồ sơ học viên và ngữ cảnh...';
 $string['progress_addie_design_outline'] = 'Đang thiết kế cấu trúc khóa học...';
 $string['progress_addie_design_completed'] = 'Đề cương khóa học đã sẵn sàng ✓';
@@ -198,7 +214,7 @@ $string['progress_addie_implementation'] = 'Đang thêm chỉ số chất lượ
 $string['progress_addie_evaluation'] = 'Đang tính điểm chất lượng...';
 $string['progress_addie_completed'] = 'Khóa học sẵn sàng! ✓';
 
-// Quality Matters
+// Quality Matters.
 $string['qm_alignment'] = 'Tuân thủ Quality Matters';
 $string['qm_score'] = 'Điểm QM';
 $string['qm_certified_ready'] = 'Sẵn sàng Chứng nhận QM';
@@ -207,7 +223,7 @@ $string['qm_recommendations'] = 'Khuyến nghị QM';
 $string['qm_standards_met'] = '{$a->met} trên {$a->total} tiêu chuẩn đạt';
 $string['verify_media_accessibility'] = 'Xác minh tất cả phương tiện có tính năng hỗ trợ tiếp cận';
 
-// Pedagogical metadata
+// Pedagogical metadata.
 $string['pedagogical_metadata'] = 'Thông số Khóa học';
 $string['source_confidence'] = 'Độ tin cậy Nguồn';
 $string['ai_transparency'] = 'Thông báo Nội dung do AI Tạo';
@@ -219,13 +235,13 @@ $string['thinking_skills'] = 'Kỹ năng Tư duy';
 $string['generation_method'] = 'Phương pháp Tạo';
 $string['human_review_required'] = 'Yêu cầu Xem xét của Giáo viên';
 
-// Section metadata
+// Section metadata.
 $string['prerequisites'] = 'Kiến thức Tiên quyết';
 $string['estimated_hours'] = '{$a} giờ';
 $string['qm_notes'] = 'Ghi chú QM';
 $string['source_documents_used'] = 'Tài liệu Nguồn';
 
-// Privacy API
+// Privacy API.
 $string['privacy:metadata:conversations'] = 'Cuộc trò chuyện với AI gia sư';
 $string['privacy:metadata:conversations:user_id'] = 'Người dùng tạo cuộc trò chuyện';
 $string['privacy:metadata:conversations:course_id'] = 'Ngữ cảnh khóa học cho cuộc trò chuyện';
@@ -258,7 +274,7 @@ $string['privacy:chatdata'] = 'Cuộc trò chuyện';
 $string['privacy:chatsettings'] = 'Cài đặt Trò chuyện';
 $string['privacy:generationdata'] = 'Yêu cầu Tạo nội dung';
 
-// Knowledge Feedback Loop
+// Knowledge Feedback Loop.
 $string['save_to_knowledge_base'] = 'Lưu vào Cơ sở Tri thức';
 $string['knowledge_feedback_loop'] = 'Vòng lặp Phản hồi Tri thức';
 $string['build_knowledge_base'] = 'Xây dựng cơ sở tri thức của tổ chức!';
@@ -279,7 +295,7 @@ $string['kb_availability'] = 'Sẽ xuất hiện trong danh sách tài liệu nh
 $string['kb_usage'] = 'Các khóa học tương lai có thể sử dụng nội dung này';
 $string['kb_chat'] = 'Sinh viên có thể đặt câu hỏi về khóa học này';
 
-// Quality Control (v2.1)
+// Quality Control (v2.1).
 $string['quality_report'] = 'Báo cáo Chất lượng Khóa học';
 $string['overall_score'] = 'Điểm Tổng thể';
 $string['source_coverage'] = 'Độ Bao phủ Nguồn';
@@ -295,7 +311,7 @@ $string['medium_confidence'] = 'Độ tin cậy trung bình - khuyến nghị xe
 $string['low_confidence'] = 'Độ tin cậy thấp - cần xem xét ưu tiên';
 $string['supplemented_note'] = 'Bao gồm nội dung bổ sung AI - xác minh theo ngữ cảnh của bạn';
 
-// Chat widget
+// Chat widget.
 $string['chat'] = 'Trò chuyện AI';
 $string['openchat'] = 'Mở trò chuyện';
 $string['closechat'] = 'Đóng trò chuyện';
@@ -312,7 +328,7 @@ $string['helpful'] = 'Hữu ích';
 $string['not_helpful'] = 'Không hữu ích';
 $string['feedback_submitted'] = 'Cảm ơn phản hồi của bạn!';
 
-// Chat settings
+// Chat settings.
 $string['enable_chat_widget'] = 'Kích hoạt widget trò chuyện';
 $string['enable_chat_widget_desc'] = 'Hiển thị bong bóng trò chuyện nổi trên các trang khóa học';
 $string['chat_course_pages_only'] = 'Chỉ các trang khóa học';
@@ -323,7 +339,7 @@ $string['chat_primary_color'] = 'Màu Chính';
 $string['chat_default_position'] = 'Vị trí Mặc định';
 $string['chat_widget_size'] = 'Kích thước Widget';
 
-// Chat history
+// Chat history.
 $string['chat_history'] = 'Lịch sử Trò chuyện';
 $string['conversation_list'] = 'Danh sách Cuộc trò chuyện';
 $string['conversation_title'] = 'Tiêu đề';
@@ -340,6 +356,6 @@ $string['view_conversation'] = 'Xem';
 $string['archive_conversation'] = 'Lưu trữ';
 $string['export_data'] = 'Xuất Dữ liệu';
 
-// Capabilities
+// Capabilities.
 $string['savian_ai:viewchathistory'] = 'Xem lịch sử cuộc trò chuyện';
 $string['savian_ai:managechatdocuments'] = 'Quản lý tài liệu trong trò chuyện';

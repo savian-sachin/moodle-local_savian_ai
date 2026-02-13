@@ -5,11 +5,27 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Library functions for Savian AI.
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * DEPRECATED: Inject Savian branding CSS and third-party libraries into pages
+ * DEPRECATED: Inject Savian branding CSS and third-party libraries into pages.
  *
  * This function is deprecated and kept for backward compatibility.
  * The new hook system is used in classes/hook_callbacks/before_standard_head_html.php
@@ -17,27 +33,27 @@ defined('MOODLE_INTERNAL') || die();
  * @deprecated since Moodle 4.5
  */
 function local_savian_ai_before_standard_html_head() {
-    // This function is deprecated - functionality moved to hook callbacks
-    // See: classes/hook_callbacks/before_standard_head_html.php
-    // Keeping empty function to avoid errors during transition
+    // This function is deprecated - functionality moved to hook callbacks.
+    // See: classes/hook_callbacks/before_standard_head_html.php.
+    // Keeping empty function to avoid errors during transition.
 }
 
 /**
- * Render consistent Savian AI page header
+ * Render consistent Savian AI page header.
  *
- * @param string $title Page title
- * @param string $subtitle Optional subtitle
- * @return string HTML
+ * @param string $title Page title.
+ * @param string $subtitle Optional subtitle.
+ * @return string HTML.
  */
 function local_savian_ai_render_header($title, $subtitle = '') {
     $html = '';
 
-    // Header bar with logo and title
+    // Header bar with logo and title.
     $html .= html_writer::start_div('card mb-4');
     $html .= html_writer::start_div('card-body p-3');
     $html .= html_writer::start_div('d-flex justify-content-between align-items-center');
 
-    // Title on left
+    // Title on left.
     $html .= html_writer::start_div('');
     $html .= html_writer::tag('h2', $title, ['class' => 'mb-0 h4']);
     if ($subtitle) {
@@ -45,7 +61,7 @@ function local_savian_ai_render_header($title, $subtitle = '') {
     }
     $html .= html_writer::end_div();
 
-    // Savian logo on right
+    // Savian logo on right.
     $html .= html_writer::tag('div', 'SAVIAN AI', ['class' => 'savian-text-primary font-weight-bold']);
 
     $html .= html_writer::end_div();
@@ -56,16 +72,16 @@ function local_savian_ai_render_header($title, $subtitle = '') {
 }
 
 /**
- * Render consistent Savian AI footer
+ * Render consistent Savian AI footer.
  *
- * @return string HTML
+ * @return string HTML.
  */
 function local_savian_ai_render_footer() {
     return html_writer::div(
         html_writer::tag('small',
             'Powered by ' . html_writer::link('https://savian.ai.vn/', 'Savian AI', [
                 'target' => '_blank',
-                'class' => 'savian-text-primary'
+                'class' => 'savian-text-primary',
             ]),
             ['class' => 'text-muted']
         ),
@@ -74,14 +90,14 @@ function local_savian_ai_render_footer() {
 }
 
 /**
- * Add navigation nodes
+ * Add navigation nodes.
  *
- * @param global_navigation $navigation Navigation object
+ * @param global_navigation $navigation Navigation object.
  */
 function local_savian_ai_extend_navigation(global_navigation $navigation) {
     global $PAGE;
 
-    // Only add to navigation if user has permission
+    // Only add to navigation if user has permission.
     if (has_capability('local/savian_ai:use', context_system::instance())) {
         $node = $navigation->add(
             get_string('pluginname', 'local_savian_ai'),
@@ -93,7 +109,7 @@ function local_savian_ai_extend_navigation(global_navigation $navigation) {
         );
         $node->showinflatnavigation = true;
 
-        // Add tutorials link
+        // Add tutorials link.
         $node->add(
             get_string('tutorials', 'local_savian_ai'),
             new moodle_url('/local/savian_ai/tutorials.php'),
@@ -106,16 +122,16 @@ function local_savian_ai_extend_navigation(global_navigation $navigation) {
 }
 
 /**
- * Extend course navigation
+ * Extend course navigation.
  *
- * @param navigation_node $navigation The navigation node to extend
- * @param stdClass $course The course to add nodes for
- * @param context $context The course context
+ * @param navigation_node $navigation The navigation node to extend.
+ * @param stdClass $course The course to add nodes for.
+ * @param context $context The course context.
  */
 function local_savian_ai_extend_navigation_course($navigation, $course, $context) {
-    // Dashboard and features are for teachers only (require 'generate' capability)
+    // Dashboard and features are for teachers only (require 'generate' capability).
     if (has_capability('local/savian_ai:generate', $context)) {
-        // Add dashboard link
+        // Add dashboard link.
         $navigation->add(
             get_string('pluginname', 'local_savian_ai'),
             new moodle_url('/local/savian_ai/course.php', ['courseid' => $course->id]),
@@ -125,7 +141,7 @@ function local_savian_ai_extend_navigation_course($navigation, $course, $context
             new pix_icon('i/report', '')
         );
 
-        // Add chat history link
+        // Add chat history link.
         $navigation->add(
             get_string('chat_history', 'local_savian_ai'),
             new moodle_url('/local/savian_ai/chat_history.php', ['courseid' => $course->id]),
@@ -138,7 +154,7 @@ function local_savian_ai_extend_navigation_course($navigation, $course, $context
 }
 
 /**
- * DEPRECATED: Add chat widget to course pages
+ * DEPRECATED: Add chat widget to course pages.
  *
  * This function is deprecated and kept for backward compatibility.
  * The new hook system is used in classes/hook_callbacks/before_footer_html.php
@@ -146,9 +162,9 @@ function local_savian_ai_extend_navigation_course($navigation, $course, $context
  * @deprecated since Moodle 4.5
  */
 function local_savian_ai_before_footer() {
-    // This function is deprecated - functionality moved to hook callbacks
-    // See: classes/hook_callbacks/before_footer_html.php
-    // Keeping empty function to avoid errors during transition
+    // This function is deprecated - functionality moved to hook callbacks.
+    // See: classes/hook_callbacks/before_footer_html.php.
+    // Keeping empty function to avoid errors during transition.
 }
 
 /**
@@ -201,17 +217,17 @@ function local_savian_ai_org_code_updated() {
 /**
  * Sync documents from API to local database.
  *
- * @return int Number of documents synced
+ * @return int Number of documents synced.
  */
 function local_savian_ai_sync_documents() {
     global $DB;
 
     $client = new \local_savian_ai\api\client();
-    $sync_response = $client->get_documents(['per_page' => 100]);
+    $syncresponse = $client->get_documents(['per_page' => 100]);
     $synced = 0;
 
-    if ($sync_response->http_code === 200 && isset($sync_response->documents)) {
-        foreach ($sync_response->documents as $doc) {
+    if ($syncresponse->http_code === 200 && isset($syncresponse->documents)) {
+        foreach ($syncresponse->documents as $doc) {
             $existing = $DB->get_record('local_savian_documents', ['savian_doc_id' => $doc->id]);
 
             $record = new stdClass();
@@ -230,16 +246,16 @@ function local_savian_ai_sync_documents() {
             $record->last_synced = time();
             $record->timemodified = time();
 
-            $api_course_id = $doc->moodle_course_id ?? $doc->course_id ?? null;
+            $apicourseid = $doc->moodle_course_id ?? $doc->course_id ?? null;
 
             if ($existing) {
                 $record->id = $existing->id;
-                $record->course_id = $existing->course_id ?: $api_course_id;
+                $record->course_id = $existing->course_id ?: $apicourseid;
                 $record->timecreated = $existing->timecreated;
                 $record->usermodified = $existing->usermodified;
                 $DB->update_record('local_savian_documents', $record);
             } else {
-                $record->course_id = $api_course_id;
+                $record->course_id = $apicourseid;
                 $record->timecreated = time();
                 $record->usermodified = 0;
                 $DB->insert_record('local_savian_documents', $record);

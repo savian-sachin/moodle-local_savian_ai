@@ -5,8 +5,24 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die;
+/**
+ * Admin settings for Savian AI.
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
     // Store current org_code in cache for comparison when settings are saved.
@@ -17,40 +33,40 @@ if ($hassiteconfig) {
     }
     $settings = new admin_settingpage('local_savian_ai', get_string('pluginname', 'local_savian_ai'));
 
-    // === CONNECTION STATUS ===
-    // Check API connection status
-    $api_key = get_config('local_savian_ai', 'api_key');
-    $org_code = get_config('local_savian_ai', 'org_code');
+    // === CONNECTION STATUS ===.
+    // Check API connection status.
+    $apikey = get_config('local_savian_ai', 'api_key');
+    $orgcode = get_config('local_savian_ai', 'org_code');
 
-    $connection_status = '';
-    if (!empty($api_key) && !empty($org_code)) {
+    $connectionstatus = '';
+    if (!empty($apikey) && !empty($orgcode)) {
         try {
             $client = new \local_savian_ai\api\client();
             $response = $client->validate();
             if ($response->http_code === 200 && isset($response->valid) && $response->valid) {
-                $org_name = $response->organization->name ?? $org_code;
-                $connection_status = html_writer::div(
+                $orgname = $response->organization->name ?? $orgcode;
+                $connectionstatus = html_writer::div(
                     html_writer::tag('span', '✓ ', ['style' => 'color: green; font-weight: bold;']) .
-                    get_string('connection_status_connected', 'local_savian_ai', $org_name),
+                    get_string('connection_status_connected', 'local_savian_ai', $orgname),
                     'alert alert-success'
                 );
             } else {
                 $error = $response->error ?? $response->message ?? 'Unknown error';
-                $connection_status = html_writer::div(
+                $connectionstatus = html_writer::div(
                     html_writer::tag('span', '✗ ', ['style' => 'color: red; font-weight: bold;']) .
                     get_string('connection_status_failed', 'local_savian_ai', $error),
                     'alert alert-danger'
                 );
             }
         } catch (Exception $e) {
-            $connection_status = html_writer::div(
+            $connectionstatus = html_writer::div(
                 html_writer::tag('span', '✗ ', ['style' => 'color: red; font-weight: bold;']) .
                 get_string('connection_status_error', 'local_savian_ai', $e->getMessage()),
                 'alert alert-danger'
             );
         }
     } else {
-        $connection_status = html_writer::div(
+        $connectionstatus = html_writer::div(
             html_writer::tag('span', '⚠ ', ['style' => 'color: orange; font-weight: bold;']) .
             get_string('connection_status_not_configured', 'local_savian_ai'),
             'alert alert-warning'
@@ -60,19 +76,19 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_heading(
         'local_savian_ai/connection_status',
         get_string('connection_status', 'local_savian_ai'),
-        $connection_status
+        $connectionstatus
     ));
 
-    // API URL
+    // API URL.
     $settings->add(new admin_setting_configtext(
         'local_savian_ai/api_url',
         get_string('api_url', 'local_savian_ai'),
         get_string('api_url_desc', 'local_savian_ai'),
-        'https://app.savian.ai.vn/api/moodle/v1/',  // Production default
+        'https://app.savian.ai.vn/api/moodle/v1/',  // Production default.
         PARAM_URL
     ));
 
-    // Organization Code - with callback to clear documents on change
+    // Organization Code - with callback to clear documents on change.
     $orgcodesetting = new admin_setting_configtext(
         'local_savian_ai/org_code',
         get_string('org_code', 'local_savian_ai'),
@@ -81,13 +97,13 @@ if ($hassiteconfig) {
                 get_string('org_code_warning', 'local_savian_ai'),
                 ['class' => 'text-warning']
             ),
-        '',  // No default - must be configured
+        '',  // No default - must be configured.
         PARAM_ALPHANUMEXT
     );
     $orgcodesetting->set_updatedcallback('local_savian_ai_org_code_updated');
     $settings->add($orgcodesetting);
 
-    // API Key
+    // API Key.
     $settings->add(new admin_setting_configpasswordunmask(
         'local_savian_ai/api_key',
         get_string('api_key', 'local_savian_ai'),
@@ -95,7 +111,7 @@ if ($hassiteconfig) {
         ''
     ));
 
-    // === CHAT WIDGET SETTINGS ===
+    // === CHAT WIDGET SETTINGS ===.
     $settings->add(new admin_setting_heading(
         'local_savian_ai/chat_heading',
         get_string('chat_settings_heading', 'local_savian_ai'),
@@ -137,7 +153,7 @@ if ($hassiteconfig) {
         'bottom-right',
         [
             'bottom-right' => get_string('position_bottom_right', 'local_savian_ai'),
-            'bottom-left' => get_string('position_bottom_left', 'local_savian_ai')
+            'bottom-left' => get_string('position_bottom_left', 'local_savian_ai'),
         ]
     ));
 
@@ -149,7 +165,7 @@ if ($hassiteconfig) {
         [
             'small' => get_string('size_small', 'local_savian_ai'),
             'medium' => get_string('size_medium', 'local_savian_ai'),
-            'large' => get_string('size_large', 'local_savian_ai')
+            'large' => get_string('size_large', 'local_savian_ai'),
         ]
     ));
 
@@ -167,7 +183,7 @@ if ($hassiteconfig) {
         1
     ));
 
-    // === LEARNING ANALYTICS SETTINGS ===
+    // === LEARNING ANALYTICS SETTINGS ===.
     $settings->add(new admin_setting_heading(
         'local_savian_ai/analytics_heading',
         get_string('analytics_settings', 'local_savian_ai'),
@@ -190,7 +206,7 @@ if ($hassiteconfig) {
             'manual' => get_string('analytics_frequency_manual', 'local_savian_ai'),
             'daily' => get_string('analytics_frequency_daily', 'local_savian_ai'),
             'weekly' => get_string('analytics_frequency_weekly', 'local_savian_ai'),
-            'both' => get_string('analytics_frequency_both', 'local_savian_ai')
+            'both' => get_string('analytics_frequency_both', 'local_savian_ai'),
         ]
     ));
 
@@ -218,7 +234,7 @@ if ($hassiteconfig) {
 
     $ADMIN->add('localplugins', $settings);
 
-    // Add link to plugin management page
+    // Add link to plugin management page.
     $ADMIN->add(
         'localplugins',
         new admin_externalpage(
@@ -229,7 +245,7 @@ if ($hassiteconfig) {
         )
     );
 
-    // Add chat monitoring dashboard link (admins only)
+    // Add chat monitoring dashboard link (admins only).
     if (has_capability('local/savian_ai:manage', context_system::instance())) {
         $ADMIN->add(
             'localplugins',

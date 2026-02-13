@@ -5,6 +5,22 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Question bank creator.
+ *
+ * @package    local_savian_ai
+ * @copyright  2026 Savian AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 namespace local_savian_ai\content;
 
@@ -14,7 +30,7 @@ require_once($CFG->dirroot . '/question/engine/bank.php');
 require_once($CFG->libdir . '/questionlib.php');
 
 /**
- * Question Bank Creator - Imports AI-generated questions into Moodle
+ * Question Bank Creator - Imports AI-generated questions into Moodle.
  *
  * Supports multichoice, true/false, short answer, essay, and matching question types.
  * Handles question formatting, answer processing, and feedback field population.
@@ -26,7 +42,7 @@ require_once($CFG->libdir . '/questionlib.php');
 class qbank_creator {
 
     /**
-     * Add generated questions to Moodle Question Bank
+     * Add generated questions to Moodle Question Bank.
      *
      * @param array $questions Array of question data from Savian AI
      * @param int $courseid Course ID
@@ -38,23 +54,23 @@ class qbank_creator {
 
         $results = ['success' => [], 'failed' => []];
 
-        // Get or create question category
+        // Get or create question category.
         $context = \context_course::instance($courseid);
         if ($categoryid === 0) {
             $categoryid = $this->get_or_create_savian_category($context->id, $courseid);
         }
 
-        foreach ($questions as $question_data) {
+        foreach ($questions as $questiondata) {
             try {
-                $question_id = $this->create_question($question_data, $categoryid, $context);
+                $questionid = $this->create_question($questiondata, $categoryid, $context);
                 $results['success'][] = [
-                    'name' => $question_data->name ?? $question_data->questiontext ?? 'Untitled',
-                    'question_id' => $question_id,
-                    'type' => $question_data->type ?? 'unknown',
+                    'name' => $questiondata->name ?? $questiondata->questiontext ?? 'Untitled',
+                    'question_id' => $questionid,
+                    'type' => $questiondata->type ?? 'unknown',
                 ];
             } catch (\Exception $e) {
                 $results['failed'][] = [
-                    'name' => $question_data->name ?? $question_data->questiontext ?? 'Untitled',
+                    'name' => $questiondata->name ?? $questiondata->questiontext ?? 'Untitled',
                     'error' => $e->getMessage(),
                 ];
             }
@@ -64,7 +80,7 @@ class qbank_creator {
     }
 
     /**
-     * Get or create Savian AI question category
+     * Get or create Savian AI question category.
      *
      * @param int $contextid Context ID
      * @param int $courseid Course ID
@@ -73,7 +89,7 @@ class qbank_creator {
     protected function get_or_create_savian_category($contextid, $courseid) {
         global $DB;
 
-        // Try to find existing category
+        // Try to find existing category.
         $category = $DB->get_record('question_categories', [
             'contextid' => $contextid,
             'name' => 'Savian AI Generated',
@@ -83,7 +99,7 @@ class qbank_creator {
             return $category->id;
         }
 
-        // Create new category
+        // Create new category.
         $newcategory = new \stdClass();
         $newcategory->name = 'Savian AI Generated';
         $newcategory->contextid = $contextid;
@@ -97,7 +113,7 @@ class qbank_creator {
     }
 
     /**
-     * Create a single question from Savian format
+     * Create a single question from Savian format.
      *
      * @param object $data Question data
      * @param int $categoryid Category ID
@@ -107,8 +123,8 @@ class qbank_creator {
     protected function create_question($data, $categoryid, $context) {
         global $USER;
 
-        // Map Savian types to Moodle qtypes
-        $type_map = [
+        // Map Savian types to Moodle qtypes.
+        $typemap = [
             'multichoice' => 'multichoice',
             'truefalse' => 'truefalse',
             'shortanswer' => 'shortanswer',
@@ -116,9 +132,9 @@ class qbank_creator {
             'matching' => 'match',
         ];
 
-        $qtype = $type_map[$data->type] ?? 'multichoice';
+        $qtype = $typemap[$data->type] ?? 'multichoice';
 
-        // Build question form data
+        // Build question form data.
         $fromform = new \stdClass();
         $fromform->category = $categoryid . ',' . $context->id;
         $fromform->name = $this->truncate_name($data->name ?? $data->questiontext);
@@ -127,7 +143,7 @@ class qbank_creator {
         $fromform->defaultmark = 1;
         $fromform->penalty = 0.3333333;
 
-        // Add type-specific fields
+        // Add type-specific fields.
         switch ($qtype) {
             case 'multichoice':
                 $fromform = $this->build_multichoice($fromform, $data);
@@ -146,7 +162,7 @@ class qbank_creator {
                 break;
         }
 
-        // Save question using Moodle's question bank API
+        // Save question using Moodle's question bank API.
         $question = new \stdClass();
         $question->category = $categoryid;
         $question->qtype = $qtype;
@@ -161,10 +177,14 @@ class qbank_creator {
     }
 
     /**
-     * Build multichoice question fields
+     * Build multichoice question fields.
+     *
+     * @param \stdClass $fromform Form data
+     * @param object $data Question data
+     * @return \stdClass Updated form data
      */
     protected function build_multichoice(\stdClass $fromform, $data) {
-        $fromform->single = 1;  // Single answer
+        $fromform->single = 1;
         $fromform->shuffleanswers = 1;
         $fromform->answernumbering = 'abc';
         $fromform->correctfeedback = ['text' => '', 'format' => FORMAT_HTML];
@@ -177,7 +197,7 @@ class qbank_creator {
 
         foreach ($data->answers as $idx => $answer) {
             $fromform->answer[$idx] = ['text' => $this->extract_string($answer->text ?? ''), 'format' => FORMAT_HTML];
-            $fromform->fraction[$idx] = (float)(($answer->fraction ?? 0) / 100);  // Convert to 0-1
+            $fromform->fraction[$idx] = (float)(($answer->fraction ?? 0) / 100);
             $fromform->feedback[$idx] = ['text' => $this->extract_string($answer->feedback ?? ''), 'format' => FORMAT_HTML];
         }
 
@@ -185,10 +205,14 @@ class qbank_creator {
     }
 
     /**
-     * Build true/false question fields
+     * Build true/false question fields.
+     *
+     * @param \stdClass $fromform Form data
+     * @param object $data Question data
+     * @return \stdClass Updated form data
      */
     protected function build_truefalse(\stdClass $fromform, $data) {
-        // Find the correct answer
+        // Find the correct answer.
         $correct = 0;
         foreach ($data->answers as $answer) {
             if (($answer->fraction ?? 0) === 100) {
@@ -201,7 +225,7 @@ class qbank_creator {
         $fromform->feedbacktrue = ['text' => '', 'format' => FORMAT_HTML];
         $fromform->feedbackfalse = ['text' => '', 'format' => FORMAT_HTML];
 
-        // Add required feedback fields
+        // Add required feedback fields.
         $fromform->correctfeedback = ['text' => 'Correct!', 'format' => FORMAT_HTML];
         $fromform->partiallycorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
         $fromform->incorrectfeedback = ['text' => 'Incorrect. Please review the material.', 'format' => FORMAT_HTML];
@@ -210,10 +234,14 @@ class qbank_creator {
     }
 
     /**
-     * Build short answer question fields
+     * Build short answer question fields.
+     *
+     * @param \stdClass $fromform Form data
+     * @param object $data Question data
+     * @return \stdClass Updated form data
      */
     protected function build_shortanswer(\stdClass $fromform, $data) {
-        $fromform->usecase = 0;  // Case insensitive
+        $fromform->usecase = 0;
 
         $fromform->answer = [];
         $fromform->fraction = [];
@@ -225,7 +253,7 @@ class qbank_creator {
             $fromform->feedback[$idx] = ['text' => $this->extract_string($answer->feedback ?? ''), 'format' => FORMAT_HTML];
         }
 
-        // Add required feedback fields
+        // Add required feedback fields.
         $fromform->correctfeedback = ['text' => 'Correct!', 'format' => FORMAT_HTML];
         $fromform->partiallycorrectfeedback = ['text' => 'Partially correct.', 'format' => FORMAT_HTML];
         $fromform->incorrectfeedback = ['text' => 'Incorrect. Please review the material.', 'format' => FORMAT_HTML];
@@ -234,10 +262,14 @@ class qbank_creator {
     }
 
     /**
-     * Build essay question fields
+     * Build essay question fields.
+     *
+     * @param \stdClass $fromform Form data
+     * @param object $data Question data
+     * @return \stdClass Updated form data
      */
     protected function build_essay(\stdClass $fromform, $data) {
-        $fromform->responseformat = 'editor';  // HTML editor
+        $fromform->responseformat = 'editor';
         $fromform->responserequired = 1;
         $fromform->responsefieldlines = 15;
         $fromform->attachments = 0;
@@ -245,7 +277,7 @@ class qbank_creator {
         $fromform->graderinfo = ['text' => $this->extract_string($data->graderinfo ?? ''), 'format' => FORMAT_HTML];
         $fromform->responsetemplate = ['text' => '', 'format' => FORMAT_HTML];
 
-        // Add feedback fields (may not be used but prevents warnings)
+        // Add feedback fields (may not be used but prevents warnings).
         $fromform->correctfeedback = ['text' => '', 'format' => FORMAT_HTML];
         $fromform->partiallycorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
         $fromform->incorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
@@ -254,7 +286,11 @@ class qbank_creator {
     }
 
     /**
-     * Build matching question fields
+     * Build matching question fields.
+     *
+     * @param \stdClass $fromform Form data
+     * @param object $data Question data
+     * @return \stdClass Updated form data
      */
     protected function build_matching(\stdClass $fromform, $data) {
         $fromform->shuffleanswers = 1;
@@ -269,7 +305,7 @@ class qbank_creator {
             }
         }
 
-        // Add feedback fields (prevents warnings)
+        // Add feedback fields (prevents warnings).
         $fromform->correctfeedback = ['text' => 'Well done!', 'format' => FORMAT_HTML];
         $fromform->partiallycorrectfeedback = ['text' => 'Partially correct.', 'format' => FORMAT_HTML];
         $fromform->incorrectfeedback = ['text' => 'Please review the material.', 'format' => FORMAT_HTML];
@@ -278,47 +314,54 @@ class qbank_creator {
     }
 
     /**
-     * Safely extract string from data (handles nested objects)
+     * Safely extract string from data (handles nested objects).
+     *
+     * @param mixed $value Value to extract string from
+     * @param string $default Default value if extraction fails
+     * @return string Extracted string
      */
     protected function extract_string($value, $default = '') {
         if (is_string($value)) {
             return $value;
         }
         if (is_object($value) || is_array($value)) {
-            // Try to find 'en' key for bilingual content
+            // Try to find 'en' key for bilingual content.
             if (is_object($value) && isset($value->en)) {
                 return (string)$value->en;
             }
             if (is_array($value) && isset($value['en'])) {
                 return (string)$value['en'];
             }
-            // Fallback to JSON
+            // Fallback to JSON.
             return json_encode($value);
         }
         return (string)$default;
     }
 
     /**
-     * Create a readable question name (not full text)
+     * Create a readable question name (not full text).
+     *
+     * @param mixed $name Name or text to truncate
+     * @return string Truncated name
      */
     protected function truncate_name($name) {
         $name = $this->extract_string($name);
         $name = strip_tags($name);
         $name = trim($name);
 
-        // If too long, create a meaningful summary
+        // If too long, create a meaningful summary.
         if (strlen($name) > 80) {
-            // Take first 10 words
+            // Take first 10 words.
             $words = explode(' ', $name);
-            $short_words = array_slice($words, 0, 10);
-            $name = implode(' ', $short_words);
+            $shortwords = array_slice($words, 0, 10);
+            $name = implode(' ', $shortwords);
 
-            // Clean up any trailing punctuation
+            // Clean up any trailing punctuation.
             $name = rtrim($name, '.,;:?!');
             $name .= '...';
         }
 
-        // Ensure within Moodle's 255 char limit
+        // Ensure within Moodle's 255 char limit.
         $name = substr($name, 0, 255);
         return $name;
     }
