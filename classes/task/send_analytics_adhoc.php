@@ -84,7 +84,7 @@ class send_analytics_adhoc extends \core\task\adhoc_task {
                 // Mark batched events as processed if this was a real_time report.
                 if ($reporttype === 'real_time' && !empty($data->event_ids)) {
                     $eventids = $data->event_ids;
-                    list($insql, $params) = $DB->get_in_or_equal($eventids);
+                    [$insql, $params] = $DB->get_in_or_equal($eventids);
                     $DB->execute(
                         "UPDATE {local_savian_analytics_events} SET processed = 1 WHERE id {$insql}",
                         $params

@@ -24,8 +24,6 @@
 
 namespace local_savian_ai\observer;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Event observer for analytics real-time data capture.
  *
@@ -43,7 +41,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class analytics_observer {
-
     /**
      * @var int Event threshold before sending analytics.
      */
@@ -163,7 +160,6 @@ class analytics_observer {
             if ($unprocessedcount >= self::EVENT_THRESHOLD) {
                 self::queue_batched_events($courseid);
             }
-
         } catch (\Exception $e) {
             // Do not break course functionality if analytics fails.
             debugging('Analytics event observer error: ' . $e->getMessage(), DEBUG_DEVELOPER);
@@ -212,7 +208,6 @@ class analytics_observer {
                 ]
             );
             \core\task\manager::queue_adhoc_task($task, true);
-
         } catch (\Exception $e) {
             debugging('Analytics queue_batched_events error: ' . $e->getMessage(), DEBUG_DEVELOPER);
         }

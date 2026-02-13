@@ -24,8 +24,6 @@
 
 namespace local_savian_ai\analytics;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Metrics calculator class for calculating analytics metrics.
  *
@@ -40,7 +38,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class metrics_calculator {
-
     /**
      * @var data_extractor Data extractor instance.
      */

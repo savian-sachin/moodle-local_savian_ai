@@ -42,10 +42,7 @@ use external_multiple_structure;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class chat extends external_api {
-
-    // ========================================
-    // SEND MESSAGE.
-    // ========================================
+    // Send message methods.
 
     /**
      * Parameters for send_message.
@@ -159,9 +156,7 @@ class chat extends external_api {
         );
     }
 
-    // ========================================
-    // GET CONVERSATION.
-    // ========================================
+    // Get conversation methods.
 
     /**
      * Parameters for get_conversation.
@@ -225,9 +220,7 @@ class chat extends external_api {
         );
     }
 
-    // ========================================
-    // LIST CONVERSATIONS.
-    // ========================================
+    // List conversations methods.
 
     /**
      * Parameters for list_conversations.
@@ -303,9 +296,7 @@ class chat extends external_api {
         );
     }
 
-    // ========================================
-    // SUBMIT FEEDBACK.
-    // ========================================
+    // Submit feedback methods.
 
     /**
      * Parameters for submit_feedback.
@@ -362,9 +353,7 @@ class chat extends external_api {
         );
     }
 
-    // ========================================
-    // SAVE WIDGET STATE.
-    // ========================================
+    // Save widget state methods.
 
     /**
      * Parameters for save_widget_state.
@@ -418,9 +407,7 @@ class chat extends external_api {
         );
     }
 
-    // ========================================
-    // GET COURSE DOCUMENTS.
-    // ========================================
+    // Get course documents methods.
 
     /**
      * Parameters for get_course_documents.

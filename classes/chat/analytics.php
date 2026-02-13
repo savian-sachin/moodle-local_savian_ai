@@ -24,8 +24,6 @@
 
 namespace local_savian_ai\chat;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Chat analytics class - provides statistics for teachers and admins.
  *

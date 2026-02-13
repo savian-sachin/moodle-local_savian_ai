@@ -41,10 +41,7 @@ use external_single_structure;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class generation extends external_api {
-
-    // ========================================
-    // GET GENERATION STATUS.
-    // ========================================
+    // Get generation status methods.
 
     /**
      * Parameters for get_generation_status.
@@ -153,9 +150,7 @@ class generation extends external_api {
         );
     }
 
-    // ========================================
-    // SAVE COURSE STRUCTURE (for edits).
-    // ========================================
+    // Save course structure methods.
 
     /**
      * Parameters for save_course_structure.

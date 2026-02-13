@@ -43,7 +43,6 @@ require_once($CFG->dirroot . '/mod/glossary/lib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_builder {
-
     /** @var qbank_creator Question bank creator. */
     private $qbankcreator;
 

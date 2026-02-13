@@ -904,7 +904,6 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
 
     // Initialize view/edit functionality.
     $PAGE->requires->js_call_amd('local_savian_ai/course_content_editor', 'init');
-
 } else if ($action === 'success' && !empty($saviancache->get('kb_save_data'))) {
     // Success page with Knowledge Feedback Loop option (v2.2).
     $savedata = $saviancache->get('kb_save_data');
@@ -979,7 +978,6 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
 
     echo html_writer::end_div();
     echo html_writer::end_div();
-
 } else {
     // Show enhanced form with Moodle standards.
     $generatorintro = '<strong>AI-Powered Course Generator</strong>'

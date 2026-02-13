@@ -33,7 +33,7 @@ if ($hassiteconfig) {
     }
     $settings = new admin_settingpage('local_savian_ai', get_string('pluginname', 'local_savian_ai'));
 
-    // === CONNECTION STATUS ===.
+    // Connection status section.
     // Check API connection status.
     $apikey = get_config('local_savian_ai', 'api_key');
     $orgcode = get_config('local_savian_ai', 'org_code');
@@ -112,7 +112,7 @@ if ($hassiteconfig) {
         ''
     ));
 
-    // === CHAT WIDGET SETTINGS ===.
+    // Chat widget settings section.
     $settings->add(new admin_setting_heading(
         'local_savian_ai/chat_heading',
         get_string('chat_settings_heading', 'local_savian_ai'),
@@ -184,7 +184,7 @@ if ($hassiteconfig) {
         1
     ));
 
-    // === LEARNING ANALYTICS SETTINGS ===.
+    // Learning analytics settings section.
     $settings->add(new admin_setting_heading(
         'local_savian_ai/analytics_heading',
         get_string('analytics_settings', 'local_savian_ai'),

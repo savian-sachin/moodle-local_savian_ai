@@ -24,8 +24,6 @@
 
 namespace local_savian_ai\analytics;
 
-defined('MOODLE_INTERNAL') || die();
-
 require_once($CFG->dirroot . '/local/savian_ai/classes/api/client.php');
 
 /**
@@ -45,7 +43,6 @@ require_once($CFG->dirroot . '/local/savian_ai/classes/api/client.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class report_builder {
-
     /**
      * @var data_extractor Data extractor instance.
      */
@@ -163,7 +160,6 @@ class report_builder {
                 'insights' => $result->insights ?? null,
                 'message' => $result->success ? 'Report sent successfully' : ($result->error ?? 'Unknown error'),
             ];
-
         } catch (\Exception $e) {
             // Mark as failed.
             $this->mark_report_failed($reportid, $e->getMessage());
@@ -309,7 +305,10 @@ class report_builder {
 
             // Calculate engagement metrics.
             $engagementmetrics = $this->calculator->calculate_engagement_metrics(
-                $courseid, $student->id, $datefrom, $dateto
+                $courseid,
+                $student->id,
+                $datefrom,
+                $dateto
             );
 
             // Calculate grade metrics.
@@ -317,7 +316,10 @@ class report_builder {
 
             // Calculate risk indicators.
             $riskindicators = $this->calculator->calculate_risk_indicators(
-                $courseid, $student->id, $engagementmetrics, $grademetrics
+                $courseid,
+                $student->id,
+                $engagementmetrics,
+                $grademetrics
             );
 
             // Get activity timeline (last 30 days).
@@ -333,7 +335,6 @@ class report_builder {
                 'activity_timeline' => $activitytimeline,
                 'module_performance' => [], // TODO: Implement per-module performance.
             ];
-
         } catch (\Exception $e) {
             // Log error but continue with other students.
             debugging('Error processing student ' . $student->id . ': ' . $e->getMessage(), DEBUG_DEVELOPER);
@@ -399,8 +400,10 @@ class report_builder {
                 $response = $this->apiclient->send_analytics($reportdata);
 
                 // Accept both 200 (sync) and 202 (async) as success.
-                if (($response->http_code === 200 || $response->http_code === 202) &&
-                    isset($response->success) && $response->success) {
+                if (
+                    ($response->http_code === 200 || $response->http_code === 202) &&
+                    isset($response->success) && $response->success
+                ) {
                     // Success - mark as sent (or pending for async).
                     $this->mark_report_sent($reportid, $response);
                     return $response;
@@ -421,7 +424,6 @@ class report_builder {
 
                 // Exponential backoff.
                 sleep(pow(2, $attempt));
-
             } catch (\Exception $e) {
                 $attempt++;
                 if ($attempt >= self::MAX_RETRIES) {

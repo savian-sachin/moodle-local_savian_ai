@@ -24,8 +24,6 @@
 
 namespace local_savian_ai\chat;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Manager class for chat restrictions.
  *
@@ -239,7 +237,7 @@ class restriction_manager {
 
             // Get group names.
             if (!empty($groupids)) {
-                list($insql, $params) = $DB->get_in_or_equal($groupids);
+                [$insql, $params] = $DB->get_in_or_equal($groupids);
                 $groups = $DB->get_records_select('groups', "id $insql", $params, '', 'id, name');
                 $restriction->group_names = array_column($groups, 'name');
             } else {

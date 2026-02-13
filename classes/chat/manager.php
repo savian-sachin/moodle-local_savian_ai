@@ -24,8 +24,6 @@
 
 namespace local_savian_ai\chat;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Chat manager class - handles chat operations and business logic.
  *
@@ -411,7 +409,7 @@ class manager {
             'role' => $message->role,
             'content' => $message->content,
             'formatted_content' => $message->formatted_content,
-            'sources' => $message->sources ?? '[]',  // Keep as JSON string for external API.
+            'sources' => $message->sources ?? '[]', // Keep as JSON string for external API.
             'feedback' => $message->feedback,
             'timestamp' => $message->timecreated,
             'formatted_time' => userdate($message->timecreated, '%H:%M'),

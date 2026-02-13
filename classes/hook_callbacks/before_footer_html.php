@@ -32,7 +32,6 @@ namespace local_savian_ai\hook_callbacks;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class before_footer_html {
-
     /**
      * Callback to load chat widget on course pages.
      *
@@ -60,11 +59,11 @@ class before_footer_html {
 
         // List of allowed page types (course-related pages students access).
         $allowedpagetypes = [
-            'course-view-',           // Course homepage.
-            'mod-',                   // All activity modules (forum, quiz, assign, page, etc.).
-            'blocks-',                // Block pages within course.
-            'grade-report-',          // Grade reports.
-            'local-savian_ai-',       // Our own plugin pages.
+            'course-view-', // Course homepage.
+            'mod-', // All activity modules (forum, quiz, assign, page, etc.).
+            'blocks-', // Block pages within course.
+            'grade-report-', // Grade reports.
+            'local-savian_ai-', // Our own plugin pages.
         ];
 
         // Check if current page is in allowed list.
@@ -79,11 +78,11 @@ class before_footer_html {
         // Block on admin, settings, preferences, user profile edit, etc.
         $blockedpagetypes = [
             'admin-',
-            'my-index',               // Dashboard.
-            'user-edit',              // Edit profile.
-            'user-preferences-',      // User preferences.
-            'course-edit',            // Course settings.
-            'enrol-',                 // Enrollment pages.
+            'my-index', // Dashboard.
+            'user-edit', // Edit profile.
+            'user-preferences-', // User preferences.
+            'course-edit', // Course settings.
+            'enrol-', // Enrollment pages.
         ];
 
         foreach ($blockedpagetypes as $blocked) {

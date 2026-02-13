@@ -240,7 +240,7 @@ echo html_writer::tag('h3', get_string('document_list', 'local_savian_ai'), ['cl
 // Show only current course documents (no global library).
 $documents = $DB->get_records('local_savian_documents', [
     'is_active' => 1,
-    'course_id' => $courseid
+    'course_id' => $courseid,
 ], 'timecreated DESC');
 
 if (empty($documents)) {
