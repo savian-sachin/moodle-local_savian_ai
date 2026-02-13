@@ -24,8 +24,6 @@
 
 namespace local_savian_ai\analytics;
 
-require_once($CFG->dirroot . '/local/savian_ai/classes/api/client.php');
-
 /**
  * Report builder class - orchestrates analytics data collection and API submission.
  *
