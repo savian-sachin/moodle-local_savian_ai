@@ -464,7 +464,7 @@ class chat extends external_api {
 
         // Get completed documents for this course.
         $documents = $DB->get_records(
-            'local_savian_documents',
+            'local_savian_ai_documents',
             [
                 'course_id' => $params['courseid'],
                 'is_active' => 1,

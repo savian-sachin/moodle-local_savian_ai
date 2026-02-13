@@ -146,11 +146,11 @@ class analytics_observer {
             $eventrecord->processed = 0;
             $eventrecord->timecreated = time();
 
-            $DB->insert_record('local_savian_analytics_events', $eventrecord);
+            $DB->insert_record('local_savian_ai_analytics_events', $eventrecord);
 
             // Check if threshold reached for this course.
             $unprocessedcount = $DB->count_records(
-                'local_savian_analytics_events',
+                'local_savian_ai_analytics_events',
                 [
                     'course_id' => $courseid,
                     'processed' => 0,
@@ -177,7 +177,7 @@ class analytics_observer {
         try {
             // Get unprocessed events.
             $events = $DB->get_records(
-                'local_savian_analytics_events',
+                'local_savian_ai_analytics_events',
                 [
                     'course_id' => $courseid,
                     'processed' => 0,
@@ -224,7 +224,7 @@ class analytics_observer {
         $cutoff = time() - ($daysold * 86400);
 
         $deleted = $DB->delete_records_select(
-            'local_savian_analytics_events',
+            'local_savian_ai_analytics_events',
             'processed = 1 AND timecreated < ?',
             [$cutoff]
         );

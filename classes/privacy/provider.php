@@ -53,7 +53,7 @@ class provider implements
     public static function get_metadata(collection $collection): collection {
         // Chat conversations.
         $collection->add_database_table(
-            'local_savian_chat_conversations',
+            'local_savian_ai_chat_conversations',
             [
                 'user_id' => 'privacy:metadata:conversations:user_id',
                 'course_id' => 'privacy:metadata:conversations:course_id',
@@ -65,7 +65,7 @@ class provider implements
 
         // Chat messages.
         $collection->add_database_table(
-            'local_savian_chat_messages',
+            'local_savian_ai_chat_messages',
             [
                 'conversation_id' => 'privacy:metadata:messages:conversation_id',
                 'role' => 'privacy:metadata:messages:role',
@@ -79,7 +79,7 @@ class provider implements
 
         // Chat settings.
         $collection->add_database_table(
-            'local_savian_chat_settings',
+            'local_savian_ai_chat_settings',
             [
                 'user_id' => 'privacy:metadata:settings:user_id',
                 'widget_position' => 'privacy:metadata:settings:widget_position',
@@ -90,7 +90,7 @@ class provider implements
 
         // Generation history.
         $collection->add_database_table(
-            'local_savian_generations',
+            'local_savian_ai_generations',
             [
                 'user_id' => 'privacy:metadata:generations:user_id',
                 'course_id' => 'privacy:metadata:generations:course_id',
@@ -103,7 +103,7 @@ class provider implements
 
         // Analytics reports (who triggered manual reports).
         $collection->add_database_table(
-            'local_savian_analytics_reports',
+            'local_savian_ai_analytics_reports',
             [
                 'course_id' => 'privacy:metadata:analytics_reports:course_id',
                 'user_id' => 'privacy:metadata:analytics_reports:user_id',
@@ -115,7 +115,7 @@ class provider implements
 
         // Analytics events (real-time tracking).
         $collection->add_database_table(
-            'local_savian_analytics_events',
+            'local_savian_ai_analytics_events',
             [
                 'course_id' => 'privacy:metadata:analytics_events:course_id',
                 'user_id' => 'privacy:metadata:analytics_events:user_id',
@@ -157,7 +157,7 @@ class provider implements
         // Add course contexts where user has chat conversations.
         $sql = "SELECT DISTINCT ctx.id
                   FROM {context} ctx
-                  JOIN {local_savian_chat_conversations} c ON c.course_id = ctx.instanceid
+                  JOIN {local_savian_ai_chat_conversations} c ON c.course_id = ctx.instanceid
                  WHERE ctx.contextlevel = :contextlevel
                    AND c.user_id = :userid";
 
@@ -184,14 +184,14 @@ class provider implements
         foreach ($contextlist->get_contexts() as $context) {
             // Export chat conversations.
             $conversations = $DB->get_records(
-                'local_savian_chat_conversations',
+                'local_savian_ai_chat_conversations',
                 ['user_id' => $userid]
             );
 
             foreach ($conversations as $conversation) {
                 // Get messages for this conversation.
                 $messages = $DB->get_records(
-                    'local_savian_chat_messages',
+                    'local_savian_ai_chat_messages',
                     ['conversation_id' => $conversation->id],
                     'timecreated ASC'
                 );
@@ -221,7 +221,7 @@ class provider implements
             }
 
             // Export chat settings.
-            $settings = $DB->get_record('local_savian_chat_settings', ['user_id' => $userid]);
+            $settings = $DB->get_record('local_savian_ai_chat_settings', ['user_id' => $userid]);
             if ($settings) {
                 writer::with_context($context)->export_data(
                     [get_string('privacy:chatsettings', 'local_savian_ai')],
@@ -233,7 +233,7 @@ class provider implements
             }
 
             // Export generation history.
-            $generations = $DB->get_records('local_savian_generations', ['user_id' => $userid]);
+            $generations = $DB->get_records('local_savian_ai_generations', ['user_id' => $userid]);
             foreach ($generations as $generation) {
                 writer::with_context($context)->export_data(
                     [get_string('privacy:generationdata', 'local_savian_ai'), $generation->id],
@@ -247,7 +247,7 @@ class provider implements
             }
 
             // Export analytics reports (manually triggered by this user).
-            $analyticsreports = $DB->get_records('local_savian_analytics_reports', ['user_id' => $userid]);
+            $analyticsreports = $DB->get_records('local_savian_ai_analytics_reports', ['user_id' => $userid]);
             foreach ($analyticsreports as $report) {
                 writer::with_context($context)->export_data(
                     [get_string('privacy:analyticsreports', 'local_savian_ai'), $report->id],
@@ -263,7 +263,7 @@ class provider implements
             }
 
             // Export analytics events (real-time tracking).
-            $analyticsevents = $DB->get_records('local_savian_analytics_events', ['user_id' => $userid]);
+            $analyticsevents = $DB->get_records('local_savian_ai_analytics_events', ['user_id' => $userid]);
             if (!empty($analyticsevents)) {
                 $eventsdata = array_map(
                     function ($event) {
@@ -323,33 +323,33 @@ class provider implements
         global $DB;
 
         // Get all conversations for this user.
-        $conversations = $DB->get_records('local_savian_chat_conversations', ['user_id' => $userid]);
+        $conversations = $DB->get_records('local_savian_ai_chat_conversations', ['user_id' => $userid]);
 
         foreach ($conversations as $conversation) {
             // Delete all messages in this conversation.
-            $DB->delete_records('local_savian_chat_messages', ['conversation_id' => $conversation->id]);
+            $DB->delete_records('local_savian_ai_chat_messages', ['conversation_id' => $conversation->id]);
         }
 
         // Delete conversations.
-        $DB->delete_records('local_savian_chat_conversations', ['user_id' => $userid]);
+        $DB->delete_records('local_savian_ai_chat_conversations', ['user_id' => $userid]);
 
         // Delete chat settings.
-        $DB->delete_records('local_savian_chat_settings', ['user_id' => $userid]);
+        $DB->delete_records('local_savian_ai_chat_settings', ['user_id' => $userid]);
 
         // Delete generation history.
-        $DB->delete_records('local_savian_generations', ['user_id' => $userid]);
+        $DB->delete_records('local_savian_ai_generations', ['user_id' => $userid]);
 
         // Delete analytics reports triggered by this user.
-        $DB->delete_records('local_savian_analytics_reports', ['user_id' => $userid]);
+        $DB->delete_records('local_savian_ai_analytics_reports', ['user_id' => $userid]);
 
         // Delete analytics events for this user.
-        $DB->delete_records('local_savian_analytics_events', ['user_id' => $userid]);
+        $DB->delete_records('local_savian_ai_analytics_events', ['user_id' => $userid]);
 
         // Delete analytics cache (anonymized data).
         // Note: We delete by finding the anonymized ID first.
         $anonymizer = new \local_savian_ai\analytics\anonymizer();
         $anonid = $anonymizer->anonymize_user_id($userid);
-        $DB->delete_records('local_savian_analytics_cache', ['anon_user_id' => $anonid]);
+        $DB->delete_records('local_savian_ai_analytics_cache', ['anon_user_id' => $anonid]);
 
         // Note: Documents are not user-specific (shared resources), so not deleted.
     }
@@ -364,19 +364,19 @@ class provider implements
 
         if ($context->contextlevel == CONTEXT_SYSTEM) {
             // Add users who have chat data.
-            $sql = "SELECT DISTINCT user_id FROM {local_savian_chat_conversations}";
+            $sql = "SELECT DISTINCT user_id FROM {local_savian_ai_chat_conversations}";
             $userlist->add_from_sql('user_id', $sql, []);
 
             // Add users who have generation history.
-            $sql = "SELECT DISTINCT user_id FROM {local_savian_generations}";
+            $sql = "SELECT DISTINCT user_id FROM {local_savian_ai_generations}";
             $userlist->add_from_sql('user_id', $sql, []);
 
             // Add users who triggered analytics reports.
-            $sql = "SELECT DISTINCT user_id FROM {local_savian_analytics_reports} WHERE user_id IS NOT NULL";
+            $sql = "SELECT DISTINCT user_id FROM {local_savian_ai_analytics_reports} WHERE user_id IS NOT NULL";
             $userlist->add_from_sql('user_id', $sql, []);
 
             // Add users in analytics events.
-            $sql = "SELECT DISTINCT user_id FROM {local_savian_analytics_events}";
+            $sql = "SELECT DISTINCT user_id FROM {local_savian_ai_analytics_events}";
             $userlist->add_from_sql('user_id', $sql, []);
         }
     }

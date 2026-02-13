@@ -97,7 +97,7 @@ if ($action === 'poll' && $saviancache->get('analytics_polling_course')) {
         if (isset($latestresponse->status) && $latestresponse->status === 'completed' && isset($latestresponse->insights)) {
             // Report is ready.
             $moodlereport = $DB->get_record_sql(
-                "SELECT * FROM {local_savian_analytics_reports}
+                "SELECT * FROM {local_savian_ai_analytics_reports}
                  WHERE course_id = ? AND status IN ('pending', 'sending', 'sent')
                  ORDER BY timecreated DESC LIMIT 1",
                 [$courseid]
@@ -111,7 +111,7 @@ if ($action === 'poll' && $saviancache->get('analytics_polling_course')) {
                 $update->api_response = json_encode($latestresponse);
                 $update->student_count = $latestresponse->student_count ?? $moodlereport->student_count;
                 $update->timemodified = time();
-                $DB->update_record('local_savian_analytics_reports', $update);
+                $DB->update_record('local_savian_ai_analytics_reports', $update);
             }
 
             $saviancache->delete('analytics_polling_course');
@@ -433,7 +433,7 @@ $latestresponse = $client->get_latest_analytics($courseid);
 if ($latestresponse->http_code === 200 && isset($latestresponse->insights) && $latestresponse->status === 'completed') {
     // Get most recent Moodle report without insights.
     $moodlereport = $DB->get_record_sql(
-        "SELECT * FROM {local_savian_analytics_reports}
+        "SELECT * FROM {local_savian_ai_analytics_reports}
          WHERE course_id = ?
          ORDER BY timecreated DESC
          LIMIT 1",
@@ -453,14 +453,14 @@ if ($latestresponse->http_code === 200 && isset($latestresponse->insights) && $l
             $update->api_response = json_encode($latestresponse);
             $update->student_count = $latestresponse->student_count ?? $moodlereport->student_count;
             $update->timemodified = time();
-            $DB->update_record('local_savian_analytics_reports', $update);
+            $DB->update_record('local_savian_ai_analytics_reports', $update);
         }
     }
 }
 
 // Get reports from Moodle database (now synced).
 $reports = $DB->get_records(
-    'local_savian_analytics_reports',
+    'local_savian_ai_analytics_reports',
     ['course_id' => $courseid],
     'timecreated DESC'
 );

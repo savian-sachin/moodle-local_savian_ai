@@ -127,7 +127,7 @@ if ($action === 'save' && confirm_sesskey()) {
     $welcomemessage = optional_param('welcome_message', '', PARAM_TEXT);
     $autoincludedocs = optional_param('auto_include_docs', 0, PARAM_INT);
 
-    $config = $DB->get_record('local_savian_chat_course_config', ['course_id' => $courseid]);
+    $config = $DB->get_record('local_savian_ai_chat_course_config', ['course_id' => $courseid]);
 
     if ($config) {
         $config->chat_enabled = $chatenabled;
@@ -136,7 +136,7 @@ if ($action === 'save' && confirm_sesskey()) {
         $config->auto_include_docs = $autoincludedocs;
         $config->timemodified = time();
         $config->usermodified = $USER->id;
-        $DB->update_record('local_savian_chat_course_config', $config);
+        $DB->update_record('local_savian_ai_chat_course_config', $config);
     } else {
         $config = new stdClass();
         $config->course_id = $courseid;
@@ -146,7 +146,7 @@ if ($action === 'save' && confirm_sesskey()) {
         $config->auto_include_docs = $autoincludedocs;
         $config->timemodified = time();
         $config->usermodified = $USER->id;
-        $DB->insert_record('local_savian_chat_course_config', $config);
+        $DB->insert_record('local_savian_ai_chat_course_config', $config);
     }
 
     redirect(
@@ -166,7 +166,7 @@ echo local_savian_ai_render_header(
 );
 
 // Get current settings.
-$config = $DB->get_record('local_savian_chat_course_config', ['course_id' => $courseid]);
+$config = $DB->get_record('local_savian_ai_chat_course_config', ['course_id' => $courseid]);
 if (!$config) {
     $config = new stdClass();
     $config->chat_enabled = 1;

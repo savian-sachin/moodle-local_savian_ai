@@ -102,7 +102,7 @@ class before_footer_html {
 
         // Check course-level chat settings.
         if ($COURSE->id != SITEID) {
-            $courseconfig = $DB->get_record('local_savian_chat_course_config', ['course_id' => $COURSE->id]);
+            $courseconfig = $DB->get_record('local_savian_ai_chat_course_config', ['course_id' => $COURSE->id]);
 
             // If course config exists, check if chat is enabled.
             if ($courseconfig && !$courseconfig->chat_enabled) {
@@ -127,12 +127,12 @@ class before_footer_html {
         }
 
         // Load user settings.
-        $usersettings = $DB->get_record('local_savian_chat_settings', ['user_id' => $USER->id]);
+        $usersettings = $DB->get_record('local_savian_ai_chat_settings', ['user_id' => $USER->id]);
 
         // Get welcome message (course-specific overrides global).
         $welcomemessage = get_config('local_savian_ai', 'chat_welcome_message');
         if ($COURSE->id != SITEID) {
-            $courseconfig = $DB->get_record('local_savian_chat_course_config', ['course_id' => $COURSE->id]);
+            $courseconfig = $DB->get_record('local_savian_ai_chat_course_config', ['course_id' => $COURSE->id]);
             if ($courseconfig && !empty($courseconfig->welcome_message)) {
                 $welcomemessage = $courseconfig->welcome_message;
             }

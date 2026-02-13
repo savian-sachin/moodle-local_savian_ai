@@ -65,7 +65,7 @@ class cleanup_old_analytics extends \core\task\scheduled_task {
 
         // Delete old analytics reports.
         $deletedreports = $DB->delete_records_select(
-            'local_savian_analytics_reports',
+            'local_savian_ai_analytics_reports',
             'timecreated < ?',
             [$cutofftime]
         );
@@ -76,7 +76,7 @@ class cleanup_old_analytics extends \core\task\scheduled_task {
 
         // Delete old processed analytics events (keep unprocessed).
         $deletedevents = $DB->delete_records_select(
-            'local_savian_analytics_events',
+            'local_savian_ai_analytics_events',
             'processed = 1 AND timecreated < ?',
             [$cutofftime]
         );
@@ -88,7 +88,7 @@ class cleanup_old_analytics extends \core\task\scheduled_task {
         // Delete old analytics cache (stale data).
         $cachecutoff = time() - (7 * 86400); // 7 days for cache.
         $deletedcache = $DB->delete_records_select(
-            'local_savian_analytics_cache',
+            'local_savian_ai_analytics_cache',
             'timemodified < ?',
             [$cachecutoff]
         );
@@ -98,7 +98,7 @@ class cleanup_old_analytics extends \core\task\scheduled_task {
         }
 
         // Clean up orphaned events (user or course deleted).
-        $sql = "DELETE FROM {local_savian_analytics_events}
+        $sql = "DELETE FROM {local_savian_ai_analytics_events}
                 WHERE user_id NOT IN (SELECT id FROM {user})
                    OR course_id NOT IN (SELECT id FROM {course})";
         $orphanedevents = $DB->execute($sql);

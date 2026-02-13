@@ -49,7 +49,7 @@ class restriction_manager {
         $usergroups = $this->get_user_group_ids($courseid, $userid);
 
         // Get all enabled restrictions for this course.
-        $restrictions = $DB->get_records('local_savian_chat_restrictions', [
+        $restrictions = $DB->get_records('local_savian_ai_chat_restrictions', [
             'course_id' => $courseid,
             'is_enabled' => 1,
         ]);
@@ -122,7 +122,7 @@ class restriction_manager {
         global $DB;
 
         $restrictiongroups = $DB->get_fieldset_select(
-            'local_savian_chat_restriction_groups',
+            'local_savian_ai_chat_restriction_groups',
             'group_id',
             'restriction_id = ?',
             [$restrictionid]
@@ -219,7 +219,7 @@ class restriction_manager {
     public function get_restrictions(int $courseid): array {
         global $DB;
 
-        $restrictions = $DB->get_records('local_savian_chat_restrictions', [
+        $restrictions = $DB->get_records('local_savian_ai_chat_restrictions', [
             'course_id' => $courseid,
         ], 'timecreated DESC');
 
@@ -228,7 +228,7 @@ class restriction_manager {
         foreach ($restrictions as $restriction) {
             // Get assigned groups.
             $groupids = $DB->get_fieldset_select(
-                'local_savian_chat_restriction_groups',
+                'local_savian_ai_chat_restriction_groups',
                 'group_id',
                 'restriction_id = ?',
                 [$restriction->id]
@@ -336,12 +336,12 @@ class restriction_manager {
         if (!empty($data->id)) {
             // Update existing.
             $record->id = $data->id;
-            $DB->update_record('local_savian_chat_restrictions', $record);
+            $DB->update_record('local_savian_ai_chat_restrictions', $record);
             $restrictionid = $record->id;
         } else {
             // Insert new.
             $record->timecreated = $now;
-            $restrictionid = $DB->insert_record('local_savian_chat_restrictions', $record);
+            $restrictionid = $DB->insert_record('local_savian_ai_chat_restrictions', $record);
         }
 
         // Update group assignments.
@@ -360,14 +360,14 @@ class restriction_manager {
         global $DB;
 
         // Delete existing assignments.
-        $DB->delete_records('local_savian_chat_restriction_groups', ['restriction_id' => $restrictionid]);
+        $DB->delete_records('local_savian_ai_chat_restriction_groups', ['restriction_id' => $restrictionid]);
 
         // Insert new assignments.
         foreach ($groupids as $groupid) {
             $record = new \stdClass();
             $record->restriction_id = $restrictionid;
             $record->group_id = $groupid;
-            $DB->insert_record('local_savian_chat_restriction_groups', $record);
+            $DB->insert_record('local_savian_ai_chat_restriction_groups', $record);
         }
     }
 
@@ -382,7 +382,7 @@ class restriction_manager {
         global $DB;
 
         // Verify restriction belongs to this course.
-        $restriction = $DB->get_record('local_savian_chat_restrictions', [
+        $restriction = $DB->get_record('local_savian_ai_chat_restrictions', [
             'id' => $restrictionid,
             'course_id' => $courseid,
         ]);
@@ -392,10 +392,10 @@ class restriction_manager {
         }
 
         // Delete group assignments first.
-        $DB->delete_records('local_savian_chat_restriction_groups', ['restriction_id' => $restrictionid]);
+        $DB->delete_records('local_savian_ai_chat_restriction_groups', ['restriction_id' => $restrictionid]);
 
         // Delete restriction.
-        $DB->delete_records('local_savian_chat_restrictions', ['id' => $restrictionid]);
+        $DB->delete_records('local_savian_ai_chat_restrictions', ['id' => $restrictionid]);
 
         return true;
     }
@@ -411,7 +411,7 @@ class restriction_manager {
     public function toggle_restriction(int $restrictionid, int $courseid, int $userid) {
         global $DB;
 
-        $restriction = $DB->get_record('local_savian_chat_restrictions', [
+        $restriction = $DB->get_record('local_savian_ai_chat_restrictions', [
             'id' => $restrictionid,
             'course_id' => $courseid,
         ]);
@@ -423,7 +423,7 @@ class restriction_manager {
         $newstatus = $restriction->is_enabled ? 0 : 1;
 
         $DB->update_record(
-            'local_savian_chat_restrictions',
+            'local_savian_ai_chat_restrictions',
             (object) [
                 'id' => $restrictionid,
                 'is_enabled' => $newstatus,
@@ -445,7 +445,7 @@ class restriction_manager {
     public function get_restriction(int $restrictionid, int $courseid): ?object {
         global $DB;
 
-        $restriction = $DB->get_record('local_savian_chat_restrictions', [
+        $restriction = $DB->get_record('local_savian_ai_chat_restrictions', [
             'id' => $restrictionid,
             'course_id' => $courseid,
         ]);
@@ -456,7 +456,7 @@ class restriction_manager {
 
         // Get assigned groups.
         $restriction->group_ids = $DB->get_fieldset_select(
-            'local_savian_chat_restriction_groups',
+            'local_savian_ai_chat_restriction_groups',
             'group_id',
             'restriction_id = ?',
             [$restriction->id]

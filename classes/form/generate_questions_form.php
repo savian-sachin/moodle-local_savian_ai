@@ -66,7 +66,7 @@ class generate_questions_form extends \moodleform {
         if ($mode === 'documents') {
             // Get only current course documents.
             $documents = $DB->get_records_menu(
-                'local_savian_documents',
+                'local_savian_ai_documents',
                 ['is_active' => 1, 'status' => 'completed', 'course_id' => $courseid],
                 'title ASC',
                 'savian_doc_id, title'

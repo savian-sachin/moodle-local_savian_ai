@@ -193,11 +193,11 @@ function local_savian_ai_org_code_updated() {
     // If org code has changed and there was a previous value.
     if (!empty($previousorgcode) && $previousorgcode !== $neworgcode) {
         // Count and delete all documents.
-        $count = $DB->count_records('local_savian_documents');
+        $count = $DB->count_records('local_savian_ai_documents');
 
         if ($count > 0) {
             // Delete all documents.
-            $DB->delete_records('local_savian_documents');
+            $DB->delete_records('local_savian_ai_documents');
 
             // Show admin notification.
             \core\notification::warning(
@@ -230,7 +230,7 @@ function local_savian_ai_sync_documents() {
 
     if ($syncresponse->http_code === 200 && isset($syncresponse->documents)) {
         foreach ($syncresponse->documents as $doc) {
-            $existing = $DB->get_record('local_savian_documents', ['savian_doc_id' => $doc->id]);
+            $existing = $DB->get_record('local_savian_ai_documents', ['savian_doc_id' => $doc->id]);
 
             $record = new stdClass();
             $record->savian_doc_id = $doc->id;
@@ -255,12 +255,12 @@ function local_savian_ai_sync_documents() {
                 $record->course_id = $existing->course_id ?: $apicourseid;
                 $record->timecreated = $existing->timecreated;
                 $record->usermodified = $existing->usermodified;
-                $DB->update_record('local_savian_documents', $record);
+                $DB->update_record('local_savian_ai_documents', $record);
             } else {
                 $record->course_id = $apicourseid;
                 $record->timecreated = time();
                 $record->usermodified = 0;
-                $DB->insert_record('local_savian_documents', $record);
+                $DB->insert_record('local_savian_ai_documents', $record);
             }
             $synced++;
         }

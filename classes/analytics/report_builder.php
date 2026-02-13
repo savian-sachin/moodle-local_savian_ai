@@ -129,7 +129,7 @@ class report_builder {
         $report->timemodified = time();
         $report->retry_count = 0;
 
-        $reportid = $this->db->insert_record('local_savian_analytics_reports', $report);
+        $reportid = $this->db->insert_record('local_savian_ai_analytics_reports', $report);
 
         try {
             // Build report data.
@@ -137,13 +137,13 @@ class report_builder {
 
             // Update student and activity counts.
             $this->db->set_field(
-                'local_savian_analytics_reports',
+                'local_savian_ai_analytics_reports',
                 'student_count',
                 count($reportdata['students']),
                 ['id' => $reportid]
             );
             $this->db->set_field(
-                'local_savian_analytics_reports',
+                'local_savian_ai_analytics_reports',
                 'activity_count',
                 $reportdata['course_summary']['total_activities'],
                 ['id' => $reportid]
@@ -391,8 +391,8 @@ class report_builder {
         while ($attempt < self::MAX_RETRIES) {
             try {
                 // Update status to sending.
-                $this->db->set_field('local_savian_analytics_reports', 'status', 'sending', ['id' => $reportid]);
-                $this->db->set_field('local_savian_analytics_reports', 'retry_count', $attempt, ['id' => $reportid]);
+                $this->db->set_field('local_savian_ai_analytics_reports', 'status', 'sending', ['id' => $reportid]);
+                $this->db->set_field('local_savian_ai_analytics_reports', 'retry_count', $attempt, ['id' => $reportid]);
 
                 // Send to API.
                 $response = $this->apiclient->send_analytics($reportdata);
@@ -450,7 +450,7 @@ class report_builder {
         $update->api_response = json_encode($response);
         $update->timemodified = time();
 
-        $this->db->update_record('local_savian_analytics_reports', $update);
+        $this->db->update_record('local_savian_ai_analytics_reports', $update);
     }
 
     /**
@@ -466,7 +466,7 @@ class report_builder {
         $update->error_message = $errormessage;
         $update->timemodified = time();
 
-        $this->db->update_record('local_savian_analytics_reports', $update);
+        $this->db->update_record('local_savian_ai_analytics_reports', $update);
     }
 
     /**

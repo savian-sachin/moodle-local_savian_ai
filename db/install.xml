@@ -2,7 +2,7 @@
 <XMLDB PATH="local/savian_ai/db" VERSION="20251230" COMMENT="XMLDB file for Savian AI plugin">
   <TABLES>
     <!-- Configuration table for API settings -->
-    <TABLE NAME="local_savian_config" COMMENT="Stores Savian AI API configuration">
+    <TABLE NAME="local_savian_ai_config" COMMENT="Stores Savian AI API configuration">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Setting name"/>
@@ -16,7 +16,7 @@
     </TABLE>
 
     <!-- Documents table for caching uploaded documents -->
-    <TABLE NAME="local_savian_documents" COMMENT="Caches documents uploaded to Savian AI">
+    <TABLE NAME="local_savian_ai_documents" COMMENT="Caches documents uploaded to Savian AI">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="savian_doc_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Document ID from Savian API"/>
@@ -49,7 +49,7 @@
     </TABLE>
 
     <!-- Generations table for logging content generation -->
-    <TABLE NAME="local_savian_generations" COMMENT="Logs content generation requests">
+    <TABLE NAME="local_savian_ai_generations" COMMENT="Logs content generation requests">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="request_id" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" COMMENT="UUID from API"/>
@@ -79,7 +79,7 @@
     </TABLE>
 
     <!-- Chat conversations table -->
-    <TABLE NAME="local_savian_chat_conversations" COMMENT="Stores chat conversations">
+    <TABLE NAME="local_savian_ai_chat_conversations" COMMENT="Stores chat conversations">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="conversation_uuid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="UUID from API or generated locally"/>
@@ -107,7 +107,7 @@
     </TABLE>
 
     <!-- Chat messages table -->
-    <TABLE NAME="local_savian_chat_messages" COMMENT="Stores individual chat messages">
+    <TABLE NAME="local_savian_ai_chat_messages" COMMENT="Stores individual chat messages">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="conversation_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -124,7 +124,7 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="conversation_id" TYPE="foreign" FIELDS="conversation_id" REFTABLE="local_savian_chat_conversations" REFFIELDS="id"/>
+        <KEY NAME="conversation_id" TYPE="foreign" FIELDS="conversation_id" REFTABLE="local_savian_ai_chat_conversations" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
         <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated"/>
@@ -133,7 +133,7 @@
     </TABLE>
 
     <!-- Chat user settings table -->
-    <TABLE NAME="local_savian_chat_settings" COMMENT="Stores per-user chat widget preferences">
+    <TABLE NAME="local_savian_ai_chat_settings" COMMENT="Stores per-user chat widget preferences">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="user_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -150,7 +150,7 @@
     </TABLE>
 
     <!-- Per-course chat settings table -->
-    <TABLE NAME="local_savian_chat_course_config" COMMENT="Per-course chat widget configuration">
+    <TABLE NAME="local_savian_ai_chat_course_config" COMMENT="Per-course chat widget configuration">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="course_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -169,7 +169,7 @@
     </TABLE>
 
     <!-- Chat restrictions table for time-based chat disabling -->
-    <TABLE NAME="local_savian_chat_restrictions" COMMENT="Chat restriction rules for courses">
+    <TABLE NAME="local_savian_ai_chat_restrictions" COMMENT="Chat restriction rules for courses">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="course_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Course this restriction applies to"/>
@@ -197,7 +197,7 @@
     </TABLE>
 
     <!-- Chat restriction groups mapping table -->
-    <TABLE NAME="local_savian_chat_restriction_groups" COMMENT="Group assignments for chat restrictions">
+    <TABLE NAME="local_savian_ai_chat_restriction_groups" COMMENT="Group assignments for chat restrictions">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="restriction_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -205,7 +205,7 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="restriction_id_fk" TYPE="foreign" FIELDS="restriction_id" REFTABLE="local_savian_chat_restrictions" REFFIELDS="id"/>
+        <KEY NAME="restriction_id_fk" TYPE="foreign" FIELDS="restriction_id" REFTABLE="local_savian_ai_chat_restrictions" REFFIELDS="id"/>
         <KEY NAME="group_id_fk" TYPE="foreign" FIELDS="group_id" REFTABLE="groups" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
@@ -214,7 +214,7 @@
     </TABLE>
 
     <!-- Analytics reports table for tracking sent analytics reports -->
-    <TABLE NAME="local_savian_analytics_reports" COMMENT="Tracks analytics reports sent to Savian AI API">
+    <TABLE NAME="local_savian_ai_analytics_reports" COMMENT="Tracks analytics reports sent to Savian AI API">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="course_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -245,7 +245,7 @@
     </TABLE>
 
     <!-- Analytics cache table for caching extracted metrics -->
-    <TABLE NAME="local_savian_analytics_cache" COMMENT="Caches extracted analytics data for performance">
+    <TABLE NAME="local_savian_ai_analytics_cache" COMMENT="Caches extracted analytics data for performance">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="course_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -265,7 +265,7 @@
     </TABLE>
 
     <!-- Analytics events table for tracking real-time events -->
-    <TABLE NAME="local_savian_analytics_events" COMMENT="Tracks real-time events for analytics">
+    <TABLE NAME="local_savian_ai_analytics_events" COMMENT="Tracks real-time events for analytics">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="course_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>

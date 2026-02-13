@@ -47,8 +47,8 @@ class analytics {
                     COUNT(m.id) as total_messages,
                     AVG(c.message_count) as avg_messages_per_conversation,
                     AVG(m.response_time_ms) as avg_response_time
-                FROM {local_savian_chat_conversations} c
-                LEFT JOIN {local_savian_chat_messages} m ON m.conversation_id = c.id
+                FROM {local_savian_ai_chat_conversations} c
+                LEFT JOIN {local_savian_ai_chat_messages} m ON m.conversation_id = c.id
                 WHERE c.course_id = ? AND c.is_archived = 0";
 
         $stats = $DB->get_record_sql($sql, [$courseid]);
@@ -94,8 +94,8 @@ class analytics {
                     COUNT(m.id) as message_count,
                     MAX(c.last_message_at) as last_active
                 FROM {user} u
-                JOIN {local_savian_chat_conversations} c ON c.user_id = u.id
-                LEFT JOIN {local_savian_chat_messages} m ON m.conversation_id = c.id
+                JOIN {local_savian_ai_chat_conversations} c ON c.user_id = u.id
+                LEFT JOIN {local_savian_ai_chat_messages} m ON m.conversation_id = c.id
                 WHERE c.course_id = :courseid $datefilter
                 GROUP BY u.id, u.firstname, u.lastname, u.email
                 ORDER BY conversation_count DESC";
@@ -117,8 +117,8 @@ class analytics {
                     COUNT(CASE WHEN m.feedback = -1 THEN 1 END) as negative_feedback,
                     COUNT(CASE WHEN m.feedback IS NOT NULL THEN 1 END) as total_feedback,
                     COUNT(m.id) as total_assistant_messages
-                FROM {local_savian_chat_messages} m
-                JOIN {local_savian_chat_conversations} c ON c.id = m.conversation_id
+                FROM {local_savian_ai_chat_messages} m
+                JOIN {local_savian_ai_chat_conversations} c ON c.id = m.conversation_id
                 WHERE c.course_id = ? AND m.role = 'assistant'";
 
         $stats = $DB->get_record_sql($sql, [$courseid]);
@@ -143,21 +143,21 @@ class analytics {
         global $DB;
 
         $stats = new \stdClass();
-        $stats->total_conversations = $DB->count_records('local_savian_chat_conversations', ['is_archived' => 0]);
-        $stats->total_messages = $DB->count_records('local_savian_chat_messages');
+        $stats->total_conversations = $DB->count_records('local_savian_ai_chat_conversations', ['is_archived' => 0]);
+        $stats->total_messages = $DB->count_records('local_savian_ai_chat_messages');
         $stats->unique_users = $DB->count_records_sql(
-            'SELECT COUNT(DISTINCT user_id) FROM {local_savian_chat_conversations}'
+            'SELECT COUNT(DISTINCT user_id) FROM {local_savian_ai_chat_conversations}'
         );
 
         // Average response time.
         $avgresponse = $DB->get_field_sql(
-            'SELECT AVG(response_time_ms) FROM {local_savian_chat_messages} WHERE response_time_ms IS NOT NULL'
+            'SELECT AVG(response_time_ms) FROM {local_savian_ai_chat_messages} WHERE response_time_ms IS NOT NULL'
         );
         $stats->avg_response_time = round($avgresponse);
 
         // Total tokens used.
         $stats->total_tokens = $DB->get_field_sql(
-            'SELECT SUM(token_count) FROM {local_savian_chat_messages}'
+            'SELECT SUM(token_count) FROM {local_savian_ai_chat_messages}'
         );
 
         return $stats;
@@ -178,9 +178,9 @@ class analytics {
                     COUNT(DISTINCT c.id) as conversation_count,
                     COUNT(DISTINCT c.user_id) as user_count,
                     COUNT(m.id) as message_count
-                FROM {local_savian_chat_conversations} c
+                FROM {local_savian_ai_chat_conversations} c
                 JOIN {course} co ON co.id = c.course_id
-                LEFT JOIN {local_savian_chat_messages} m ON m.conversation_id = c.id
+                LEFT JOIN {local_savian_ai_chat_messages} m ON m.conversation_id = c.id
                 WHERE c.course_id IS NOT NULL
                 GROUP BY c.course_id, co.fullname
                 ORDER BY conversation_count DESC";
@@ -202,7 +202,7 @@ class analytics {
                     u.firstname,
                     u.lastname,
                     co.fullname as course_name
-                FROM {local_savian_chat_conversations} c
+                FROM {local_savian_ai_chat_conversations} c
                 JOIN {user} u ON u.id = c.user_id
                 LEFT JOIN {course} co ON co.id = c.course_id
                 ORDER BY c.last_message_at DESC";
@@ -225,7 +225,7 @@ class analytics {
                     DATE(FROM_UNIXTIME(timecreated)) as date,
                     COUNT(DISTINCT conversation_id) as conversations,
                     COUNT(id) as messages
-                FROM {local_savian_chat_messages}
+                FROM {local_savian_ai_chat_messages}
                 WHERE timecreated >= ?
                 GROUP BY DATE(FROM_UNIXTIME(timecreated))
                 ORDER BY date ASC";

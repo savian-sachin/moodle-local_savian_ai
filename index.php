@@ -67,7 +67,7 @@ if ($apiconnected) {
     $syncresponse = $client->get_documents(['per_page' => 100]);
     if ($syncresponse->http_code === 200 && isset($syncresponse->documents)) {
         foreach ($syncresponse->documents as $doc) {
-            $existing = $DB->get_record('local_savian_documents', ['savian_doc_id' => $doc->id]);
+            $existing = $DB->get_record('local_savian_ai_documents', ['savian_doc_id' => $doc->id]);
 
             $record = new stdClass();
             $record->savian_doc_id = $doc->id;
@@ -92,12 +92,12 @@ if ($apiconnected) {
                 $record->course_id = $existing->course_id ?: $apicourseid;
                 $record->timecreated = $existing->timecreated;
                 $record->usermodified = $existing->usermodified;
-                $DB->update_record('local_savian_documents', $record);
+                $DB->update_record('local_savian_ai_documents', $record);
             } else {
                 $record->course_id = $apicourseid;
                 $record->timecreated = time();
                 $record->usermodified = 0;
-                $DB->insert_record('local_savian_documents', $record);
+                $DB->insert_record('local_savian_ai_documents', $record);
             }
         }
     }
@@ -107,7 +107,7 @@ if ($apiconnected) {
 echo html_writer::start_div('row mb-4');
 
 // Total Documents.
-$totaldocs = $DB->count_records('local_savian_documents', ['is_active' => 1]);
+$totaldocs = $DB->count_records('local_savian_ai_documents', ['is_active' => 1]);
 echo html_writer::start_div('col-md-3 col-6 mb-3');
 echo html_writer::start_div('card text-center');
 echo html_writer::start_div('card-body');
@@ -120,7 +120,7 @@ echo html_writer::end_div();
 // Total Questions.
 $totalquestions = $DB->get_field_sql(
     'SELECT COALESCE(SUM(questions_count), 0)
-       FROM {local_savian_generations}
+       FROM {local_savian_ai_generations}
       WHERE generation_type IN (?, ?)',
     ['questions', 'questions_from_documents']
 );
@@ -134,7 +134,7 @@ echo html_writer::end_div();
 echo html_writer::end_div();
 
 // Total Course Content.
-$coursecontentgens = $DB->get_records('local_savian_generations', ['generation_type' => 'course_content']);
+$coursecontentgens = $DB->get_records('local_savian_ai_generations', ['generation_type' => 'course_content']);
 $totalsections = 0;
 $totalactivities = 0;
 foreach ($coursecontentgens as $gen) {
@@ -261,17 +261,17 @@ if (!empty($usercourses)) {
 
     foreach ($usercourses as $course) {
         $coursedocs = $DB->count_records(
-            'local_savian_documents',
+            'local_savian_ai_documents',
             ['course_id' => $course->id, 'is_active' => 1]
         );
         $coursequestions = $DB->get_field_sql(
             'SELECT COALESCE(SUM(questions_count), 0)
-               FROM {local_savian_generations}
+               FROM {local_savian_ai_generations}
               WHERE course_id = ? AND generation_type IN (?, ?)',
             [$course->id, 'questions', 'questions_from_documents']
         );
 
-        $coursecontent = $DB->get_records('local_savian_generations', [
+        $coursecontent = $DB->get_records('local_savian_ai_generations', [
             'course_id' => $course->id,
             'generation_type' => 'course_content',
         ]);
@@ -313,7 +313,7 @@ if (!empty($usercourses)) {
 // Recent activity.
 echo html_writer::tag('h3', 'Recent Activity', ['class' => 'mt-4']);
 
-$recent = $DB->get_records('local_savian_generations', null, 'timecreated DESC', '*', 0, 10);
+$recent = $DB->get_records('local_savian_ai_generations', null, 'timecreated DESC', '*', 0, 10);
 
 if (!empty($recent)) {
     echo html_writer::start_div('list-group');

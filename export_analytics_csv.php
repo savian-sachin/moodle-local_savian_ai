@@ -28,7 +28,7 @@ require_login();
 
 $reportid = required_param('reportid', PARAM_INT);
 
-$report = $DB->get_record('local_savian_analytics_reports', ['id' => $reportid], '*', MUST_EXIST);
+$report = $DB->get_record('local_savian_ai_analytics_reports', ['id' => $reportid], '*', MUST_EXIST);
 
 $course = $DB->get_record('course', ['id' => $report->course_id], '*', MUST_EXIST);
 $context = context_course::instance($report->course_id);

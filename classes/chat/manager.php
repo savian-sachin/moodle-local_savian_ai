@@ -54,7 +54,7 @@ class manager {
         $isnewconversation = false;
         if ($conversationid) {
             $conversation = $DB->get_record(
-                'local_savian_chat_conversations',
+                'local_savian_ai_chat_conversations',
                 ['id' => $conversationid, 'user_id' => $USER->id],
                 '*',
                 MUST_EXIST
@@ -76,7 +76,7 @@ class manager {
 
             // Auto-include all active course documents for students.
             $documentids = $DB->get_fieldset_select(
-                'local_savian_documents',
+                'local_savian_ai_documents',
                 'savian_doc_id',
                 'course_id = ? AND is_active = 1',
                 [$courseid]
@@ -129,7 +129,7 @@ class manager {
         // Update conversation UUID if this was a new conversation.
         if ($isnewconversation && isset($response->conversation_id)) {
             $DB->set_field(
-                'local_savian_chat_conversations',
+                'local_savian_ai_chat_conversations',
                 'conversation_uuid',
                 $response->conversation_id,
                 ['id' => $conversation->id]
@@ -159,19 +159,19 @@ class manager {
 
         // Update conversation metadata.
         $DB->set_field(
-            'local_savian_chat_conversations',
+            'local_savian_ai_chat_conversations',
             'message_count',
             $conversation->message_count + 2,
             ['id' => $conversation->id]
         );
         $DB->set_field(
-            'local_savian_chat_conversations',
+            'local_savian_ai_chat_conversations',
             'last_message_at',
             time(),
             ['id' => $conversation->id]
         );
         $DB->set_field(
-            'local_savian_chat_conversations',
+            'local_savian_ai_chat_conversations',
             'timemodified',
             time(),
             ['id' => $conversation->id]
@@ -206,7 +206,7 @@ class manager {
         $conversation->timemodified = time();
         $conversation->last_message_at = time();
 
-        $conversation->id = $DB->insert_record('local_savian_chat_conversations', $conversation);
+        $conversation->id = $DB->insert_record('local_savian_ai_chat_conversations', $conversation);
 
         return $conversation;
     }
@@ -236,7 +236,7 @@ class manager {
         // Format content (Markdown, LaTeX, code highlighting).
         $message->formatted_content = $this->format_content($content);
 
-        $message->id = $DB->insert_record('local_savian_chat_messages', $message);
+        $message->id = $DB->insert_record('local_savian_ai_chat_messages', $message);
 
         return $message;
     }
@@ -264,14 +264,14 @@ class manager {
         global $DB, $USER;
 
         $conversation = $DB->get_record(
-            'local_savian_chat_conversations',
+            'local_savian_ai_chat_conversations',
             ['id' => $conversationid, 'user_id' => $USER->id],
             '*',
             MUST_EXIST
         );
 
         $messages = $DB->get_records(
-            'local_savian_chat_messages',
+            'local_savian_ai_chat_messages',
             ['conversation_id' => $conversationid],
             'timecreated ASC'
         );
@@ -297,7 +297,7 @@ class manager {
         }
 
         $conversations = $DB->get_records(
-            'local_savian_chat_conversations',
+            'local_savian_ai_chat_conversations',
             $params,
             'last_message_at DESC',
             '*',
@@ -320,20 +320,20 @@ class manager {
     public function submit_feedback($messageid, $feedback, $comment = '') {
         global $DB, $USER;
 
-        $message = $DB->get_record('local_savian_chat_messages', ['id' => $messageid], '*', MUST_EXIST);
+        $message = $DB->get_record('local_savian_ai_chat_messages', ['id' => $messageid], '*', MUST_EXIST);
 
         // Verify user owns this conversation.
         $conversation = $DB->get_record(
-            'local_savian_chat_conversations',
+            'local_savian_ai_chat_conversations',
             ['id' => $message->conversation_id, 'user_id' => $USER->id],
             '*',
             MUST_EXIST
         );
 
         // Update message.
-        $DB->set_field('local_savian_chat_messages', 'feedback', $feedback, ['id' => $messageid]);
+        $DB->set_field('local_savian_ai_chat_messages', 'feedback', $feedback, ['id' => $messageid]);
         if ($comment) {
-            $DB->set_field('local_savian_chat_messages', 'feedback_comment', $comment, ['id' => $messageid]);
+            $DB->set_field('local_savian_ai_chat_messages', 'feedback_comment', $comment, ['id' => $messageid]);
         }
 
         // Submit to API if message_uuid exists.
@@ -356,14 +356,14 @@ class manager {
         global $DB, $USER;
 
         $conversation = $DB->get_record(
-            'local_savian_chat_conversations',
+            'local_savian_ai_chat_conversations',
             ['id' => $conversationid, 'user_id' => $USER->id],
             '*',
             MUST_EXIST
         );
 
-        $DB->set_field('local_savian_chat_conversations', 'is_archived', 1, ['id' => $conversationid]);
-        $DB->set_field('local_savian_chat_conversations', 'timemodified', time(), ['id' => $conversationid]);
+        $DB->set_field('local_savian_ai_chat_conversations', 'is_archived', 1, ['id' => $conversationid]);
+        $DB->set_field('local_savian_ai_chat_conversations', 'timemodified', time(), ['id' => $conversationid]);
 
         return ['success' => true];
     }
@@ -378,20 +378,20 @@ class manager {
     public function save_widget_preferences($position, $minimized) {
         global $DB, $USER;
 
-        $settings = $DB->get_record('local_savian_chat_settings', ['user_id' => $USER->id]);
+        $settings = $DB->get_record('local_savian_ai_chat_settings', ['user_id' => $USER->id]);
 
         if ($settings) {
             $settings->widget_position = $position;
             $settings->widget_minimized = $minimized;
             $settings->timemodified = time();
-            $DB->update_record('local_savian_chat_settings', $settings);
+            $DB->update_record('local_savian_ai_chat_settings', $settings);
         } else {
             $settings = new \stdClass();
             $settings->user_id = $USER->id;
             $settings->widget_position = $position;
             $settings->widget_minimized = $minimized;
             $settings->timemodified = time();
-            $DB->insert_record('local_savian_chat_settings', $settings);
+            $DB->insert_record('local_savian_ai_chat_settings', $settings);
         }
 
         return ['success' => true];

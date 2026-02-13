@@ -86,7 +86,7 @@ class send_analytics_adhoc extends \core\task\adhoc_task {
                     $eventids = $data->event_ids;
                     [$insql, $params] = $DB->get_in_or_equal($eventids);
                     $DB->execute(
-                        "UPDATE {local_savian_analytics_events} SET processed = 1 WHERE id {$insql}",
+                        "UPDATE {local_savian_ai_analytics_events} SET processed = 1 WHERE id {$insql}",
                         $params
                     );
                     mtrace("  Marked " . count($eventids) . " events as processed.");

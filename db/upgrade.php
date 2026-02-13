@@ -249,5 +249,32 @@ function xmldb_local_savian_ai_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026010700, 'local', 'savian_ai');
     }
 
+    if ($oldversion < 2026021301) {
+        // Rename all tables from local_savian_* to local_savian_ai_* for correct frankenstyle naming.
+        $tables = [
+            'local_savian_config' => 'local_savian_ai_config',
+            'local_savian_documents' => 'local_savian_ai_documents',
+            'local_savian_generations' => 'local_savian_ai_generations',
+            'local_savian_chat_conversations' => 'local_savian_ai_chat_conversations',
+            'local_savian_chat_messages' => 'local_savian_ai_chat_messages',
+            'local_savian_chat_settings' => 'local_savian_ai_chat_settings',
+            'local_savian_chat_course_config' => 'local_savian_ai_chat_course_config',
+            'local_savian_chat_restrictions' => 'local_savian_ai_chat_restrictions',
+            'local_savian_chat_restriction_groups' => 'local_savian_ai_chat_restriction_groups',
+            'local_savian_analytics_reports' => 'local_savian_ai_analytics_reports',
+            'local_savian_analytics_cache' => 'local_savian_ai_analytics_cache',
+            'local_savian_analytics_events' => 'local_savian_ai_analytics_events',
+        ];
+
+        foreach ($tables as $oldname => $newname) {
+            $table = new xmldb_table($oldname);
+            if ($dbman->table_exists($table)) {
+                $dbman->rename_table($table, $newname);
+            }
+        }
+
+        upgrade_plugin_savepoint(true, 2026021301, 'local', 'savian_ai');
+    }
+
     return true;
 }

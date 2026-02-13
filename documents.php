@@ -56,7 +56,7 @@ if ($action === 'delete' && $docid && confirm_sesskey()) {
 
     if ($response->http_code >= 200 && $response->http_code < 300 && (!isset($response->success) || $response->success)) {
         // Update local record.
-        $DB->set_field('local_savian_documents', 'is_active', 0, ['savian_doc_id' => $docid]);
+        $DB->set_field('local_savian_ai_documents', 'is_active', 0, ['savian_doc_id' => $docid]);
         redirect(
             new moodle_url('/local/savian_ai/documents.php', ['courseid' => $courseid]),
             get_string('document_deleted', 'local_savian_ai'),
@@ -136,7 +136,7 @@ if ($mform->is_cancelled()) {
             $record->timemodified = time();
             $record->usermodified = $USER->id;
 
-            $DB->insert_record('local_savian_documents', $record);
+            $DB->insert_record('local_savian_ai_documents', $record);
 
             redirect(
                 new moodle_url('/local/savian_ai/documents.php', ['courseid' => $courseid]),
@@ -177,7 +177,7 @@ $syncresponse = $client->get_documents(['per_page' => 100]);
 if ($syncresponse->http_code === 200 && isset($syncresponse->documents)) {
     // Update local cache with documents from current organization.
     foreach ($syncresponse->documents as $doc) {
-        $existing = $DB->get_record('local_savian_documents', ['savian_doc_id' => $doc->id]);
+        $existing = $DB->get_record('local_savian_ai_documents', ['savian_doc_id' => $doc->id]);
 
         $record = new stdClass();
         $record->savian_doc_id = $doc->id;
@@ -204,13 +204,13 @@ if ($syncresponse->http_code === 200 && isset($syncresponse->documents)) {
             $record->course_id = $existing->course_id ?: $apicourseid;
             $record->timecreated = $existing->timecreated;
             $record->usermodified = $existing->usermodified;
-            $DB->update_record('local_savian_documents', $record);
+            $DB->update_record('local_savian_ai_documents', $record);
         } else {
             // For new documents synced from API, use the course_id from the API response.
             $record->course_id = $apicourseid;
             $record->timecreated = time();
             $record->usermodified = 0;
-            $DB->insert_record('local_savian_documents', $record);
+            $DB->insert_record('local_savian_ai_documents', $record);
         }
     }
 }
@@ -238,7 +238,7 @@ if (has_capability('local/savian_ai:generate', $context)) {
 echo html_writer::tag('h3', get_string('document_list', 'local_savian_ai'), ['class' => 'mt-4']);
 
 // Show only current course documents (no global library).
-$documents = $DB->get_records('local_savian_documents', [
+$documents = $DB->get_records('local_savian_ai_documents', [
     'is_active' => 1,
     'course_id' => $courseid,
 ], 'timecreated DESC');

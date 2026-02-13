@@ -118,7 +118,7 @@ class send_analytics_weekly extends \core\task\scheduled_task {
                 // Get last weekly report.
                 $lastreport = $DB->get_record_sql(
                     "SELECT MAX(date_to) as last_date
-                     FROM {local_savian_analytics_reports}
+                     FROM {local_savian_ai_analytics_reports}
                      WHERE course_id = ?
                        AND status = 'sent'
                        AND report_type = 'scheduled'",

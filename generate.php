@@ -154,7 +154,7 @@ if ($action === 'add' && confirm_sesskey()) {
         $log->status = 'completed';
         $log->timecreated = time();
         $log->timemodified = time();
-        $DB->insert_record('local_savian_generations', $log);
+        $DB->insert_record('local_savian_ai_generations', $log);
 
         // Clear cache.
         $saviancache->delete('questions');

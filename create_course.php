@@ -62,7 +62,7 @@ if ($action === 'create' && confirm_sesskey() && !empty($saviancache->get('cours
     $log->response_data = json_encode($results);
     $log->timecreated = time();
     $log->timemodified = time();
-    $DB->insert_record('local_savian_generations', $log);
+    $DB->insert_record('local_savian_ai_generations', $log);
 
     // Store generation data for knowledge feedback loop (v2.2).
     $kbsavedata = [
@@ -987,7 +987,7 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
 
     // Show only current course completed documents.
     $documents = $DB->get_records_menu(
-        'local_savian_documents',
+        'local_savian_ai_documents',
         ['is_active' => 1, 'status' => 'completed', 'course_id' => $courseid],
         'title ASC',
         'savian_doc_id, title'

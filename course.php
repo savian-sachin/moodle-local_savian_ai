@@ -46,16 +46,16 @@ echo $OUTPUT->header();
 echo local_savian_ai_render_header('Dashboard', $course->fullname);
 
 // Statistics.
-$doccount = $DB->count_records('local_savian_documents', ['course_id' => $courseid, 'is_active' => 1]);
+$doccount = $DB->count_records('local_savian_ai_documents', ['course_id' => $courseid, 'is_active' => 1]);
 $questionscount = $DB->get_field_sql(
     'SELECT COALESCE(SUM(questions_count), 0)
-       FROM {local_savian_generations}
+       FROM {local_savian_ai_generations}
       WHERE course_id = ? AND generation_type IN (?, ?)',
     [$courseid, 'questions', 'questions_from_documents']
 );
 
 // Get course content generation stats.
-$coursegenerations = $DB->get_records('local_savian_generations', [
+$coursegenerations = $DB->get_records('local_savian_ai_generations', [
     'course_id' => $courseid,
     'generation_type' => 'course_content',
 ]);
@@ -79,7 +79,7 @@ foreach ($coursegenerations as $gen) {
 
 // Get last activity.
 $lastactivity = $DB->get_field_sql(
-    'SELECT MAX(timecreated) FROM {local_savian_generations} WHERE course_id = ?',
+    'SELECT MAX(timecreated) FROM {local_savian_ai_generations} WHERE course_id = ?',
     [$courseid]
 );
 
