@@ -337,9 +337,10 @@ See [LICENSE.txt](LICENSE.txt) for the full license text.
 - Complete GPL v3 boilerplate on all files
 - Moodle coding standards: snake_case to camelCase variables, PSR-2 formatting
 - Database tables renamed to correct frankenstyle prefix (local_savian_ai_*)
+- All user-facing strings use get_string() for full localization support (130+ strings)
+- Privacy API rewritten with correct interfaces, context-aware export/delete, all tables declared
 - Chat restriction system for course-level control
 - Improved document deletion and API error handling
-- Privacy API with full GDPR export/delete support
 - Hook-based architecture (Moodle 4.5 hooks API)
 
 ### Previous Releases
