@@ -107,7 +107,12 @@ if ($response && isset($response->insights)) {
     // Struggling topics.
     if (isset($insights->struggling_topics) && !empty($insights->struggling_topics)) {
         fputcsv($output, [get_string('csv_struggling_topics', 'local_savian_ai')]);
-        fputcsv($output, [get_string('csv_topic_module', 'local_savian_ai'), get_string('csv_students_struggling', 'local_savian_ai'), get_string('csv_average_grade', 'local_savian_ai'), get_string('csv_recommended_action', 'local_savian_ai')]);
+        fputcsv($output, [
+            get_string('csv_topic_module', 'local_savian_ai'),
+            get_string('csv_students_struggling', 'local_savian_ai'),
+            get_string('csv_average_grade', 'local_savian_ai'),
+            get_string('csv_recommended_action', 'local_savian_ai'),
+        ]);
 
         foreach ($insights->struggling_topics as $topic) {
             fputcsv($output, [
@@ -133,7 +138,10 @@ if ($response && isset($response->insights)) {
         fputcsv($output, [get_string('csv_low_engagement_count', 'local_savian_ai'), $engagement->low_engagement_count ?? 0]);
 
         if (isset($engagement->peak_activity_days) && is_array($engagement->peak_activity_days)) {
-            fputcsv($output, [get_string('csv_peak_activity_days', 'local_savian_ai'), implode(', ', $engagement->peak_activity_days)]);
+            fputcsv($output, [
+                get_string('csv_peak_activity_days', 'local_savian_ai'),
+                implode(', ', $engagement->peak_activity_days),
+            ]);
         }
 
         if (isset($engagement->peak_activity_hours) && is_array($engagement->peak_activity_hours)) {
@@ -149,7 +157,10 @@ if ($response && isset($response->insights)) {
     // Summary statistics.
     fputcsv($output, [get_string('csv_summary', 'local_savian_ai')]);
     fputcsv($output, [get_string('csv_metric', 'local_savian_ai'), get_string('csv_value', 'local_savian_ai')]);
-    fputcsv($output, [get_string('csv_students_processed', 'local_savian_ai'), $insights->processed_students ?? $report->student_count]);
+    fputcsv($output, [
+        get_string('csv_students_processed', 'local_savian_ai'),
+        $insights->processed_students ?? $report->student_count,
+    ]);
 
     if (isset($insights->at_risk_students)) {
         $atriskcount = is_array($insights->at_risk_students) ?

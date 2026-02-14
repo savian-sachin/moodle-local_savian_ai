@@ -132,7 +132,8 @@ if ($action === 'poll' && $saviancache->get('analytics_polling_course')) {
 
         redirect(
             new moodle_url('/local/savian_ai/analytics_reports.php', ['courseid' => $courseid]),
-            get_string('error_retrieving_analytics', 'local_savian_ai', $latestresponse->error ?? get_string('csv_unknown', 'local_savian_ai')),
+            get_string('error_retrieving_analytics', 'local_savian_ai',
+                $latestresponse->error ?? get_string('csv_unknown', 'local_savian_ai')),
             null,
             'error'
         );
@@ -171,7 +172,10 @@ require(['jquery'], function($) {
 ");
 
 // Consistent header.
-echo local_savian_ai_render_header(get_string('learning_analytics', 'local_savian_ai'), get_string('analytics_dashboard_subtitle', 'local_savian_ai'));
+echo local_savian_ai_render_header(
+    get_string('learning_analytics', 'local_savian_ai'),
+    get_string('analytics_dashboard_subtitle', 'local_savian_ai')
+);
 
 // Show polling status with progress (if action=poll).
 if ($action === 'poll' && $saviancache->get('analytics_polling_course')) {
@@ -260,7 +264,8 @@ if ($action === 'poll' && $saviancache->get('analytics_polling_course')) {
     if ($studentsprocessed > 0) {
         echo html_writer::tag(
             'p',
-            get_string('students_analyzed_progress', 'local_savian_ai', (object)['processed' => $studentsprocessed, 'total' => $studentcount]),
+            get_string('students_analyzed_progress', 'local_savian_ai',
+                (object)['processed' => $studentsprocessed, 'total' => $studentcount]),
             ['class' => 'text-muted']
         );
     }
@@ -278,13 +283,15 @@ if ($action === 'poll' && $saviancache->get('analytics_polling_course')) {
     $estimatedtotalminutes = ceil(($studentcount * 4.5) / 60);
     echo html_writer::tag(
         'p',
-        get_string('estimated_total_time', 'local_savian_ai', (object)['minutes' => $estimatedtotalminutes, 'students' => $studentcount]),
+        get_string('estimated_total_time', 'local_savian_ai',
+            (object)['minutes' => $estimatedtotalminutes, 'students' => $studentcount]),
         ['class' => 'badge badge-info']
     );
 
     // What is happening.
     echo html_writer::start_div('mt-4 p-3 bg-light rounded');
-    echo html_writer::tag('small', '<strong>' . get_string('whats_happening', 'local_savian_ai') . '</strong>', ['class' => 'text-muted']);
+    $whatshappening = '<strong>' . get_string('whats_happening', 'local_savian_ai') . '</strong>';
+    echo html_writer::tag('small', $whatshappening, ['class' => 'text-muted']);
     echo html_writer::start_tag('ul', ['class' => 'text-left text-muted small mt-2 mb-0']);
     echo html_writer::tag('li', get_string('step_extracting_metrics', 'local_savian_ai'));
     echo html_writer::tag('li', get_string('step_analyzing_performance', 'local_savian_ai'));
@@ -390,7 +397,8 @@ if ($action !== 'poll') {
         echo html_writer::start_div('form-group');
         echo html_writer::tag('label', get_string('report_period', 'local_savian_ai'));
         echo html_writer::start_tag('select', ['name' => 'date_from', 'class' => 'form-control']);
-        echo html_writer::tag('option', get_string('all_time_recommended', 'local_savian_ai'), ['value' => '0', 'selected' => 'selected']);
+        echo html_writer::tag('option', get_string('all_time_recommended', 'local_savian_ai'),
+            ['value' => '0', 'selected' => 'selected']);
         echo html_writer::tag('option', get_string('last_30_days', 'local_savian_ai'), ['value' => (time() - 30 * 86400)]);
         echo html_writer::tag('option', get_string('last_60_days', 'local_savian_ai'), ['value' => (time() - 60 * 86400)]);
         echo html_writer::tag('option', get_string('last_90_days', 'local_savian_ai'), ['value' => (time() - 90 * 86400)]);
@@ -801,7 +809,9 @@ if (empty($reports)) {
                 // Engagement Insights.
                 if (isset($insights->engagement_insights)) {
                     $engagement = $insights->engagement_insights;
-                    echo html_writer::tag('h5', get_string('engagement_insights', 'local_savian_ai'), ['class' => 'text-primary mt-4 mb-3']);
+                    echo html_writer::tag('h5',
+                        get_string('engagement_insights', 'local_savian_ai'),
+                        ['class' => 'text-primary mt-4 mb-3']);
 
                     echo html_writer::start_div('row');
                     if (isset($engagement->average_engagement_score)) {
@@ -812,7 +822,9 @@ if (empty($reports)) {
                             $avgengagement,
                             ['class' => 'h4 text-primary']
                         );
-                        echo html_writer::tag('small', get_string('avg_engagement_label', 'local_savian_ai'), ['class' => 'text-muted']);
+                        echo html_writer::tag('small',
+                            get_string('avg_engagement_label', 'local_savian_ai'),
+                            ['class' => 'text-muted']);
                         echo html_writer::end_div();
                     }
                     if (isset($engagement->low_engagement_count)) {

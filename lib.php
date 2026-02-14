@@ -60,7 +60,9 @@ function local_savian_ai_render_header($title, $subtitle = '') {
     $html .= html_writer::end_div();
 
     // Savian logo on right.
-    $html .= html_writer::tag('div', get_string('header_brand', 'local_savian_ai'), ['class' => 'savian-text-primary font-weight-bold']);
+    $html .= html_writer::tag('div',
+        get_string('header_brand', 'local_savian_ai'),
+        ['class' => 'savian-text-primary font-weight-bold']);
 
     $html .= html_writer::end_div();
     $html .= html_writer::end_div();
