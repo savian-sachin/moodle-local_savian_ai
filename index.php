@@ -40,8 +40,8 @@ echo $OUTPUT->header();
 
 // Consistent header.
 echo local_savian_ai_render_header(
-    'Savian AI Dashboard',
-    'AI-powered content generation for Moodle'
+    get_string('dashboard_title', 'local_savian_ai'),
+    get_string('dashboard_subtitle', 'local_savian_ai')
 );
 
 if (empty($apikey)) {
@@ -49,7 +49,7 @@ if (empty($apikey)) {
     if (has_capability('local/savian_ai:manage', context_system::instance())) {
         echo html_writer::link(
             new moodle_url('/admin/settings.php', ['section' => 'local_savian_ai']),
-            'Configure API Settings',
+            get_string('configure_api', 'local_savian_ai'),
             ['class' => 'btn btn-savian']
         );
     }
@@ -112,7 +112,7 @@ echo html_writer::start_div('col-md-3 col-6 mb-3');
 echo html_writer::start_div('card text-center');
 echo html_writer::start_div('card-body');
 echo html_writer::tag('div', $totaldocs, ['class' => 'h2 mb-0 savian-text-primary']);
-echo html_writer::tag('div', 'Total Documents', ['class' => 'text-muted small']);
+echo html_writer::tag('div', get_string('total_documents', 'local_savian_ai'), ['class' => 'text-muted small']);
 echo html_writer::end_div();
 echo html_writer::end_div();
 echo html_writer::end_div();
@@ -128,7 +128,7 @@ echo html_writer::start_div('col-md-3 col-6 mb-3');
 echo html_writer::start_div('card text-center');
 echo html_writer::start_div('card-body');
 echo html_writer::tag('div', $totalquestions, ['class' => 'h2 mb-0 savian-text-primary']);
-echo html_writer::tag('div', 'Questions Generated', ['class' => 'text-muted small']);
+echo html_writer::tag('div', get_string('questions_generated_stat', 'local_savian_ai'), ['class' => 'text-muted small']);
 echo html_writer::end_div();
 echo html_writer::end_div();
 echo html_writer::end_div();
@@ -150,7 +150,7 @@ echo html_writer::start_div('col-md-3 col-6 mb-3');
 echo html_writer::start_div('card text-center');
 echo html_writer::start_div('card-body');
 echo html_writer::tag('div', $totalsections, ['class' => 'h2 mb-0 savian-text-primary']);
-echo html_writer::tag('div', 'Course Sections', ['class' => 'text-muted small']);
+echo html_writer::tag('div', get_string('course_sections_stat', 'local_savian_ai'), ['class' => 'text-muted small']);
 echo html_writer::end_div();
 echo html_writer::end_div();
 echo html_writer::end_div();
@@ -160,7 +160,7 @@ echo html_writer::start_div('col-md-3 col-6 mb-3');
 echo html_writer::start_div('card text-center');
 echo html_writer::start_div('card-body');
 echo html_writer::tag('div', $totalactivities, ['class' => 'h2 mb-0 savian-text-primary']);
-echo html_writer::tag('div', 'Activities Created', ['class' => 'text-muted small']);
+echo html_writer::tag('div', get_string('activities_created_stat', 'local_savian_ai'), ['class' => 'text-muted small']);
 echo html_writer::end_div();
 echo html_writer::end_div();
 echo html_writer::end_div();
@@ -170,12 +170,12 @@ echo html_writer::end_div(); // End row.
 // API status and quota.
 if ($apiconnected) {
     echo html_writer::start_div('card mb-4 savian-accent-card');
-    echo html_writer::div('API Usage & Quota', 'card-header');
+    echo html_writer::div(get_string('quota_heading', 'local_savian_ai'), 'card-header');
     echo html_writer::start_div('card-body');
 
     $orgname = $apiresponse->organization->name ?? $orgcode;
     echo html_writer::div(
-        'Connected to ' . $orgname,
+        get_string('connection_status_connected', 'local_savian_ai', $orgname),
         'alert alert-success mb-3'
     );
 
@@ -188,7 +188,7 @@ if ($apiconnected) {
             $percentage = ($q->limit > 0) ? ($q->used / $q->limit * 100) : 0;
 
             echo html_writer::start_div('col-md-4 mb-3');
-            echo html_writer::tag('strong', 'Questions');
+            echo html_writer::tag('strong', get_string('quota_questions', 'local_savian_ai'));
             echo html_writer::div(
                 html_writer::div('', 'progress-bar bg-primary', [
                     'style' => "width: {$percentage}%",
@@ -207,7 +207,7 @@ if ($apiconnected) {
             $percentage = ($d->limit > 0) ? ($d->used / $d->limit * 100) : 0;
 
             echo html_writer::start_div('col-md-4 mb-3');
-            echo html_writer::tag('strong', 'Documents');
+            echo html_writer::tag('strong', get_string('quota_documents', 'local_savian_ai'));
             echo html_writer::div(
                 html_writer::div('', 'progress-bar bg-info', [
                     'style' => "width: {$percentage}%",
@@ -226,7 +226,7 @@ if ($apiconnected) {
             $percentage = ($c->limit > 0) ? ($c->used / $c->limit * 100) : 0;
 
             echo html_writer::start_div('col-md-4 mb-3');
-            echo html_writer::tag('strong', 'Course Content');
+            echo html_writer::tag('strong', get_string('quota_course_content', 'local_savian_ai'));
             echo html_writer::div(
                 html_writer::div('', 'progress-bar bg-success', [
                     'style' => "width: {$percentage}%",
@@ -245,18 +245,25 @@ if ($apiconnected) {
     echo html_writer::end_div();
     echo html_writer::end_div();
 } else {
-    echo $OUTPUT->notification('API connection failed', 'warning');
+    echo $OUTPUT->notification(get_string('error_api_connection', 'local_savian_ai'), 'warning');
 }
 
 // Your courses.
-echo html_writer::tag('h3', 'Your Courses', ['class' => 'mt-4']);
+echo html_writer::tag('h3', get_string('your_courses', 'local_savian_ai'), ['class' => 'mt-4']);
 
 // Get user's courses.
 $usercourses = enrol_get_users_courses($USER->id, true);
 
 if (!empty($usercourses)) {
     $table = new html_table();
-    $table->head = ['Course', 'Documents', 'Questions', 'Sections', 'Activities', 'Actions'];
+    $table->head = [
+        get_string('course_header', 'local_savian_ai'),
+        get_string('documents', 'local_savian_ai'),
+        get_string('questions_header', 'local_savian_ai'),
+        get_string('sections_header', 'local_savian_ai'),
+        get_string('summary_activities', 'local_savian_ai'),
+        get_string('actions', 'local_savian_ai'),
+    ];
     $table->attributes['class'] = 'table table-striped generaltable';
 
     foreach ($usercourses as $course) {
@@ -298,7 +305,7 @@ if (!empty($usercourses)) {
         $row[] = $activities;
         $row[] = html_writer::link(
             new moodle_url('/local/savian_ai/course.php', ['courseid' => $course->id]),
-            'Open Dashboard',
+            get_string('open_dashboard', 'local_savian_ai'),
             ['class' => 'btn btn-sm btn-savian']
         );
 
@@ -307,11 +314,11 @@ if (!empty($usercourses)) {
 
     echo html_writer::table($table);
 } else {
-    echo html_writer::div('No courses found', 'alert alert-info');
+    echo html_writer::div(get_string('no_courses_found', 'local_savian_ai'), 'alert alert-info');
 }
 
 // Recent activity.
-echo html_writer::tag('h3', 'Recent Activity', ['class' => 'mt-4']);
+echo html_writer::tag('h3', get_string('recent_activity', 'local_savian_ai'), ['class' => 'mt-4']);
 
 $recent = $DB->get_records('local_savian_ai_generations', null, 'timecreated DESC', '*', 0, 10);
 
@@ -329,7 +336,7 @@ if (!empty($recent)) {
         switch ($activity->generation_type) {
             case 'questions':
                 $icon = '?';
-                $description = "{$activity->questions_count} questions generated";
+                $description = get_string('questions_generated', 'local_savian_ai', $activity->questions_count);
                 break;
             case 'questions_from_documents':
                 $icon = 'Q';
@@ -357,7 +364,7 @@ if (!empty($recent)) {
 
     echo html_writer::end_div();
 } else {
-    echo html_writer::div('No recent activity', 'alert alert-info');
+    echo html_writer::div(get_string('no_recent_activity', 'local_savian_ai'), 'alert alert-info');
 }
 
 // Help and tutorials link.
@@ -370,7 +377,7 @@ echo html_writer::link(
 );
 echo html_writer::tag(
     'p',
-    'Need help getting started? Check out our tutorials!',
+    get_string('tutorials_help_text', 'local_savian_ai'),
     ['class' => 'text-muted mt-2']
 );
 echo html_writer::end_div();

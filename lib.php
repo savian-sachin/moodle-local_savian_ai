@@ -60,7 +60,7 @@ function local_savian_ai_render_header($title, $subtitle = '') {
     $html .= html_writer::end_div();
 
     // Savian logo on right.
-    $html .= html_writer::tag('div', 'SAVIAN AI', ['class' => 'savian-text-primary font-weight-bold']);
+    $html .= html_writer::tag('div', get_string('header_brand', 'local_savian_ai'), ['class' => 'savian-text-primary font-weight-bold']);
 
     $html .= html_writer::end_div();
     $html .= html_writer::end_div();
@@ -77,7 +77,7 @@ function local_savian_ai_render_header($title, $subtitle = '') {
 function local_savian_ai_render_footer() {
     $link = html_writer::link(
         'https://savian.ai.vn/',
-        'Savian AI',
+        get_string('pluginname', 'local_savian_ai'),
         [
             'target' => '_blank',
             'class' => 'savian-text-primary',
@@ -86,7 +86,7 @@ function local_savian_ai_render_footer() {
     return html_writer::div(
         html_writer::tag(
             'small',
-            'Powered by ' . $link,
+            get_string('powered_by', 'local_savian_ai', $link),
             ['class' => 'text-muted']
         ),
         'text-center mt-4 mb-3'

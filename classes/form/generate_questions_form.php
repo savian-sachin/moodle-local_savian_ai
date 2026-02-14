@@ -164,8 +164,8 @@ class generate_questions_form extends \moodleform {
 
         // Language.
         $languages = [
-            'en' => 'English',
-            'vi' => 'Vietnamese',
+            'en' => get_string('lang_english', 'local_savian_ai'),
+            'vi' => get_string('lang_vietnamese', 'local_savian_ai'),
         ];
         $mform->addElement(
             'select',

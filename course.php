@@ -43,7 +43,7 @@ $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
 
 // Consistent header.
-echo local_savian_ai_render_header('Dashboard', $course->fullname);
+echo local_savian_ai_render_header(get_string('dashboard', 'local_savian_ai'), $course->fullname);
 
 // Statistics.
 $doccount = $DB->count_records('local_savian_ai_documents', ['course_id' => $courseid, 'is_active' => 1]);
@@ -84,7 +84,7 @@ $lastactivity = $DB->get_field_sql(
 );
 
 echo html_writer::start_div('card mb-4 savian-accent-card');
-echo html_writer::div('Course Statistics', 'card-header');
+echo html_writer::div(get_string('course_statistics', 'local_savian_ai'), 'card-header');
 echo html_writer::start_div('card-body');
 
 echo html_writer::start_div('row');
@@ -92,26 +92,26 @@ echo html_writer::start_div('row');
 // Documents stat.
 echo html_writer::start_div('col-md-3 col-6 mb-2');
 echo html_writer::tag('div', $doccount, ['class' => 'h3 mb-0 savian-text-primary']);
-echo html_writer::tag('small', 'Documents', ['class' => 'text-muted']);
+echo html_writer::tag('small', get_string('documents', 'local_savian_ai'), ['class' => 'text-muted']);
 echo html_writer::end_div();
 
 // Questions stat.
 echo html_writer::start_div('col-md-3 col-6 mb-2');
 echo html_writer::tag('div', $questionscount, ['class' => 'h3 mb-0 savian-text-primary']);
-echo html_writer::tag('small', 'Questions', ['class' => 'text-muted']);
+echo html_writer::tag('small', get_string('questions_header', 'local_savian_ai'), ['class' => 'text-muted']);
 echo html_writer::end_div();
 
 // Sections stat.
 echo html_writer::start_div('col-md-3 col-6 mb-2');
 echo html_writer::tag('div', $sectionscreated, ['class' => 'h3 mb-0 savian-text-primary']);
-echo html_writer::tag('small', 'Sections', ['class' => 'text-muted']);
+echo html_writer::tag('small', get_string('sections_header', 'local_savian_ai'), ['class' => 'text-muted']);
 echo html_writer::end_div();
 
 // Pages stat.
 echo html_writer::start_div('col-md-3 col-6 mb-2');
 $totalactivities = $pagescreated + $quizzescreated + $assignmentscreated;
 echo html_writer::tag('div', $totalactivities, ['class' => 'h3 mb-0 savian-text-primary']);
-echo html_writer::tag('small', 'Activities', ['class' => 'text-muted']);
+echo html_writer::tag('small', get_string('summary_activities', 'local_savian_ai'), ['class' => 'text-muted']);
 echo html_writer::end_div();
 
 echo html_writer::end_div();
@@ -120,7 +120,7 @@ echo html_writer::end_div();
 if ($lastactivity) {
     $lastactivitytext = html_writer::tag(
         'small',
-        'Last activity: ' . userdate($lastactivity, '%d %B %Y, %H:%M'),
+        get_string('last_activity_date', 'local_savian_ai', userdate($lastactivity, '%d %B %Y, %H:%M')),
         ['class' => 'text-muted']
     );
     echo html_writer::div($lastactivitytext, 'mt-2 border-top pt-2');
@@ -135,16 +135,16 @@ echo html_writer::start_div('row');
 // Documents card.
 echo html_writer::start_div('col-md-4 mb-3');
 echo html_writer::start_div('card h-100');
-echo html_writer::div('Documents', 'card-header');
+echo html_writer::div(get_string('documents', 'local_savian_ai'), 'card-header');
 echo html_writer::start_div('card-body');
 echo html_writer::tag(
     'p',
-    'Upload and manage documents for AI content generation.',
+    get_string('documents_card_desc', 'local_savian_ai'),
     ['class' => 'card-text']
 );
 echo html_writer::link(
     new moodle_url('/local/savian_ai/documents.php', ['courseid' => $courseid]),
-    'Manage Documents',
+    get_string('manage_documents', 'local_savian_ai'),
     ['class' => 'btn btn-primary']
 );
 echo html_writer::end_div();
@@ -154,22 +154,22 @@ echo html_writer::end_div();
 // Chat card.
 echo html_writer::start_div('col-md-4 mb-3');
 echo html_writer::start_div('card h-100');
-echo html_writer::div('AI Chat', 'card-header');
+echo html_writer::div(get_string('chat', 'local_savian_ai'), 'card-header');
 echo html_writer::start_div('card-body');
 echo html_writer::tag(
     'p',
-    'Ask questions about course materials and get instant AI-powered answers.',
+    get_string('chat_card_desc', 'local_savian_ai'),
     ['class' => 'card-text']
 );
 $chatbuttons = html_writer::link(
     new moodle_url('/local/savian_ai/chat.php', ['courseid' => $courseid]),
-    'Open Chat',
+    get_string('open_chat', 'local_savian_ai'),
     ['class' => 'btn btn-savian mr-2']
 );
 if (has_capability('local/savian_ai:generate', $context)) {
     $chatbuttons .= html_writer::link(
         new moodle_url('/local/savian_ai/chat_course_settings.php', ['courseid' => $courseid]),
-        'Settings',
+        get_string('settings_label', 'local_savian_ai'),
         ['class' => 'btn btn-outline-secondary btn-sm']
     );
 }
@@ -182,16 +182,16 @@ echo html_writer::end_div();
 if (has_capability('local/savian_ai:generate', $context)) {
     echo html_writer::start_div('col-md-4 mb-3');
     echo html_writer::start_div('card h-100');
-    echo html_writer::div('Generate Questions', 'card-header');
+    echo html_writer::div(get_string('generate_questions', 'local_savian_ai'), 'card-header');
     echo html_writer::start_div('card-body');
     echo html_writer::tag(
         'p',
-        'Create quiz questions from your course documents.',
+        get_string('generate_questions_card_desc', 'local_savian_ai'),
         ['class' => 'card-text']
     );
     echo html_writer::link(
         new moodle_url('/local/savian_ai/generate.php', ['courseid' => $courseid, 'mode' => 'documents']),
-        'Generate Questions',
+        get_string('generate_questions', 'local_savian_ai'),
         ['class' => 'btn btn-primary']
     );
     echo html_writer::end_div();
@@ -201,16 +201,16 @@ if (has_capability('local/savian_ai:generate', $context)) {
     // Course Content Generation card.
     echo html_writer::start_div('col-md-12 mb-3');
     echo html_writer::start_div('card');
-    echo html_writer::div('Generate Course Content', 'card-header');
+    echo html_writer::div(get_string('generate_course_content', 'local_savian_ai'), 'card-header');
     echo html_writer::start_div('card-body');
     echo html_writer::tag(
         'p',
-        'Generate complete course sections with pages, quizzes, and assignments from your documents.',
+        get_string('generate_course_content_desc', 'local_savian_ai'),
         ['class' => 'card-text']
     );
     echo html_writer::link(
         new moodle_url('/local/savian_ai/create_course.php', ['courseid' => $courseid]),
-        'Generate Course Content',
+        get_string('generate_course_content', 'local_savian_ai'),
         ['class' => 'btn btn-savian']
     );
     echo html_writer::end_div();
@@ -220,17 +220,16 @@ if (has_capability('local/savian_ai:generate', $context)) {
     // Learning Analytics card.
     echo html_writer::start_div('col-md-12 mb-3');
     echo html_writer::start_div('card savian-accent-card');
-    echo html_writer::div('Learning Analytics', 'card-header');
+    echo html_writer::div(get_string('learning_analytics', 'local_savian_ai'), 'card-header');
     echo html_writer::start_div('card-body');
     echo html_writer::tag(
         'p',
-        'Get AI-powered insights on student performance and engagement.'
-            . ' Identify at-risk students who need intervention.',
+        get_string('analytics_description', 'local_savian_ai'),
         ['class' => 'card-text']
     );
     echo html_writer::link(
         new moodle_url('/local/savian_ai/analytics_reports.php', ['courseid' => $courseid]),
-        'Analytics Dashboard',
+        get_string('learning_analytics', 'local_savian_ai'),
         ['class' => 'btn btn-savian']
     );
     echo html_writer::end_div();
@@ -244,7 +243,7 @@ echo html_writer::end_div(); // End row.
 echo html_writer::div(
     html_writer::link(
         new moodle_url('/course/view.php', ['id' => $courseid]),
-        '&#8592; Back to course',
+        get_string('backtocourse', 'local_savian_ai'),
         ['class' => 'btn btn-secondary']
     ),
     'mt-3'
@@ -260,7 +259,7 @@ echo html_writer::link(
 );
 echo html_writer::tag(
     'p',
-    'Need help? Check out our step-by-step tutorials!',
+    get_string('tutorials_help_text_teacher', 'local_savian_ai'),
     ['class' => 'text-muted mt-2']
 );
 echo html_writer::end_div();
@@ -270,7 +269,7 @@ echo html_writer::start_div('mt-5 mb-4');
 echo html_writer::start_tag('details', ['class' => 'border rounded p-3 bg-light']);
 echo html_writer::tag(
     'summary',
-    'Coming Soon: Advanced Features',
+    get_string('coming_soon_features', 'local_savian_ai'),
     ['class' => 'font-weight-bold text-success', 'style' => 'cursor: pointer;']
 );
 echo html_writer::start_div('mt-3');
