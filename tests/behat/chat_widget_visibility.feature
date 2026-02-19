@@ -1,4 +1,4 @@
-@local_savian_ai @javascript
+@local @local_savian_ai @javascript
 Feature: Chat widget visibility
   As a user I should only see the Savian AI chat widget when authorized
   and on an appropriate course page with the widget enabled.

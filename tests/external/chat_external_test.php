@@ -16,11 +16,6 @@
 
 namespace local_savian_ai\external;
 
-defined('MOODLE_INTERNAL') || die();
-
-global $CFG;
-require_once($CFG->libdir . '/externallib.php');
-
 /**
  * Unit tests for the chat external web services.
  *
@@ -32,6 +27,7 @@ require_once($CFG->libdir . '/externallib.php');
  * @copyright  2026 Savian AI
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers     \local_savian_ai\external\chat
+ * @runTestsInSeparateProcesses
  */
 final class chat_external_test extends \advanced_testcase {
     /**
