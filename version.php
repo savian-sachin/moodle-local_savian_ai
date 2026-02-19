@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_savian_ai';
-$plugin->version = 2026021400;  // YYYYMMDDXX format.
+$plugin->version = 2026021401;  // YYYYMMDDXX format.
 $plugin->requires = 2024100700; // Moodle 4.5 minimum.
 $plugin->maturity = MATURITY_STABLE;
 $plugin->release = 'v1.2.0';

@@ -36,7 +36,7 @@
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #6C3BAA 0%, #8B5AC8 100%);
+    background: linear-gradient(135deg, #6c3baa 0%, #8b5ac8 100%);
     color: white;
     display: flex;
     align-items: center;
@@ -53,7 +53,7 @@
 }
 
 .savian-chat-bubble:focus {
-    outline: 2px solid #6C3BAA;
+    outline: 2px solid #6c3baa;
     outline-offset: 2px;
 }
 
@@ -170,7 +170,7 @@
    ========================================== */
 
 .savian-chat-header {
-    background: linear-gradient(135deg, #6C3BAA 0%, #8B5AC8 100%);
+    background: linear-gradient(135deg, #6c3baa 0%, #8b5ac8 100%);
     color: white;
     padding: 16px;
     display: flex;
@@ -266,7 +266,7 @@
 }
 
 .savian-chat-message.user .savian-message-content {
-    background: #6C3BAA;
+    background: #6c3baa;
     color: white;
     border-bottom-right-radius: 4px;
 }
@@ -359,18 +359,18 @@
 
 .savian-btn-feedback:hover {
     background: #f0f0f0;
-    border-color: #6C3BAA;
-    color: #6C3BAA;
+    border-color: #6c3baa;
+    color: #6c3baa;
 }
 
 .savian-btn-feedback:focus {
-    outline: 2px solid #6C3BAA;
+    outline: 2px solid #6c3baa;
     outline-offset: 1px;
 }
 
 .savian-btn-feedback.active {
-    background: #6C3BAA;
-    border-color: #6C3BAA;
+    background: #6c3baa;
+    border-color: #6c3baa;
     color: white;
 }
 
@@ -399,7 +399,17 @@
 }
 
 @keyframes typing {
-    0%, 60%, 100% {
+    0% {
+        opacity: 0.3;
+        transform: translateY(0);
+    }
+
+    60% {
+        opacity: 0.3;
+        transform: translateY(0);
+    }
+
+    100% {
         opacity: 0.3;
         transform: translateY(0);
     }
@@ -466,7 +476,7 @@
 
 .savian-chat-input:focus {
     outline: none;
-    border-color: #6C3BAA;
+    border-color: #6c3baa;
     box-shadow: 0 0 0 3px rgba(108, 59, 170, 0.1);
 }
 
@@ -476,7 +486,7 @@
 }
 
 .savian-btn-send {
-    background: #6C3BAA;
+    background: #6c3baa;
     color: white;
     border: none;
     border-radius: 50%;
@@ -501,7 +511,7 @@
 }
 
 .savian-btn-send:focus {
-    outline: 2px solid #6C3BAA;
+    outline: 2px solid #6c3baa;
     outline-offset: 2px;
 }
 
@@ -584,7 +594,7 @@
 
 .savian-conversation-item.active {
     background: #f0e6ff;
-    border-left: 4px solid #6C3BAA;
+    border-left: 4px solid #6c3baa;
 }
 
 .savian-conv-title {
@@ -713,6 +723,7 @@
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
+    /* stylelint-disable declaration-no-important */
     .savian-chat-window,
     .savian-chat-message,
     .savian-typing-dot,
@@ -723,6 +734,7 @@
     * {
         transition: none !important;
     }
+    /* stylelint-enable declaration-no-important */
 }
 
 /* Focus visible for keyboard navigation */
@@ -730,7 +742,7 @@
 .savian-btn-send:focus-visible,
 .savian-btn-icon:focus-visible,
 .savian-btn-feedback:focus-visible {
-    outline: 2px solid #6C3BAA;
+    outline: 2px solid #6c3baa;
     outline-offset: 2px;
 }
 
@@ -807,9 +819,11 @@
    ========================================== */
 
 @media print {
+    /* stylelint-disable declaration-no-important */
     .savian-chat-widget {
         display: none !important;
     }
+    /* stylelint-enable declaration-no-important */
 }
 
 /* ==========================================
@@ -857,7 +871,7 @@
     justify-content: center;
     text-align: center;
     padding: 30px 20px;
-    background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+    background: linear-gradient(180deg, #f8f9fa 0%, #fff 100%);
     min-height: 300px;
 }
 
@@ -905,7 +919,7 @@
 .savian-chat-widget.restricted .countdown-value {
     font-size: 28px;
     font-weight: 700;
-    color: #6C3BAA;
+    color: #6c3baa;
     line-height: 1;
     font-variant-numeric: tabular-nums;
 }

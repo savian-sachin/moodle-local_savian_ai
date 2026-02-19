@@ -11,7 +11,7 @@
 /* Small logo - top right corner only */
 .savian-logo-small {
     font-size: 14px;
-    color: #6C3BAA;
+    color: #6c3baa;
     font-weight: 600;
     float: right;
     opacity: 0.7;
@@ -20,7 +20,7 @@
 
 /* Subtle accent border for key feature cards */
 .savian-accent-card {
-    border-left: 4px solid #6C3BAA;
+    border-left: 4px solid #6c3baa;
 }
 
 /* =======================
@@ -29,26 +29,26 @@
 
 /* Savian branded button - ONLY for primary plugin actions */
 .btn-savian {
-    background: linear-gradient(135deg, #6C3BAA 0%, #8B5AC8 100%);
-    border-color: #6C3BAA;
-    color: white !important;
+    background: linear-gradient(135deg, #6c3baa 0%, #8b5ac8 100%);
+    border-color: #6c3baa;
+    color: #fff;
     transition: all 0.3s ease;
 }
 
 .btn-savian:hover,
 .btn-savian:focus,
 .btn-savian:active {
-    background: linear-gradient(135deg, #8B5AC8 0%, #9D6FD4 100%);
-    border-color: #8B5AC8;
-    color: white !important;
+    background: linear-gradient(135deg, #8b5ac8 0%, #9d6fd4 100%);
+    border-color: #8b5ac8;
+    color: #fff;
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(108, 59, 170, 0.4) !important;
+    box-shadow: 0 6px 12px rgba(108, 59, 170, 0.4);
 }
 
 .btn-savian:not(:disabled):not(.disabled):active,
 .btn-savian:not(:disabled):not(.disabled).active {
-    background: linear-gradient(135deg, #6C3BAA 0%, #8B5AC8 100%);
-    color: white !important;
+    background: linear-gradient(135deg, #6c3baa 0%, #8b5ac8 100%);
+    color: #fff;
 }
 
 /* =======================
@@ -57,9 +57,9 @@
 
 /* Processing status - subtle purple */
 .badge-savian-processing {
-    background-color: #F3F0F9;
-    color: #6C3BAA;
-    border: 1px solid #D4C2EA;
+    background-color: #f3f0f9;
+    color: #6c3baa;
+    border: 1px solid #d4c2ea;
 }
 
 /* =======================
@@ -68,12 +68,12 @@
 
 /* Purple text for emphasis (use sparingly) */
 .savian-text-primary {
-    color: #6C3BAA;
+    color: #6c3baa;
 }
 
 /* Light purple background (very subtle) */
 .savian-bg-light {
-    background-color: #F9F8FC;
+    background-color: #f9f8fc;
 }
 
 /* =======================
