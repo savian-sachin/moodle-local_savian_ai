@@ -283,7 +283,10 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
                         '/local/savian_ai/create_course.php?courseid=' +
                         courseid + '&action=preview';
                 } else if (response.status === 'failed') {
-                    Notification.alert('" . get_string('generation_failed_title', 'local_savian_ai') . "', response.error || '" . get_string('error', 'local_savian_ai') . "', 'OK');
+                    Notification.alert(
+                        '" . get_string('generation_failed_title', 'local_savian_ai') . "',
+                        response.error || '" . get_string('error', 'local_savian_ai') . "',
+                        'OK');
                     window.location.href = M.cfg.wwwroot +
                         '/local/savian_ai/create_course.php?courseid=' + courseid;
                 } else {
