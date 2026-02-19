@@ -16,8 +16,10 @@ Feature: Chat widget visibility
       | teacher1 | C1     | editingteacher |
       | student1 | C1     | student        |
 
-  Scenario: Chat widget does not appear when plugin is not configured
-    Given I log in as "teacher1"
+  Scenario: Chat widget does not appear when explicitly disabled
+    Given the following config values are set as admin:
+      | enable_chat_widget | 0 | local_savian_ai |
+    And I log in as "teacher1"
     When I am on "Course 1" course homepage
     Then "#savian-chat-widget" "css_element" should not exist
 

@@ -90,11 +90,11 @@ final class provider_test extends provider_testcase {
         ]);
 
         $contextlist = provider::get_contexts_for_userid($user->id);
-        $contextids = $contextlist->get_contextids();
+        $contextids = array_map('intval', $contextlist->get_contextids());
 
-        // Should include system context and the course context.
+        // Should include the course context.
         $coursecontext = \context_course::instance($course->id);
-        $this->assertContains($coursecontext->id, $contextids);
+        $this->assertContains((int) $coursecontext->id, $contextids);
     }
 
     /**
@@ -106,11 +106,11 @@ final class provider_test extends provider_testcase {
         $user = $this->getDataGenerator()->create_user();
 
         $contextlist = provider::get_contexts_for_userid($user->id);
-        $contextids = $contextlist->get_contextids();
+        $contextids = array_map('intval', $contextlist->get_contextids());
 
         // Should include system context (always added).
         $systemcontext = \context_system::instance();
-        $this->assertContains($systemcontext->id, $contextids);
+        $this->assertContains((int) $systemcontext->id, $contextids);
 
         // Should not include any course contexts.
         $this->assertCount(1, $contextids);
@@ -240,10 +240,10 @@ final class provider_test extends provider_testcase {
         $userlist = new userlist($coursecontext, 'local_savian_ai');
         provider::get_users_in_context($userlist);
 
-        $userids = $userlist->get_userids();
+        $userids = array_map('intval', $userlist->get_userids());
 
-        $this->assertContains($user1->id, $userids);
-        $this->assertContains($user2->id, $userids);
-        $this->assertNotContains($user3->id, $userids);
+        $this->assertContains((int) $user1->id, $userids);
+        $this->assertContains((int) $user2->id, $userids);
+        $this->assertNotContains((int) $user3->id, $userids);
     }
 }
