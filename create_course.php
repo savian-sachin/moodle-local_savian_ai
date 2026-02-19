@@ -295,7 +295,10 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
                 }
             } else {
                 // Error in response.
-                Notification.alert('" . get_string('error', 'local_savian_ai') . "', response.error || '" . get_string('generation_status_error', 'local_savian_ai') . "', 'OK');
+                Notification.alert(
+                    '" . get_string('error', 'local_savian_ai') . "',
+                    response.error || '" . get_string('generation_status_error', 'local_savian_ai') . "',
+                    'OK');
                 setTimeout(updateProgress, pollInterval * 2); // Retry with longer interval.
             }
         }).fail(function(error) {
@@ -389,7 +392,8 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
 
         echo html_writer::start_div('card mb-3 border-success');
         echo html_writer::start_div('card-body');
-        echo html_writer::tag('h5', '📊 ' . get_string('quality_report', 'local_savian_ai'), ['class' => 'card-title text-success']);
+        $qrtitle = '📊 ' . get_string('quality_report', 'local_savian_ai');
+        echo html_writer::tag('h5', $qrtitle, ['class' => 'card-title text-success']);
 
         // Scores in row.
         echo html_writer::start_div('row text-center mb-3');
@@ -432,7 +436,11 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
             $riskicon = $risk === 'low' ? '✓' : ($risk === 'medium' ? '⚠️' : '❗');
             echo html_writer::div(
                 html_writer::tag('div', $riskicon, ['class' => "h2 mb-0 text-{$riskcolor}"]) .
-                html_writer::tag('div', get_string('risk_label_text', 'local_savian_ai', ucfirst($risk)), ['class' => 'small text-muted']),
+                html_writer::tag(
+                    'div',
+                    get_string('risk_label_text', 'local_savian_ai', ucfirst($risk)),
+                    ['class' => 'small text-muted']
+                ),
                 'col-md-3'
             );
         }
@@ -453,7 +461,8 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
 
         // Priority Reviews.
         if (isset($report->instructor_summary->priority_reviews) && !empty($report->instructor_summary->priority_reviews)) {
-            echo html_writer::tag('strong', '📝 ' . get_string('priority_reviews', 'local_savian_ai') . ':', ['class' => 'd-block mb-2']);
+            $reviewlabel = '📝 ' . get_string('priority_reviews', 'local_savian_ai') . ':';
+            echo html_writer::tag('strong', $reviewlabel, ['class' => 'd-block mb-2']);
             echo html_writer::start_tag('ul', ['class' => 'mb-2']);
             foreach ($report->instructor_summary->priority_reviews as $item) {
                 echo html_writer::tag('li', s($item));
@@ -464,7 +473,9 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
         // Recommended review time.
         if (isset($report->instructor_summary->recommended_review_time)) {
             echo html_writer::div(
-                '⏱️ <em>' . get_string('estimated_review_time', 'local_savian_ai', s($report->instructor_summary->recommended_review_time)) . '</em>',
+                '⏱️ <em>'
+                . get_string('estimated_review_time', 'local_savian_ai', s($report->instructor_summary->recommended_review_time))
+                . '</em>',
                 'text-muted small'
             );
         }
@@ -669,7 +680,9 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
             'title' => get_string('include_item', 'local_savian_ai'),
         ];
         echo html_writer::empty_tag('input', $sectioncheckattrs);
-        echo html_writer::tag('strong', '📖 ' . get_string('section_n_label', 'local_savian_ai', ($idx + 1)) . ' ' . s($section->title ?? ''));
+        $sectionlabel = '📖 ' . get_string('section_n_label', 'local_savian_ai', ($idx + 1))
+            . ' ' . s($section->title ?? '');
+        echo html_writer::tag('strong', $sectionlabel);
 
         // ADDIE v2.1: Section coverage badge.
         if (isset($section->coverage_info)) {
@@ -763,7 +776,8 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
         // ADDIE v2.0: Source documents used.
         if (isset($section->source_documents_used) && !empty($section->source_documents_used)) {
             echo html_writer::div(
-                '<small><strong>📚 Sources:</strong> ' . implode(', ', array_map('s', $section->source_documents_used)) . '</small>',
+                '<small><strong>📚 Sources:</strong> '
+                . implode(', ', array_map('s', $section->source_documents_used)) . '</small>',
                 'text-muted mb-2'
             );
         }
@@ -855,7 +869,9 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
                     'data-item' => $itemidx,
                     'title' => get_string('view_full_content', 'local_savian_ai'),
                 ];
-                echo html_writer::tag('button', '<i class="fa fa-eye"></i> ' . get_string('view_conversation', 'local_savian_ai'), $viewattrs);
+                $viewtext = '<i class="fa fa-eye"></i> '
+                    . get_string('view_conversation', 'local_savian_ai');
+                echo html_writer::tag('button', $viewtext, $viewattrs);
                 $editattrs = [
                     'class' => 'btn btn-outline-primary',
                     'data-action' => 'edit-item',
@@ -863,7 +879,9 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
                     'data-item' => $itemidx,
                     'title' => get_string('view_edit_before_adding', 'local_savian_ai'),
                 ];
-                echo html_writer::tag('button', '<i class="fa fa-edit"></i> ' . get_string('edit_item', 'local_savian_ai'), $editattrs);
+                $edittext = '<i class="fa fa-edit"></i> '
+                    . get_string('edit_item', 'local_savian_ai');
+                echo html_writer::tag('button', $edittext, $editattrs);
                 echo html_writer::end_div();
 
                 echo html_writer::end_div();
@@ -948,8 +966,10 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
     echo html_writer::start_div('card border-primary mt-4 mb-4');
     echo html_writer::start_div('card-body p-4');
 
-    echo html_writer::tag('h5', '💡 ' . get_string('save_to_knowledge_base', 'local_savian_ai'), ['class' => 'card-title text-primary']);
-    echo html_writer::tag('p', '<strong>' . get_string('build_knowledge_base', 'local_savian_ai') . '</strong>', ['class' => 'mb-3']);
+    $kbtitle = '💡 ' . get_string('save_to_knowledge_base', 'local_savian_ai');
+    echo html_writer::tag('h5', $kbtitle, ['class' => 'card-title text-primary']);
+    $kbintro = '<strong>' . get_string('build_knowledge_base', 'local_savian_ai') . '</strong>';
+    echo html_writer::tag('p', $kbintro, ['class' => 'mb-3']);
 
     echo html_writer::tag('p', get_string('kb_benefits_intro', 'local_savian_ai'));
     echo html_writer::start_tag('ul', ['class' => 'mb-3']);
@@ -1006,7 +1026,8 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
 
         // FIELDSET 1: Basic Information.
         echo html_writer::start_tag('fieldset', ['class' => 'mb-4']);
-        echo html_writer::tag('legend', '📚 ' . get_string('basic_information', 'local_savian_ai'), ['class' => 'font-weight-bold text-primary']);
+        $basiclegend = '📚 ' . get_string('basic_information', 'local_savian_ai');
+        echo html_writer::tag('legend', $basiclegend, ['class' => 'font-weight-bold text-primary']);
 
         // Display course name (not editable - use existing course).
         echo html_writer::start_div('alert alert-light border mb-3');
@@ -1046,7 +1067,8 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
 
         // FIELDSET 2: Learner Profile (ADDIE v2.0) - Improved Alignment.
         echo html_writer::start_tag('fieldset', ['class' => 'mb-4']);
-        echo html_writer::tag('legend', '👥 ' . get_string('learner_profile', 'local_savian_ai'), ['class' => 'font-weight-bold text-primary']);
+        $profilelegend = '👥 ' . get_string('learner_profile', 'local_savian_ai');
+        echo html_writer::tag('legend', $profilelegend, ['class' => 'font-weight-bold text-primary']);
         $profilehelp = '<small class="text-muted">'
             . get_string('learner_profile_help', 'local_savian_ai')
             . '</small>';
@@ -1141,7 +1163,8 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
 
         // FIELDSET 3: Source Documents and Duration.
         echo html_writer::start_tag('fieldset', ['class' => 'mb-4']);
-        echo html_writer::tag('legend', '📄 ' . get_string('source_docs_settings', 'local_savian_ai'), ['class' => 'font-weight-bold text-primary']);
+        $docslegend = '📄 ' . get_string('source_docs_settings', 'local_savian_ai');
+        echo html_writer::tag('legend', $docslegend, ['class' => 'font-weight-bold text-primary']);
 
         echo html_writer::start_div('row');
 
@@ -1229,7 +1252,11 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
         $durationinput = html_writer::start_div('input-group')
             . $durationselect . $weeksappend
             . html_writer::end_div();
-        $durationhelp = html_writer::tag('small', get_string('course_duration_recommended', 'local_savian_ai'), ['class' => 'form-text text-muted']);
+        $durationhelp = html_writer::tag(
+            'small',
+            get_string('course_duration_recommended', 'local_savian_ai'),
+            ['class' => 'form-text text-muted']
+        );
         echo html_writer::div($durationlabel . $durationinput . $durationhelp, 'form-group');
         echo html_writer::end_div();
 
@@ -1239,7 +1266,8 @@ require(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notifica
 
         // FIELDSET 4: Content Types.
         echo html_writer::start_tag('fieldset', ['class' => 'mb-4']);
-        echo html_writer::tag('legend', '🎨 ' . get_string('content_types', 'local_savian_ai'), ['class' => 'font-weight-bold text-primary']);
+        $ctlegend = '🎨 ' . get_string('content_types', 'local_savian_ai');
+        echo html_writer::tag('legend', $ctlegend, ['class' => 'font-weight-bold text-primary']);
         echo html_writer::div(
             '<small class="text-muted">' . get_string('content_types_note', 'local_savian_ai') . '</small>',
             'mb-3'
