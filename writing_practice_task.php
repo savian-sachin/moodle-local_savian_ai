@@ -236,10 +236,8 @@ echo html_writer::empty_tag('input', [
     'type' => 'checkbox', 'id' => 'wp-improved', 'name' => 'include_improved_writing',
     'class' => 'form-check-input', 'value' => '1', 'checked' => 'checked',
 ]);
-echo html_writer::tag('label',
-    get_string('writing_practice_include_improved', 'local_savian_ai'),
-    ['for' => 'wp-improved', 'class' => 'form-check-label']
-);
+$includelabel = get_string('writing_practice_include_improved', 'local_savian_ai');
+echo html_writer::tag('label', $includelabel, ['for' => 'wp-improved', 'class' => 'form-check-label']);
 echo html_writer::end_div();
 
 // Buttons.

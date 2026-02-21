@@ -42,7 +42,6 @@ use external_value;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class writing extends external_api {
-
     /**
      * Returns parameter definitions for get_submission_status.
      *

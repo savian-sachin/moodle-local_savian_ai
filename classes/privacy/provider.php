@@ -482,7 +482,7 @@ class provider implements
                 ['courseid' => $courseid]
             );
             if (!empty($taskids)) {
-                list($insql, $inparams) = $DB->get_in_or_equal($taskids, SQL_PARAMS_NAMED);
+                [$insql, $inparams] = $DB->get_in_or_equal($taskids, SQL_PARAMS_NAMED);
                 $DB->delete_records_select(
                     'local_savian_ai_writing_submissions',
                     'writing_task_id ' . $insql,

@@ -42,7 +42,7 @@ $PAGE->set_course($course);
 $PAGE->set_title(get_string('writing_practice', 'local_savian_ai'));
 $PAGE->set_heading($course->fullname);
 
-// --- POST: submit writing ---
+// POST: submit writing.
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === '') {
     require_sesskey();
 
@@ -106,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === '') {
     redirect($pollurl);
 }
 
-// --- POLL ---
+// Poll action.
 if ($action === 'poll') {
     if (empty($submissionuuid)) {
         $cache          = \cache::make('local_savian_ai', 'session_data');
@@ -163,7 +163,7 @@ if ($action === 'poll') {
     die;
 }
 
-// --- FEEDBACK ---
+// Feedback action.
 if ($action === 'feedback') {
     if (empty($submissionuuid)) {
         $cache          = \cache::make('local_savian_ai', 'session_data');
@@ -215,12 +215,11 @@ if ($action === 'feedback') {
             if (isset($ielts->overall_band)) {
                 $overallval = (float) $ielts->overall_band;
                 echo html_writer::start_div('text-center mb-4');
-                echo html_writer::tag('div', get_string('writing_practice_ielts_overall', 'local_savian_ai'),
-                    ['class' => 'savian-wp-ielts-overall-label']);
-                echo html_writer::tag('div', s((string) $overallval),
-                    ['class' => 'savian-wp-ielts-overall-badge']);
-                echo html_writer::tag('div', get_string('writing_practice_ielts_outof', 'local_savian_ai'),
-                    ['class' => 'savian-wp-ielts-outof']);
+                $overalllabel = get_string('writing_practice_ielts_overall', 'local_savian_ai');
+                echo html_writer::tag('div', $overalllabel, ['class' => 'savian-wp-ielts-overall-label']);
+                echo html_writer::tag('div', s((string) $overallval), ['class' => 'savian-wp-ielts-overall-badge']);
+                $outofstr = get_string('writing_practice_ielts_outof', 'local_savian_ai');
+                echo html_writer::tag('div', $outofstr, ['class' => 'savian-wp-ielts-outof']);
                 echo html_writer::end_div();
             }
 
@@ -383,7 +382,7 @@ if ($action === 'feedback') {
     die;
 }
 
-// --- Default: task selector + writing form ---
+// Default: task selector + writing form.
 $tasks = $DB->get_records(
     'local_savian_ai_writing_tasks',
     ['course_id' => $courseid, 'is_active' => 1],

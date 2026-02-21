@@ -32,7 +32,6 @@ use external_single_structure;
  * @runTestsInSeparateProcesses
  */
 final class writing_external_test extends advanced_testcase {
-
     /**
      * Test that get_submission_status_parameters returns correct structure.
      */

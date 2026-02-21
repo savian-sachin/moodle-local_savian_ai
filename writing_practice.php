@@ -173,7 +173,7 @@ if (!empty($tasks)) {
         $students = $reportresponse->students ?? [];
         if (!empty($students)) {
             // Collect all moodle_user_ids and pre-load full names.
-            $stuuserids = array_filter(array_map(function($s) {
+            $stuuserids = array_filter(array_map(function ($s) {
                 return (int) ($s->moodle_user_id ?? 0);
             }, $students));
             $namefields = 'id,firstname,lastname,firstnamephonetic,lastnamephonetic,middlename,alternatename';
@@ -215,7 +215,7 @@ if (!empty($tasks)) {
         $atrisk = $atriskresponse->at_risk_students ?? $atriskresponse->students ?? [];
         if (!empty($atrisk)) {
             // Pre-load user names.
-            $riskuserids = array_filter(array_map(function($s) {
+            $riskuserids = array_filter(array_map(function ($s) {
                 return (int) ($s->moodle_user_id ?? 0);
             }, $atrisk));
             $riskfields = 'id,firstname,lastname,firstnamephonetic,lastnamephonetic,middlename,alternatename';
@@ -226,8 +226,7 @@ if (!empty($tasks)) {
             echo html_writer::start_div('card mb-4 border-warning');
             echo html_writer::div(get_string('writing_practice_atrisk', 'local_savian_ai'), 'card-header');
             echo html_writer::start_div('card-body');
-            echo html_writer::tag('p', get_string('writing_practice_atrisk_desc', 'local_savian_ai'),
-                ['class' => 'text-muted']);
+            echo html_writer::tag('p', get_string('writing_practice_atrisk_desc', 'local_savian_ai'), ['class' => 'text-muted']);
 
             echo html_writer::start_tag('table', ['class' => 'table table-sm']);
             echo html_writer::start_tag('thead');

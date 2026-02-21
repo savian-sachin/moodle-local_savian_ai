@@ -276,7 +276,6 @@ function xmldb_local_savian_ai_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026021301, 'local', 'savian_ai');
     }
 
-
     if ($oldversion < 2026022101) {
         // Create local_savian_ai_writing_tasks table.
         $table = new xmldb_table('local_savian_ai_writing_tasks');
