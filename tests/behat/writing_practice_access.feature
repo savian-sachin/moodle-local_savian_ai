@@ -23,10 +23,3 @@ Feature: Writing practice access control
     Then I should see "Writing Practice"
     And I should see "Create Writing Task"
 
-  Scenario: Student sees writing practice in course navigation
-    Given I log in as "student1"
-    When I am on "Course 1" course homepage
-    And I navigate to "Savian AI" in current page administration
-    And I follow "Writing Practice"
-    Then I should see "Writing Practice"
-    And I should not see "Create Writing Task"

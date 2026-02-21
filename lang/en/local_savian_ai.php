@@ -1014,6 +1014,59 @@ $string['tutorial_view_admin'] = 'View Admin Tutorials';
 $string['tutorial_view_student'] = 'View Student Tutorials';
 $string['tutorial_view_teacher'] = 'View Teacher Tutorials';
 $string['tutorial_welcome'] = 'Welcome to Savian AI Tutorials';
+$string['tutorial_writing_cefr_desc'] = 'Each submission is assessed against the CEFR scale (A1–C2). ' .
+    'The AI gives a level, a reasoning paragraph, identified strengths, grammar errors, and an improved version of the text.';
+$string['tutorial_writing_cefr_grades'] = 'CEFR grades map to Moodle gradebook scores: ' .
+    'A1=1, A2=2, B1=3, B2=4, C1=5, C2=6 (out of 6.0)';
+$string['tutorial_writing_cefr_heading'] = 'CEFR / IELTS Scoring Explained';
+$string['tutorial_writing_cefr_ielts'] = 'For IELTS exam types the AI returns four band scores (Task Achievement, ' .
+    'Coherence & Cohesion, Lexical Resource, Grammatical Range & Accuracy) plus an overall band out of 9.0.';
+$string['tutorial_writing_cefr_target'] = 'Set a <strong>Target CEFR Level</strong> when creating the task ' .
+    'so the AI calibrates its feedback to that proficiency goal.';
+$string['tutorial_writing_create_step1'] = 'Navigate to your course and click <strong>Savian AI</strong> ' .
+    'in the course navigation.';
+$string['tutorial_writing_create_step2'] = 'Click <strong>Writing Practice</strong>.';
+$string['tutorial_writing_create_step3'] = 'Click <strong>Create Writing Task</strong>.';
+$string['tutorial_writing_create_step4'] = 'Fill in: Title, Writing Prompt, Task Type (Essay/Letter/Email/Report/Review/Story), ' .
+    'Language, Exam Type, Target CEFR Level, and optional min/max word counts.';
+$string['tutorial_writing_create_step5'] = 'Tick <strong>Include AI-Improved Writing</strong> if you want students ' .
+    'to receive a corrected version of their text alongside the feedback.';
+$string['tutorial_writing_create_step6'] = 'Click <strong>Create Task</strong>. The task is synced with the AI ' .
+    'service and immediately available to students.';
+$string['tutorial_writing_create_title'] = 'Part 1 (Teacher): Creating a Writing Task';
+$string['tutorial_writing_desc'] = 'Create AI-assessed writing tasks, submit writing for instant feedback, ' .
+    'and understand CEFR/IELTS scoring and gradebook integration.';
+$string['tutorial_writing_gradebook_desc'] = 'Each writing task automatically creates a grade item in the Moodle ' .
+    'gradebook. Grades are written when a student receives feedback.';
+$string['tutorial_writing_gradebook_heading'] = 'Part 4: Gradebook Integration';
+$string['tutorial_writing_gradebook_ielts'] = '<strong>IELTS tasks</strong>: overall band score (0.0 – 9.0) ' .
+    'is recorded directly as the grade.';
+$string['tutorial_writing_gradebook_max'] = 'Max grade is <strong>9.0</strong> for IELTS exam types and ' .
+    '<strong>6.0</strong> for all CEFR-based types.';
+$string['tutorial_writing_gradebook_note'] = 'Deleting a task also removes its gradebook item. ' .
+    'Only the most recent submission grade is kept in the gradebook.';
+$string['tutorial_writing_gradebook_standard'] = '<strong>CEFR tasks</strong>: the CEFR level maps to a numeric ' .
+    'grade (A1=1 … C2=6) which is written to the gradebook.';
+$string['tutorial_writing_gradebook_view'] = 'Teachers can view all grades in the standard Moodle Gradebook ' .
+    '(Course → Grades) as well as via the Writing Practice class report.';
+$string['tutorial_writing_submit_feedback'] = 'The AI returns: CEFR level, reasoning, strengths, ' .
+    'grammar/spelling notes, areas for improvement, and (if enabled) an AI-improved version of the text.';
+$string['tutorial_writing_submit_grade'] = 'Your grade (CEFR score or IELTS band) is automatically recorded ' .
+    'in the Moodle gradebook.';
+$string['tutorial_writing_submit_step1'] = 'Navigate to your course, click <strong>Savian AI</strong> ' .
+    'then <strong>Writing Practice</strong>.';
+$string['tutorial_writing_submit_step2'] = 'Select a task from the dropdown and read the prompt carefully.';
+$string['tutorial_writing_submit_step3'] = 'Type or paste your writing into the text area.';
+$string['tutorial_writing_submit_step4'] = 'Click <strong>Submit Writing</strong>. ' .
+    'The AI takes 8–15 seconds to analyse your text.';
+$string['tutorial_writing_submit_step5'] = 'Review your feedback on screen. ' .
+    'Return any time via <strong>View your last feedback</strong>.';
+$string['tutorial_writing_submit_title'] = 'Part 2 (Student): Submitting Writing and Getting AI Feedback';
+$string['tutorial_writing_submit_tip'] = 'Re-read the prompt before submitting. The AI checks whether your ' .
+    'response actually addresses the task, so staying on-topic raises your score.';
+$string['tutorial_writing_tip'] = 'Combine Writing Practice with the Chat tutor: after receiving feedback, ' .
+    'students can ask the chat tutor to explain any grammar point or vocabulary suggestion.';
+$string['tutorial_writing_title'] = 'Tutorial 8: Writing Practice';
 $string['tutorials'] = 'Help & Tutorials';
 $string['tutorials_help_text'] = 'Need help getting started? Check out our tutorials!';
 $string['tutorials_help_text_teacher'] = 'Need help? Check out our step-by-step tutorials!';

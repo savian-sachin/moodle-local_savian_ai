@@ -159,6 +159,21 @@ function local_savian_ai_show_overview() {
     echo html_writer::end_div();
     echo html_writer::end_div();
 
+    // Writing Practice card.
+    echo html_writer::start_div('col-md-4 mb-3');
+    echo html_writer::start_div('card h-100 tutorial-card');
+    echo html_writer::start_div('card-body text-center');
+    echo html_writer::tag('h4', get_string('writing_practice', $s), ['class' => 'card-title']);
+    echo html_writer::tag('p', get_string('tutorial_writing_desc', $s), ['class' => 'card-text']);
+    echo html_writer::link(
+        new moodle_url('/local/savian_ai/tutorials.php', ['role' => 'teacher']),
+        get_string('tutorial_view_teacher', $s),
+        ['class' => 'btn btn-primary']
+    );
+    echo html_writer::end_div();
+    echo html_writer::end_div();
+    echo html_writer::end_div();
+
     echo html_writer::end_div();
 }
 
@@ -489,6 +504,9 @@ function local_savian_ai_show_teacher_tutorials() {
     echo html_writer::div(get_string('tutorial_chathistory_tip', $s), 'alert alert-info mt-3');
     echo html_writer::end_div();
     echo html_writer::end_div();
+
+    // Tutorial 8: Writing Practice.
+    local_savian_ai_show_writing_practice_tutorial();
 }
 
 /**
@@ -565,6 +583,9 @@ function local_savian_ai_show_student_tutorials() {
     echo html_writer::end_div();
     echo html_writer::end_div();
 
+    // Writing Practice tutorial for students.
+    local_savian_ai_show_writing_practice_tutorial();
+
     // FAQs.
     echo html_writer::start_div('card mb-4 tutorial-card');
     echo html_writer::div(get_string('tutorial_faq', $s), 'card-header');
@@ -577,6 +598,68 @@ function local_savian_ai_show_student_tutorials() {
     echo html_writer::tag('p', get_string('tutorial_faq_source_a', $s));
     echo html_writer::tag('h6', get_string('tutorial_faq_wrong_q', $s), ['class' => 'mt-3']);
     echo html_writer::tag('p', get_string('tutorial_faq_wrong_a', $s));
+    echo html_writer::end_div();
+    echo html_writer::end_div();
+}
+
+/**
+ * Writing Practice tutorial (shown in both teacher and student views).
+ *
+ * @return void
+ */
+function local_savian_ai_show_writing_practice_tutorial() {
+    $s = 'local_savian_ai';
+    echo html_writer::start_div('card mb-4 tutorial-card');
+    $header = get_string('tutorial_writing_title', $s);
+    echo html_writer::div($header, 'card-header bg-purple text-white');
+    echo html_writer::start_div('card-body');
+
+    // Part 1: Teacher — Creating a writing task.
+    echo html_writer::tag('h5', get_string('tutorial_writing_create_title', $s));
+    echo html_writer::start_tag('ol');
+    echo html_writer::tag('li', get_string('tutorial_writing_create_step1', $s));
+    echo html_writer::tag('li', get_string('tutorial_writing_create_step2', $s));
+    echo html_writer::tag('li', get_string('tutorial_writing_create_step3', $s));
+    echo html_writer::tag('li', get_string('tutorial_writing_create_step4', $s));
+    echo html_writer::tag('li', get_string('tutorial_writing_create_step5', $s));
+    echo html_writer::tag('li', get_string('tutorial_writing_create_step6', $s));
+    echo html_writer::end_tag('ol');
+
+    // Part 2: Student — Submitting writing.
+    echo html_writer::tag('h5', get_string('tutorial_writing_submit_title', $s), ['class' => 'mt-4']);
+    echo html_writer::start_tag('ol');
+    echo html_writer::tag('li', get_string('tutorial_writing_submit_step1', $s));
+    echo html_writer::tag('li', get_string('tutorial_writing_submit_step2', $s));
+    echo html_writer::tag('li', get_string('tutorial_writing_submit_step3', $s));
+    echo html_writer::tag('li', get_string('tutorial_writing_submit_step4', $s));
+    echo html_writer::tag('li', get_string('tutorial_writing_submit_step5', $s));
+    echo html_writer::end_tag('ol');
+    echo html_writer::tag('p', get_string('tutorial_writing_submit_feedback', $s));
+    echo html_writer::tag('p', get_string('tutorial_writing_submit_grade', $s));
+    echo html_writer::div(get_string('tutorial_writing_submit_tip', $s), 'alert alert-info mt-2');
+
+    // Part 3: CEFR/IELTS scoring.
+    echo html_writer::tag('h5', get_string('tutorial_writing_cefr_heading', $s), ['class' => 'mt-4']);
+    echo html_writer::tag('p', get_string('tutorial_writing_cefr_desc', $s));
+    echo html_writer::start_tag('ul');
+    echo html_writer::tag('li', get_string('tutorial_writing_cefr_target', $s));
+    echo html_writer::tag('li', get_string('tutorial_writing_cefr_grades', $s));
+    echo html_writer::tag('li', get_string('tutorial_writing_cefr_ielts', $s));
+    echo html_writer::end_tag('ul');
+
+    // Part 4: Gradebook integration.
+    echo html_writer::tag('h5', get_string('tutorial_writing_gradebook_heading', $s), ['class' => 'mt-4']);
+    echo html_writer::tag('p', get_string('tutorial_writing_gradebook_desc', $s));
+    echo html_writer::start_tag('ul');
+    echo html_writer::tag('li', get_string('tutorial_writing_gradebook_max', $s));
+    echo html_writer::tag('li', get_string('tutorial_writing_gradebook_standard', $s));
+    echo html_writer::tag('li', get_string('tutorial_writing_gradebook_ielts', $s));
+    echo html_writer::tag('li', get_string('tutorial_writing_gradebook_view', $s));
+    echo html_writer::end_tag('ul');
+    echo html_writer::div(get_string('tutorial_writing_gradebook_note', $s), 'alert alert-warning mt-2');
+
+    echo html_writer::div(get_string('tutorial_writing_tip', $s), 'alert alert-success mt-3');
+
     echo html_writer::end_div();
     echo html_writer::end_div();
 }
