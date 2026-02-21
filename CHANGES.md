@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Privacy provider and language strings updated to reflect that email is no longer transmitted
 
 ### Upgrade Notes
-- No database changes required
+- **New database tables**: `local_savian_ai_writing_tasks` and `local_savian_ai_writing_submissions` — created automatically on upgrade
 - No configuration changes required
 
 ---
@@ -350,7 +350,7 @@ from development versions into a production-ready package.
 ## Upgrade Notes
 
 ### From 1.2.0 to 1.3.0
-- No database changes required
+- **New database tables**: `local_savian_ai_writing_tasks` and `local_savian_ai_writing_submissions` — created automatically on upgrade (visit Site Administration → Notifications)
 - No configuration changes required
 - `user_email` is no longer sent to the external API — no action needed
 
