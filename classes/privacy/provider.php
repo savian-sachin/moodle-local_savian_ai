@@ -200,7 +200,6 @@ class provider implements
             'savian_api',
             [
                 'user_id' => 'privacy:metadata:external:user_id',
-                'user_email' => 'privacy:metadata:external:user_email',
                 'course_id' => 'privacy:metadata:external:course_id',
                 'chat_message' => 'privacy:metadata:external:chat_message',
                 'document_content' => 'privacy:metadata:external:document_content',

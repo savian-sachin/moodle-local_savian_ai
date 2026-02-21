@@ -103,7 +103,6 @@ class manager {
             $conversationuuid,
             [
                 'user_id' => $USER->id,
-                'user_email' => $USER->email,
                 'user_role' => $userrole,
                 'course_id' => $courseid,
                 'course_name' => $coursename,

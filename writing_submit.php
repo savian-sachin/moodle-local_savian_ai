@@ -69,7 +69,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === '') {
         'task_id'           => (int) $taskrecord->api_task_id,
         'submission_text'   => $text,
         'moodle_user_id'    => (string) $USER->id,
-        'moodle_user_email' => $USER->email,
         'word_count'        => $wordcount,
     ];
 

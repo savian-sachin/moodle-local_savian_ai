@@ -390,7 +390,6 @@ class client {
             'message' => $message,
             'conversation_id' => $conversationuuid,
             'user_id' => (string)($options['user_id'] ?? $USER->id),
-            'user_email' => $options['user_email'] ?? $USER->email,
             'user_role' => $options['user_role'] ?? 'teacher',
             'course_id' => $options['course_id'] ? (string)$options['course_id'] : null,
             'course_name' => $options['course_name'] ?? ($COURSE->id != SITEID ? $COURSE->fullname : null),

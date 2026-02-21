@@ -500,7 +500,6 @@ $string['privacy:metadata:external:anonymized_analytics'] = 'Anonymized student 
 $string['privacy:metadata:external:chat_message'] = 'Chat messages sent to AI';
 $string['privacy:metadata:external:course_id'] = 'Course ID for scoping';
 $string['privacy:metadata:external:document_content'] = 'Document content for processing';
-$string['privacy:metadata:external:user_email'] = 'User email for context';
 $string['privacy:metadata:external:user_id'] = 'User ID sent to AI service';
 $string['privacy:metadata:generations'] = 'AI generation request history';
 $string['privacy:metadata:generations:course_id'] = 'Target course';

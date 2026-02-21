@@ -195,7 +195,6 @@ $string['privacy:metadata:external'] = 'Dịch vụ Bên ngoài Savian AI';
 $string['privacy:metadata:external:chat_message'] = 'Tin nhắn trò chuyện gửi đến AI';
 $string['privacy:metadata:external:course_id'] = 'ID khóa học';
 $string['privacy:metadata:external:document_content'] = 'Nội dung tài liệu để xử lý';
-$string['privacy:metadata:external:user_email'] = 'Email người dùng cho ngữ cảnh';
 $string['privacy:metadata:external:user_id'] = 'ID người dùng gửi đến dịch vụ AI';
 $string['privacy:metadata:generations'] = 'Lịch sử yêu cầu tạo nội dung AI';
 $string['privacy:metadata:generations:course_id'] = 'Khóa học đích';
