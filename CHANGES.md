@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.0] - 2026-02-21 - Writing Practice & GDPR Data Minimisation
+
+### Added
+- **AI Writing Practice**: Students submit written work in Moodle and receive instant AI feedback with CEFR/IELTS scoring, grammar highlights, and an improved version of their text — integrated with the Moodle gradebook
+- **Legal & Procurement documentation**: New section in README for universities covering DPA requests, GDPR compliance summary, and procurement steps
+
+### Changed
+- **Free trial extended to 30 days** (was 14 days)
+
+### Security
+- **GDPR data minimisation**: `user_email` is no longer sent to the external Savian AI API in chat messages or writing submissions — user session is tracked by numeric user ID only
+- Privacy provider and language strings updated to reflect that email is no longer transmitted
+
+### Upgrade Notes
+- No database changes required
+- No configuration changes required
+
+---
+
 ## [1.2.0] - 2026-02-13 - Plugin Review Compliance
 
 ### Added
@@ -48,7 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Tutorial 7: Monitoring Student Chat Conversations
 - **API Setup Documentation**: README now includes step-by-step guide
   - Registration URL: https://app.savian.ai.vn/en/content-generation/moodle-plugin/register/
-  - 14-day free trial information
+  - 30-day free trial information
   - Credential setup instructions
 
 ### Fixed
@@ -329,6 +348,11 @@ from development versions into a production-ready package.
 ---
 
 ## Upgrade Notes
+
+### From 1.2.0 to 1.3.0
+- No database changes required
+- No configuration changes required
+- `user_email` is no longer sent to the external API — no action needed
 
 ### From 1.1.1 to 1.2.0
 - New cache definitions in `db/caches.php` (auto-registered on upgrade)
