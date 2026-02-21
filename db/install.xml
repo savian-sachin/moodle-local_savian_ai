@@ -285,5 +285,67 @@
         <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated"/>
       </INDEXES>
     </TABLE>
+
+    <!-- Writing tasks table for AI writing practice -->
+    <TABLE NAME="local_savian_ai_writing_tasks" COMMENT="Stores writing tasks for AI writing practice">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="api_task_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="API's task_id"/>
+        <FIELD NAME="course_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="teacher_user_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="title" TYPE="char" LENGTH="200" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="prompt" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="task_type" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="essay" SEQUENCE="false"/>
+        <FIELD NAME="exam_type" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="general" SEQUENCE="false"/>
+        <FIELD NAME="target_cefr_level" TYPE="char" LENGTH="5" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="word_count_min" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="150" SEQUENCE="false"/>
+        <FIELD NAME="word_count_max" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="300" SEQUENCE="false"/>
+        <FIELD NAME="time_limit_minutes" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="include_improved_writing" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
+        <FIELD NAME="language" TYPE="char" LENGTH="5" NOTNULL="true" DEFAULT="en" SEQUENCE="false"/>
+        <FIELD NAME="is_active" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="api_task_id" TYPE="unique" FIELDS="api_task_id"/>
+        <KEY NAME="course_id_fk" TYPE="foreign" FIELDS="course_id" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="teacher_user_id_fk" TYPE="foreign" FIELDS="teacher_user_id" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="is_active" UNIQUE="false" FIELDS="is_active"/>
+      </INDEXES>
+    </TABLE>
+
+    <!-- Writing submissions table for AI writing practice -->
+    <TABLE NAME="local_savian_ai_writing_submissions" COMMENT="Stores student writing submissions and AI feedback">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="submission_uuid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="writing_task_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="api_task_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="moodle_user_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="pending" SEQUENCE="false"/>
+        <FIELD NAME="progress" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="stage" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="word_count" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="submission_text" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="time_spent_seconds" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="feedback_json" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Full AI feedback JSON"/>
+        <FIELD NAME="error_message" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="submission_uuid" TYPE="unique" FIELDS="submission_uuid"/>
+        <KEY NAME="writing_task_id_fk" TYPE="foreign" FIELDS="writing_task_id" REFTABLE="local_savian_ai_writing_tasks" REFFIELDS="id"/>
+        <KEY NAME="moodle_user_id_fk" TYPE="foreign" FIELDS="moodle_user_id" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="status" UNIQUE="false" FIELDS="status"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

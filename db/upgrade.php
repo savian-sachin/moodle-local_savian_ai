@@ -276,5 +276,86 @@ function xmldb_local_savian_ai_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026021301, 'local', 'savian_ai');
     }
 
+
+    if ($oldversion < 2026022101) {
+        // Create local_savian_ai_writing_tasks table.
+        $table = new xmldb_table('local_savian_ai_writing_tasks');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('api_task_id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('course_id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('teacher_user_id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('title', XMLDB_TYPE_CHAR, '200', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('prompt', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+        $table->add_field('task_type', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'essay');
+        $table->add_field('exam_type', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL, null, 'general');
+        $table->add_field('target_cefr_level', XMLDB_TYPE_CHAR, '5', null, null, null, null);
+        $table->add_field('word_count_min', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '150');
+        $table->add_field('word_count_max', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '300');
+        $table->add_field('time_limit_minutes', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('include_improved_writing', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+        $table->add_field('language', XMLDB_TYPE_CHAR, '5', null, XMLDB_NOTNULL, null, 'en');
+        $table->add_field('is_active', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('api_task_id', XMLDB_KEY_UNIQUE, ['api_task_id']);
+        $table->add_key('course_id_fk', XMLDB_KEY_FOREIGN, ['course_id'], 'course', ['id']);
+        $table->add_key('teacher_user_id_fk', XMLDB_KEY_FOREIGN, ['teacher_user_id'], 'user', ['id']);
+
+        $table->add_index('is_active', XMLDB_INDEX_NOTUNIQUE, ['is_active']);
+
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Create local_savian_ai_writing_submissions table.
+        $table = new xmldb_table('local_savian_ai_writing_submissions');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('submission_uuid', XMLDB_TYPE_CHAR, '36', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('writing_task_id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('api_task_id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('moodle_user_id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('status', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'pending');
+        $table->add_field('progress', XMLDB_TYPE_INTEGER, '3', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('stage', XMLDB_TYPE_CHAR, '50', null, null, null, null);
+        $table->add_field('word_count', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('time_spent_seconds', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('feedback_json', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('error_message', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('submission_uuid', XMLDB_KEY_UNIQUE, ['submission_uuid']);
+        $table->add_key(
+            'writing_task_id_fk',
+            XMLDB_KEY_FOREIGN,
+            ['writing_task_id'],
+            'local_savian_ai_writing_tasks',
+            ['id']
+        );
+        $table->add_key('moodle_user_id_fk', XMLDB_KEY_FOREIGN, ['moodle_user_id'], 'user', ['id']);
+
+        $table->add_index('status', XMLDB_INDEX_NOTUNIQUE, ['status']);
+
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026022101, 'local', 'savian_ai');
+    }
+
+    if ($oldversion < 2026022102) {
+        // Add submission_text column to local_savian_ai_writing_submissions.
+        $table = new xmldb_table('local_savian_ai_writing_submissions');
+        $field = new xmldb_field('submission_text', XMLDB_TYPE_TEXT, null, null, null, null, null, 'word_count');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2026022102, 'local', 'savian_ai');
+    }
+
     return true;
 }

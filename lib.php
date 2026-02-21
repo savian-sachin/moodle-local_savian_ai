@@ -157,6 +157,98 @@ function local_savian_ai_extend_navigation_course($navigation, $course, $context
             new pix_icon('i/report', '')
         );
     }
+
+    // Writing Practice: teachers go to the task manager; students go to submit page.
+    $wpurl = has_capability('local/savian_ai:generate', $context)
+        ? new moodle_url('/local/savian_ai/writing_practice.php', ['courseid' => $course->id])
+        : new moodle_url('/local/savian_ai/writing_submit.php', ['courseid' => $course->id]);
+    $wpnode = $navigation->add(
+        get_string('writing_practice', 'local_savian_ai'),
+        $wpurl,
+        navigation_node::TYPE_CUSTOM,
+        null,
+        'savian_writing_practice',
+        new pix_icon('i/edit', '')
+    );
+    $wpnode->showinflatnavigation = true;
+}
+
+/**
+ * Create or update the grade item for a writing task in the Moodle gradebook.
+ *
+ * Called on task create; also called by grade_update() internally on grade write.
+ * IELTS exam types use a max grade of 9.0; all others use 6.0 (CEFR A1-C2).
+ *
+ * @param stdClass $task Row from local_savian_ai_writing_tasks.
+ * @param mixed $grades null to create/update item only; array of grade objects to post grades.
+ * @return int GRADE_UPDATE_OK or GRADE_UPDATE_FAILED.
+ */
+function local_savian_ai_grade_item_update($task, $grades = null) {
+    global $CFG;
+    require_once($CFG->libdir . '/gradelib.php');
+
+    $ieltstypes = ['ielts_task1', 'ielts_task2'];
+    $grademax = in_array($task->exam_type, $ieltstypes) ? 9.0 : 6.0;
+
+    $params = [
+        'itemname'  => $task->title,
+        'gradetype' => GRADE_TYPE_VALUE,
+        'grademax'  => $grademax,
+        'grademin'  => 0,
+    ];
+
+    if ($grades === 'reset') {
+        $params['reset'] = true;
+        $grades = null;
+    }
+
+    return grade_update(
+        'local/savian_ai',
+        $task->course_id,
+        'local_savian_ai',
+        'writing_task',
+        $task->id,
+        0,
+        $grades,
+        $params
+    );
+}
+
+/**
+ * Delete the grade item for a writing task from the Moodle gradebook.
+ *
+ * Called on task soft-delete to remove the grade column from Gradebook Setup.
+ *
+ * @param stdClass $task Row from local_savian_ai_writing_tasks.
+ * @return int GRADE_UPDATE_OK or GRADE_UPDATE_FAILED.
+ */
+function local_savian_ai_grade_item_delete($task) {
+    global $CFG;
+    require_once($CFG->libdir . '/gradelib.php');
+
+    return grade_update(
+        'local/savian_ai',
+        $task->course_id,
+        'local_savian_ai',
+        'writing_task',
+        $task->id,
+        0,
+        null,
+        ['deleted' => 1]
+    );
+}
+
+/**
+ * Map a CEFR level string to a numeric grade (1-6).
+ *
+ * A1=1, A2=2, B1=3, B2=4, C1=5, C2=6.
+ *
+ * @param string $cefrlevel CEFR level string e.g. 'B2'.
+ * @return float Grade value (1.0-6.0), or 0.0 if unrecognised.
+ */
+function local_savian_ai_cefr_to_grade($cefrlevel) {
+    $map = ['A1' => 1.0, 'A2' => 2.0, 'B1' => 3.0, 'B2' => 4.0, 'C1' => 5.0, 'C2' => 6.0];
+    return $map[$cefrlevel] ?? 0.0;
 }
 
 /**

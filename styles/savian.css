@@ -96,3 +96,92 @@
 
    This ensures the plugin blends naturally with Moodle's theme.
    ======================= */
+
+/* =======================
+   WRITING PRACTICE
+   ======================= */
+
+.savian-wp-textarea {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1rem;
+    line-height: 1.7;
+    min-height: 280px;
+    resize: vertical;
+}
+
+.savian-wp-cefr-badge {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #6c3baa;
+    border: 3px solid #6c3baa;
+    border-radius: 8px;
+    padding: 0.4rem 1rem;
+    display: inline-block;
+}
+
+.savian-wp-error-mark {
+    background-color: #fff3cd;
+    border-bottom: 2px solid #ffc107;
+    cursor: pointer;
+    position: relative;
+}
+
+.savian-wp-error-mark.spelling {
+    border-bottom-color: #dc3545;
+    background-color: #f8d7da;
+}
+
+.savian-wp-progress-stage {
+    font-size: 0.85rem;
+    color: #6c3baa;
+    font-style: italic;
+}
+
+.savian-wp-diff-original {
+    background-color: #ffeef0;
+    text-decoration: line-through;
+    color: #86181d;
+}
+
+.savian-wp-diff-improved {
+    background-color: #e6ffed;
+    color: #145a32;
+}
+
+.savian-wp-ielts-overall-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+.savian-wp-ielts-overall-badge {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: #6c3baa;
+    line-height: 1;
+}
+.savian-wp-ielts-outof {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 0.15rem;
+}
+.savian-wp-ielts-sublabel {
+    font-size: 0.9rem;
+    color: #343a40;
+}
+.savian-wp-ielts-subval {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #6c3baa;
+}
+.savian-wp-ielts-progress {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e9ecef;
+}
+.savian-wp-ielts-bar {
+    background-color: #6c3baa;
+    border-radius: 4px;
+    transition: width 0.6s ease;
+}

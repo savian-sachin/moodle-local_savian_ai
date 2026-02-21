@@ -46,11 +46,17 @@ class local_savian_ai_generator extends component_generator_base {
     protected $generationcount = 0;
 
     /**
+     * @var int Writing task counter for unique API task IDs.
+     */
+    protected $writingtaskcount = 0;
+
+    /**
      * Reset the generators internal state.
      */
     public function reset() {
         $this->conversationcount = 0;
-        $this->generationcount = 0;
+        $this->generationcount   = 0;
+        $this->writingtaskcount  = 0;
         parent::reset();
     }
 
@@ -146,6 +152,71 @@ class local_savian_ai_generator extends component_generator_base {
         $record['id'] = $DB->insert_record('local_savian_ai_chat_restrictions', (object) $record);
 
         return (object) $record;
+    }
+
+    /**
+     * Create a writing task record.
+     *
+     * @param array $data Override defaults for the writing task.
+     * @return stdClass The created writing task record.
+     */
+    public function create_writing_task(array $data = []): \stdClass {
+        global $DB;
+
+        $this->writingtaskcount++;
+
+        $defaults = [
+            'api_task_id'              => $this->writingtaskcount,
+            'course_id'                => 0,
+            'teacher_user_id'          => 0,
+            'title'                    => 'Test writing task ' . $this->writingtaskcount,
+            'prompt'                   => 'Write about the topic.',
+            'task_type'                => 'essay',
+            'exam_type'                => 'general',
+            'target_cefr_level'        => 'B2',
+            'word_count_min'           => 150,
+            'word_count_max'           => 300,
+            'time_limit_minutes'       => null,
+            'include_improved_writing' => 1,
+            'language'                 => 'en',
+            'is_active'                => 1,
+            'timecreated'              => time(),
+            'timemodified'             => time(),
+        ];
+
+        $record     = (object) array_merge($defaults, $data);
+        $record->id = $DB->insert_record('local_savian_ai_writing_tasks', $record);
+        return $record;
+    }
+
+    /**
+     * Create a writing submission record.
+     *
+     * @param array $data Override defaults for the submission.
+     * @return stdClass The created writing submission record.
+     */
+    public function create_writing_submission(array $data = []): \stdClass {
+        global $DB;
+
+        $defaults = [
+            'submission_uuid'  => \core\uuid::generate(),
+            'writing_task_id'  => 0,
+            'api_task_id'      => 0,
+            'moodle_user_id'   => 0,
+            'status'           => 'pending',
+            'progress'         => 0,
+            'stage'            => '',
+            'word_count'       => 200,
+            'time_spent_seconds' => null,
+            'feedback_json'    => null,
+            'error_message'    => null,
+            'timecreated'      => time(),
+            'timemodified'     => time(),
+        ];
+
+        $record     = (object) array_merge($defaults, $data);
+        $record->id = $DB->insert_record('local_savian_ai_writing_submissions', $record);
+        return $record;
     }
 
     /**

@@ -515,6 +515,99 @@ class client {
     }
 
     /**
+     * Create a writing task.
+     *
+     * @param array $data Task data (title, prompt, task_type, exam_type, etc.).
+     * @return object Response object.
+     */
+    public function create_writing_task($data) {
+        return $this->request('POST', 'writing/tasks/create/', $data);
+    }
+
+    /**
+     * List writing tasks.
+     *
+     * @param int|null $courseid Optional course ID filter.
+     * @return object Response object.
+     */
+    public function list_writing_tasks($courseid = null) {
+        $q = $courseid ? '?course_id=' . urlencode($courseid) : '';
+        return $this->request('GET', 'writing/tasks/' . $q);
+    }
+
+    /**
+     * Get a single writing task.
+     *
+     * @param int $taskid Task ID.
+     * @return object Response object.
+     */
+    public function get_writing_task($taskid) {
+        return $this->request('GET', 'writing/tasks/' . (int)$taskid . '/');
+    }
+
+    /**
+     * Delete a writing task.
+     *
+     * @param int $taskid Task ID.
+     * @return object Response object.
+     */
+    public function delete_writing_task($taskid) {
+        return $this->request('POST', 'writing/tasks/' . (int)$taskid . '/delete/', []);
+    }
+
+    /**
+     * Submit writing for AI assessment.
+     *
+     * @param array $data Submission data (task_id, text, user_id, etc.).
+     * @return object Response object.
+     */
+    public function submit_writing($data) {
+        return $this->request('POST', 'writing/submit/', $data);
+    }
+
+    /**
+     * Get writing submission status.
+     *
+     * @param string $submissionid Submission UUID.
+     * @return object Response object.
+     */
+    public function get_writing_submission_status($submissionid) {
+        return $this->request('GET', 'writing/submissions/' . $submissionid . '/status/');
+    }
+
+    /**
+     * Get writing submission feedback.
+     *
+     * @param string $submissionid Submission UUID.
+     * @return object Response object.
+     */
+    public function get_writing_submission_feedback($submissionid) {
+        return $this->request('GET', 'writing/submissions/' . $submissionid . '/feedback/');
+    }
+
+    /**
+     * Get class writing report.
+     *
+     * @param int $courseid Course ID.
+     * @param array $filters Optional filters.
+     * @return object Response object.
+     */
+    public function get_writing_class_report($courseid, $filters = []) {
+        $q = $filters ? '?' . http_build_query($filters) : '';
+        return $this->request('GET', 'writing/reports/class/' . urlencode($courseid) . '/' . $q);
+    }
+
+    /**
+     * Get at-risk students for writing.
+     *
+     * @param int $courseid Course ID.
+     * @return object Response object.
+     */
+    public function get_writing_at_risk_students($courseid) {
+        return $this->request('GET', 'writing/reports/at-risk/' . urlencode($courseid) . '/');
+    }
+
+    /**
      * Create error response object.
      *
      * @param string $message Error message.

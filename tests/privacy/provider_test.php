@@ -42,7 +42,7 @@ final class provider_test extends provider_testcase {
 
         $items = $collection->get_collection();
 
-        // Count database tables (should be 10) plus 1 external location.
+        // Count database tables (should be 12) plus 1 external location.
         $tables = [];
         $externals = [];
         foreach ($items as $item) {
@@ -64,6 +64,8 @@ final class provider_test extends provider_testcase {
             'local_savian_ai_analytics_reports',
             'local_savian_ai_analytics_events',
             'local_savian_ai_analytics_cache',
+            'local_savian_ai_writing_tasks',
+            'local_savian_ai_writing_submissions',
         ];
 
         foreach ($expectedtables as $table) {

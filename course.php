@@ -235,6 +235,29 @@ if (has_capability('local/savian_ai:generate', $context)) {
     echo html_writer::end_div();
     echo html_writer::end_div();
     echo html_writer::end_div();
+
+    // Writing Practice card.
+    echo html_writer::start_div('col-md-4 mb-3');
+    echo html_writer::start_div('card h-100');
+    echo html_writer::div(get_string('writing_practice', 'local_savian_ai'), 'card-header');
+    echo html_writer::start_div('card-body');
+    echo html_writer::tag('p', get_string('writing_practice_card_desc', 'local_savian_ai'), ['class' => 'card-text']);
+    $wpmanageurl = new moodle_url('/local/savian_ai/writing_practice.php', ['courseid' => $courseid]);
+    $wpsubmiturl = new moodle_url('/local/savian_ai/writing_submit.php', ['courseid' => $courseid]);
+    $wpbtns = html_writer::link(
+        $wpmanageurl,
+        get_string('writing_practice_manage_tasks', 'local_savian_ai'),
+        ['class' => 'btn btn-primary mr-2']
+    );
+    $wpbtns .= html_writer::link(
+        $wpsubmiturl,
+        get_string('writing_practice_submit', 'local_savian_ai'),
+        ['class' => 'btn btn-outline-secondary btn-sm']
+    );
+    echo html_writer::div($wpbtns, '');
+    echo html_writer::end_div();
+    echo html_writer::end_div();
+    echo html_writer::end_div();
 }
 
 echo html_writer::end_div(); // End row.

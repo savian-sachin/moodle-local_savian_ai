@@ -171,6 +171,30 @@ class provider implements
             'privacy:metadata:analytics_cache'
         );
 
+        // Writing tasks (created by teachers).
+        $collection->add_database_table(
+            'local_savian_ai_writing_tasks',
+            [
+                'teacher_user_id' => 'privacy:metadata:writing_tasks:teacher_user_id',
+                'course_id'       => 'privacy:metadata:writing_tasks:course_id',
+                'title'           => 'privacy:metadata:writing_tasks:title',
+                'timecreated'     => 'privacy:metadata:writing_tasks:timecreated',
+            ],
+            'privacy:metadata:writing_tasks'
+        );
+
+        // Writing submissions (student submissions and AI feedback).
+        $collection->add_database_table(
+            'local_savian_ai_writing_submissions',
+            [
+                'moodle_user_id' => 'privacy:metadata:writing_submissions:moodle_user_id',
+                'feedback_json'  => 'privacy:metadata:writing_submissions:feedback_json',
+                'word_count'     => 'privacy:metadata:writing_submissions:word_count',
+                'timecreated'    => 'privacy:metadata:writing_submissions:timecreated',
+            ],
+            'privacy:metadata:writing_submissions'
+        );
+
         // External service data.
         $collection->add_external_location_link(
             'savian_api',
@@ -239,6 +263,29 @@ class provider implements
                   JOIN {local_savian_ai_analytics_events} e ON e.course_id = ctx.instanceid
                  WHERE ctx.contextlevel = :contextlevel
                    AND e.user_id = :userid";
+        $contextlist->add_from_sql($sql, [
+            'contextlevel' => CONTEXT_COURSE,
+            'userid' => $userid,
+        ]);
+
+        // Course contexts where user has writing submissions.
+        $sql = "SELECT DISTINCT ctx.id
+                  FROM {context} ctx
+                  JOIN {local_savian_ai_writing_tasks} wt ON wt.course_id = ctx.instanceid
+                  JOIN {local_savian_ai_writing_submissions} ws ON ws.writing_task_id = wt.id
+                 WHERE ctx.contextlevel = :contextlevel
+                   AND ws.moodle_user_id = :userid";
+        $contextlist->add_from_sql($sql, [
+            'contextlevel' => CONTEXT_COURSE,
+            'userid' => $userid,
+        ]);
+
+        // Course contexts where user created writing tasks (teachers).
+        $sql = "SELECT DISTINCT ctx.id
+                  FROM {context} ctx
+                  JOIN {local_savian_ai_writing_tasks} wt ON wt.course_id = ctx.instanceid
+                 WHERE ctx.contextlevel = :contextlevel
+                   AND wt.teacher_user_id = :userid";
         $contextlist->add_from_sql($sql, [
             'contextlevel' => CONTEXT_COURSE,
             'userid' => $userid,
@@ -369,6 +416,25 @@ class provider implements
                         (object) ['events' => $eventsdata]
                     );
                 }
+
+                // Export writing submissions for this course.
+                $sql = "SELECT ws.*
+                          FROM {local_savian_ai_writing_submissions} ws
+                          JOIN {local_savian_ai_writing_tasks} wt ON wt.id = ws.writing_task_id
+                         WHERE ws.moodle_user_id = :userid
+                           AND wt.course_id = :courseid";
+                $submissions = $DB->get_records_sql($sql, ['userid' => $userid, 'courseid' => $courseid]);
+                foreach ($submissions as $submission) {
+                    writer::with_context($context)->export_data(
+                        [get_string('writing_practice', 'local_savian_ai'), $submission->id],
+                        (object) [
+                            'submission_uuid' => $submission->submission_uuid,
+                            'status'          => $submission->status,
+                            'word_count'      => $submission->word_count,
+                            'created' => \core_privacy\local\request\transform::datetime($submission->timecreated),
+                        ]
+                    );
+                }
             }
         }
     }
@@ -407,6 +473,22 @@ class provider implements
 
             // Delete analytics cache for this course.
             $DB->delete_records('local_savian_ai_analytics_cache', ['course_id' => $courseid]);
+
+            // Delete writing submissions for this course.
+            $taskids = $DB->get_fieldset_select(
+                'local_savian_ai_writing_tasks',
+                'id',
+                'course_id = :courseid',
+                ['courseid' => $courseid]
+            );
+            if (!empty($taskids)) {
+                list($insql, $inparams) = $DB->get_in_or_equal($taskids, SQL_PARAMS_NAMED);
+                $DB->delete_records_select(
+                    'local_savian_ai_writing_submissions',
+                    'writing_task_id ' . $insql,
+                    $inparams
+                );
+            }
         }
     }
 
@@ -488,6 +570,9 @@ class provider implements
         $anonymizer = new \local_savian_ai\analytics\anonymizer();
         $anonid = $anonymizer->anonymize_user_id($userid);
         $DB->delete_records('local_savian_ai_analytics_cache', ['anon_user_id' => $anonid, 'course_id' => $courseid]);
+
+        // Delete writing submissions for this user in this course.
+        $DB->delete_records('local_savian_ai_writing_submissions', ['moodle_user_id' => $userid]);
     }
 
     /**
@@ -521,6 +606,13 @@ class provider implements
             // Users in analytics events for this course.
             $sql = "SELECT DISTINCT user_id FROM {local_savian_ai_analytics_events} WHERE course_id = :courseid";
             $userlist->add_from_sql('user_id', $sql, ['courseid' => $courseid]);
+
+            // Users who have writing submissions in this course.
+            $sql = "SELECT DISTINCT ws.moodle_user_id
+                      FROM {local_savian_ai_writing_submissions} ws
+                      JOIN {local_savian_ai_writing_tasks} wt ON wt.id = ws.writing_task_id
+                     WHERE wt.course_id = :courseid";
+            $userlist->add_from_sql('moodle_user_id', $sql, ['courseid' => $courseid]);
         }
     }
 }

@@ -97,4 +97,13 @@ $functions = [
         'ajax' => true,
         'loginrequired' => true,
     ],
+    'local_savian_ai_get_submission_status' => [
+        'classname' => 'local_savian_ai\external\writing',
+        'methodname' => 'get_submission_status',
+        'classpath' => '',
+        'description' => 'Poll AI writing submission status',
+        'type' => 'read',
+        'ajax' => true,
+        'loginrequired' => true,
+    ],
 ];
