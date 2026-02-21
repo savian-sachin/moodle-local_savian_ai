@@ -126,7 +126,7 @@ Before configuring the plugin, you need to obtain API credentials from Savian AI
 
 > 💡 **Free Trial**: New accounts include a 30-day free trial to test all features.
 
-> 📧 **Need Help?**: Contact support@savian.ai for assistance with registration or credentials.
+> 📧 **Need Help?**: Contact info@savian.ai.vn for assistance with registration or credentials.
 
 ### 2. Configure Plugin Settings
 
@@ -359,7 +359,7 @@ We offer a Data Processing Agreement for institutions that require one under GDP
 
 - **Documentation**: [User Guide](USER_GUIDE.md) | [Analytics Guide](ANALYTICS_USER_GUIDE.md)
 - **Issues**: [GitHub Issues](https://github.com/savian-sachin/moodle-local_savian_ai/issues)
-- **Contact**: support@savian.ai
+- **Contact**: info@savian.ai.vn
 
 ---
 
