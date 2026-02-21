@@ -4,7 +4,7 @@
 
 [![Moodle Version](https://img.shields.io/badge/Moodle-4.5%2B-orange)](https://moodle.org/)
 [![License](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](LICENSE.txt)
-[![Version](https://img.shields.io/badge/version-1.2.0-brightgreen)](CHANGES.md)
+[![Version](https://img.shields.io/badge/version-1.3.0-brightgreen)](CHANGES.md)
 [![Stability](https://img.shields.io/badge/stability-stable-green)](https://github.com/savian-sachin/moodle-local_savian_ai/releases)
 
 ---
@@ -60,7 +60,7 @@
 - **Moodle**: 4.5 or higher
 - **PHP**: 8.1, 8.2, or 8.3 (8.4+ not officially supported)
 - **Database**: PostgreSQL or MySQL
-- **Savian AI Account**: API credentials required ([Register here](https://app.savian.ai.vn/en/content-generation/moodle-plugin/register/) - 14-day free trial)
+- **Savian AI Account**: API credentials required ([Register here](https://app.savian.ai.vn/en/content-generation/moodle-plugin/register/) - 30-day free trial)
 
 ---
 
@@ -116,7 +116,7 @@ Before configuring the plugin, you need to obtain API credentials from Savian AI
      - **Organization Code**: Your organization identifier
    - These credentials are available in your Savian AI dashboard
 
-> 💡 **Free Trial**: New accounts include a 14-day free trial to test all features.
+> 💡 **Free Trial**: New accounts include a 30-day free trial to test all features.
 
 > 📧 **Need Help?**: Contact support@savian.ai for assistance with registration or credentials.
 
@@ -245,7 +245,7 @@ Navigate to **Site Administration → Users → Permissions → Define roles**
 - User preferences
 
 **Sent to External Service**:
-- User ID and email (for context)
+- User ID (for session tracking — no email or name)
 - Course ID and name
 - Chat messages
 - Document content (for processing)
@@ -262,6 +262,41 @@ Navigate to **Site Administration → Users → Permissions → Define roles**
 - Export of all their chat data
 - Deletion of all personal data
 - View what data is stored
+
+---
+
+## 🏛️ Legal & Procurement (Universities & Institutions)
+
+Universities and institutions often need formal documentation before deploying third-party plugins. Here is what we provide and how to get started.
+
+### Data Processing Agreement (DPA)
+
+We offer a Data Processing Agreement for institutions that require one under GDPR or equivalent regulations. To request a DPA:
+
+- Email **info@savian.ai.vn** with your institution name and country
+- We will send you our standard DPA template within 2 business days
+- If your institution has its own DPA template, send it to us — we are happy to review and sign your terms
+
+### GDPR Compliance
+
+- The plugin is built with Moodle's Privacy API — user data export and deletion are fully supported
+- Only the minimum data required to generate AI responses is sent to our servers (user ID, course ID, chat messages, document content — no email or personal identifiers)
+- Our servers are hosted in Vietnam; data transfer outside the EU/EEA is covered under the DPA
+- Full privacy policy: https://savian.ai.vn/privacy-policy/
+
+### Procurement Path
+
+| Step | Action |
+|---|---|
+| 1. Evaluate | Generate a free API key and trial the plugin for 30 days at no cost → [Register here](https://app.savian.ai.vn/en/content-generation/moodle-plugin/) |
+| 2. Request proposal | Email **info@savian.ai.vn** with your institution name, country, and approximate number of users |
+| 3. Review DPA | We send you a DPA template (or review yours) |
+| 4. Sign & deploy | Once paperwork is signed, upgrade your API key to a paid plan |
+
+### Contact for Procurement
+
+- **Email**: info@savian.ai.vn
+- **Subject line**: `[Procurement] <Institution Name>`
 
 ---
 
@@ -330,20 +365,15 @@ See [LICENSE.txt](LICENSE.txt) for the full license text.
 
 ## 🔄 Version
 
-**Current Version**: 1.2.0 (February 2026) - **Stable Release**
+**Current Version**: 1.3.0 (February 2026) - **Stable Release**
 
-### What's New in v1.2.0
-- Full Moodle plugin directory compliance (codechecker, PHPDoc, ESLint all passing)
-- Complete GPL v3 boilerplate on all files
-- Moodle coding standards: snake_case to camelCase variables, PSR-2 formatting
-- Database tables renamed to correct frankenstyle prefix (local_savian_ai_*)
-- All user-facing strings use get_string() for full localization support (130+ strings)
-- Privacy API rewritten with correct interfaces, context-aware export/delete, all tables declared
-- Chat restriction system for course-level control
-- Improved document deletion and API error handling
-- Hook-based architecture (Moodle 4.5 hooks API)
+### What's New in v1.3.0
+- AI Writing Practice: students submit written work and receive instant AI feedback with CEFR/IELTS scoring, grammar highlights, and an improved version — integrated with the Moodle gradebook
+- GDPR data minimisation: user email address is no longer sent to the external API
+- Legal & Procurement documentation for universities
 
 ### Previous Releases
+- **v1.2.0**: Full Moodle plugin directory compliance, Privacy API rewrite, hook-based architecture
 - **v1.1.1**: Connection status, document sync, tutorials
 - **v1.1.0**: Learning Analytics with at-risk detection, CSV export
 - **v1.0.0**: Initial release with course generation, AI chat, question bank
