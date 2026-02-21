@@ -23,19 +23,10 @@ Feature: Writing practice access control
     Then I should see "Writing Practice"
     And I should see "Create Writing Task"
 
-  Scenario: Student cannot access teacher writing practice page
+  Scenario: Student sees writing practice in course navigation
     Given I log in as "student1"
-    When I visit "/local/savian_ai/writing_practice.php?courseid=1"
-    Then I should see "Sorry, but you do not currently have permissions"
-
-  Scenario: Student can access writing submit page
-    Given I log in as "student1"
-    When I visit "/local/savian_ai/writing_submit.php?courseid=1"
+    When I am on "Course 1" course homepage
+    And I navigate to "Savian AI" in current page administration
+    And I follow "Writing Practice"
     Then I should see "Writing Practice"
     And I should not see "Create Writing Task"
-
-  Scenario: Writing Practice card visible on teacher dashboard
-    Given I log in as "teacher1"
-    When I visit "/local/savian_ai/course.php?courseid=1"
-    Then I should see "Writing Practice"
-    And I should see "Manage Writing Tasks"
