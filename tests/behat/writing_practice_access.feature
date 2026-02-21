@@ -22,4 +22,3 @@ Feature: Writing practice access control
     And I follow "Writing Practice"
     Then I should see "Writing Practice"
     And I should see "Create Writing Task"
-
