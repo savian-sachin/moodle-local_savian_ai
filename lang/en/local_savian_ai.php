@@ -1061,9 +1061,9 @@ $string['tutorial_writing_submit_step4'] = 'Click <strong>Submit Writing</strong
     'The AI takes 8–15 seconds to analyse your text.';
 $string['tutorial_writing_submit_step5'] = 'Review your feedback on screen. ' .
     'Return any time via <strong>View your last feedback</strong>.';
-$string['tutorial_writing_submit_title'] = 'Part 2 (Student): Submitting Writing and Getting AI Feedback';
 $string['tutorial_writing_submit_tip'] = 'Re-read the prompt before submitting. The AI checks whether your ' .
     'response actually addresses the task, so staying on-topic raises your score.';
+$string['tutorial_writing_submit_title'] = 'Part 2 (Student): Submitting Writing and Getting AI Feedback';
 $string['tutorial_writing_tip'] = 'Combine Writing Practice with the Chat tutor: after receiving feedback, ' .
     'students can ask the chat tutor to explain any grammar point or vocabulary suggestion.';
 $string['tutorial_writing_title'] = 'Tutorial 8: Writing Practice';
